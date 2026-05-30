@@ -7,9 +7,8 @@ export default async function handler(req, res) {
 
   try {
     const { prompt } = req.body;
-
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -18,14 +17,14 @@ export default async function handler(req, res) {
         })
       }
     );
-
     const data = await response.json();
+    console.log('Gemini response:', JSON.stringify(data));
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Javob kelmadi';
-
     res.status(200).json({
       choices: [{ message: { content: text } }]
     });
   } catch(err) {
+    console.error('Error:', err);
     res.status(500).json({ error: { message: err.message } });
   }
 }
