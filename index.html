@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23f5c518'/><text y='.9em' font-size='75' x='12'>⚡</text></svg>">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23f5c518'/><text y='.9em' font-size='75' x='12'>⚡</text></svg>">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <meta name="theme-color" content="#0d1117">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -996,6 +996,11 @@ function installApp(){
 }
 function clearAllData(){if(!confirm("BARCHA ma'lumotlar o'chiriladi!"))return;localStorage.clear();location.reload();}
 document.getElementById('historyModal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+// Service Worker - PWA uchun
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/sw.js').catch(()=>{});
+}
 
 // PWA Install
 let deferredPrompt;
