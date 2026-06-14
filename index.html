@@ -212,163 +212,163 @@ tr:hover td{background:rgba(245,197,24,0.03);}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
 
-@media(max-width:768px){
-  .sidebar{transform:translateX(-100%);z-index:500;}
-  .sidebar.open{transform:translateX(0);}
-  .main{margin-left:0!important;max-width:100vw!important;padding:12px!important;padding-bottom:80px!important;}
-  .page-header{font-size:20px!important;}
-  .page-sub{font-size:12px!important;margin-bottom:14px!important;}
-  .stats-row{grid-template-columns:repeat(2,1fr)!important;gap:8px!important;}
-  .stat-card{padding:12px!important;}
-  .stat-num{font-size:24px!important;}
-  .form-row{grid-template-columns:1fr!important;}
-  .dot{width:30px!important;height:30px!important;}
-  .mobile-header{display:flex!important;}
-  .card{padding:14px!important;margin-bottom:12px!important;}
-  .task-item{padding:10px 12px!important;}
-  .chat-bubble{max-width:92%!important;font-size:13px!important;}
-  .btn{padding:10px 14px!important;font-size:13px!important;}
-  .streak-num{font-size:40px!important;}
-  .week-dots{gap:4px!important;}
-  .dot{width:28px!important;height:28px!important;font-size:10px!important;}
-  table{font-size:11px!important;}
-  th,td{padding:7px 8px!important;}
-}
-@media(max-width:400px){
-  .stats-row{grid-template-columns:repeat(2,1fr)!important;}
-  .page-header{font-size:18px!important;}
-  .card-title{font-size:13px!important;}
-}
-.mobile-header{display:none;align-items:center;justify-content:space-between;margin-bottom:18px;}
-.hamburger{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;cursor:pointer;font-size:18px;color:var(--text);}
-.mobile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:499;}
+/* ===== MOBILE HEADER ===== */
+.mobile-header{display:none;align-items:center;justify-content:space-between;padding:14px 16px 10px;margin-bottom:0;position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);}
+.hamburger{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 11px;cursor:pointer;font-size:18px;color:var(--text);}
+.mobile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:499;backdrop-filter:blur(2px);}
 .mobile-overlay.open{display:block;}
 
-/* ===== DESKTOP OPTIMIZATIONS (769px+) ===== */
-@media(min-width:769px){
-  /* Wider sidebar */
-  .sidebar{width:260px;}
-  .main{margin-left:260px;max-width:calc(100vw - 260px);padding:32px 40px;}
+/* ===== MOBILE SIDEBAR (slide-in drawer) ===== */
+@media(max-width:768px){
+  /* Sidebar as drawer */
+  .sidebar{
+    transform:translateX(-100%);
+    z-index:500;
+    width:80vw;
+    max-width:300px;
+    box-shadow:4px 0 24px rgba(0,0,0,0.5);
+    border-right:1px solid var(--border2);
+  }
+  .sidebar.open{transform:translateX(0);}
 
-  /* Logo bigger */
-  .logo-icon{width:40px;height:40px;font-size:22px;}
-  .logo-text{font-size:20px;}
+  /* Main content */
+  .main{
+    margin-left:0!important;
+    max-width:100vw!important;
+    padding:0!important;
+    padding-bottom:80px!important;
+  }
 
-  /* Nav items bigger */
-  .nav-item{padding:11px 12px;font-size:14px;margin-bottom:2px;}
-  .nav-icon{font-size:18px;width:24px;}
-  .nav-section{font-size:11px;padding:14px 10px 6px;}
+  /* Page content padding */
+  .page{padding:16px!important;}
 
-  /* Page header */
-  .page-header{font-size:28px;}
-  .page-sub{font-size:14px;margin-bottom:28px;}
+  /* Mobile header visible */
+  .mobile-header{display:flex!important;}
+
+  /* Page title */
+  .page-header{font-size:22px!important;margin-bottom:2px!important;}
+  .page-sub{font-size:13px!important;margin-bottom:16px!important;color:var(--text2);}
 
   /* Cards */
-  .card{padding:24px;border-radius:14px;margin-bottom:20px;}
-  .card-title{font-size:14px;margin-bottom:16px;}
+  .card{
+    padding:16px!important;
+    margin-bottom:12px!important;
+    border-radius:14px!important;
+  }
+  .card-title{font-size:13px!important;margin-bottom:12px!important;}
 
-  /* 4-col stats grid */
-  .stats-row{grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;}
-  .stat-card{padding:20px;border-radius:14px;}
-  .stat-num{font-size:36px;margin-bottom:6px;}
-  .stat-label{font-size:12px;}
+  /* Form — single column */
+  .form-row{grid-template-columns:1fr!important;gap:0!important;}
+  .form-group{margin-bottom:12px!important;}
+  input,textarea,select{
+    padding:13px 14px!important;
+    font-size:15px!important;
+    border-radius:10px!important;
+  }
+  .form-label{font-size:11px!important;letter-spacing:0.8px!important;}
 
-  /* Streak */
-  .streak-num{font-size:72px;}
-  .streak-card{padding:28px;}
-  .dot{width:40px;height:40px;font-size:13px;}
-  .dot-day{font-size:11px;}
-  .week-dots{gap:10px;}
+  /* Buttons — full width on mobile */
+  .btn{
+    padding:13px 18px!important;
+    font-size:14px!important;
+    border-radius:10px!important;
+  }
+  .btn-sm{padding:8px 14px!important;font-size:13px!important;}
 
-  /* Form inputs */
-  input,textarea,select{padding:12px 14px;font-size:14px;border-radius:10px;}
-  .form-label{font-size:12px;margin-bottom:6px;}
-  .form-group{margin-bottom:14px;}
-  .form-row{gap:16px;}
-
-  /* Buttons */
-  .btn{padding:11px 22px;font-size:14px;border-radius:10px;}
-  .btn-sm{padding:6px 14px;font-size:13px;}
+  /* Task items */
+  .task-item{
+    padding:14px 16px!important;
+    border-radius:12px!important;
+    margin-bottom:10px!important;
+  }
+  .task-title{font-size:14px!important;}
+  .task-meta{font-size:12px!important;margin-top:4px!important;}
 
   /* Status buttons */
-  .status-btn{padding:5px 13px;font-size:12px;}
+  .status-btn{padding:6px 12px!important;font-size:12px!important;}
+  .status-btns{gap:8px!important;margin-top:10px!important;}
 
-  /* Tasks */
-  .task-item{padding:16px 18px;border-radius:12px;margin-bottom:10px;}
-  .task-title{font-size:14.5px;}
-  .task-meta{font-size:13px;}
+  /* Stats grid — 2 col */
+  .stats-row{grid-template-columns:repeat(2,1fr)!important;gap:10px!important;margin-bottom:12px!important;}
+  .stat-card{padding:16px 12px!important;border-radius:14px!important;text-align:center!important;}
+  .stat-num{font-size:28px!important;margin-bottom:4px!important;}
+  .stat-label{font-size:11px!important;}
+
+  /* Streak */
+  .streak-card{padding:20px 16px!important;border-radius:14px!important;}
+  .streak-num{font-size:52px!important;}
+  .week-dots{gap:6px!important;margin-top:12px!important;}
+  .dot{width:34px!important;height:34px!important;font-size:11px!important;}
+  .dot-day{font-size:10px!important;}
+
+  /* Chart */
+  .chart-tabs{gap:8px!important;margin-bottom:12px!important;}
+  .chart-tab{padding:7px 14px!important;font-size:12px!important;}
 
   /* Chat */
-  .chat-bubble{font-size:14px;padding:13px 17px;}
-  .chat-input-row textarea{font-size:14px;padding:12px;}
-  .chat-name{font-size:11px;}
+  .chat-bubble{max-width:88%!important;font-size:14px!important;padding:12px 15px!important;border-radius:14px!important;}
+  .chat-name{font-size:11px!important;}
+  .chat-input-row textarea{font-size:15px!important;padding:12px!important;}
+  .chat-send{padding:12px 18px!important;font-size:18px!important;}
 
   /* Table */
+  .table-wrap{border-radius:10px!important;overflow:hidden!important;}
+  table{font-size:12px!important;}
+  th{font-size:11px!important;padding:9px 10px!important;}
+  td{padding:9px 10px!important;}
+
+  /* History */
+  .history-item{padding:14px 16px!important;border-radius:12px!important;margin-bottom:10px!important;}
+  .history-goal{font-size:14px!important;}
+  .history-preview{font-size:12px!important;}
+
+  /* AI box */
+  .ai-box{padding:16px!important;border-radius:12px!important;margin-top:10px!important;}
+  .ai-content{font-size:14px!important;line-height:1.75!important;}
+
+  /* Progress */
+  .progress-bar{height:8px!important;}
+  .progress-label{font-size:13px!important;}
+
+  /* Empty state */
+  .empty-state{padding:48px 20px!important;}
+  .empty-state .icon{font-size:44px!important;margin-bottom:12px!important;}
+
+  /* Modal */
+  .modal{
+    width:94%!important;
+    border-radius:16px!important;
+    padding:24px!important;
+    margin:20px!important;
+  }
+  .modal-header{font-size:17px!important;}
+
+  /* Section title */
+  .section-title{font-size:11px!important;margin:18px 0 10px!important;}
+}
+
+/* ===== DESKTOP ===== */
+@media(min-width:769px){
+  .sidebar{width:260px;}
+  .main{margin-left:260px;max-width:calc(100vw - 260px);padding:32px 44px;}
+  .page-header{font-size:28px;}
+  .page-sub{font-size:14px;margin-bottom:28px;}
+  .card{padding:24px;border-radius:14px;margin-bottom:20px;}
+  .card-title{font-size:14px;margin-bottom:16px;}
+  .stats-row{grid-template-columns:repeat(4,1fr);gap:16px;}
+  .stat-card{padding:20px;border-radius:14px;}
+  .stat-num{font-size:36px;}
+  .stat-label{font-size:12px;}
+  .streak-num{font-size:72px;}
+  .dot{width:40px;height:40px;font-size:13px;}
+  input,textarea,select{padding:12px 14px;font-size:14px;border-radius:10px;}
+  .btn{padding:11px 22px;font-size:14px;border-radius:10px;}
+  .task-item{padding:16px 18px;border-radius:12px;margin-bottom:10px;}
+  .task-title{font-size:14.5px;}
   table{font-size:14px;}
   th{font-size:12px;padding:12px 16px;}
   td{padding:12px 16px;}
-
-  /* History */
-  .history-item{padding:16px 18px;border-radius:12px;margin-bottom:10px;}
-  .history-goal{font-size:14.5px;}
-  .history-preview{font-size:13px;}
-  .history-date{font-size:12px;}
-
-  /* Week grid */
-  .week-grid{gap:8px;margin-top:14px;}
-  .day-card{padding:12px 6px;}
-  .day-name{font-size:10px;}
-  .day-hours{font-size:16px;}
-  .day-task{font-size:9px;}
-
-  /* Progress bar */
-  .progress-bar{height:8px;}
-  .progress-label{font-size:13px;}
-
-  /* AI box */
-  .ai-box{padding:20px;border-radius:12px;}
-  .ai-content{font-size:14px;line-height:1.8;}
-  .ai-header{font-size:13px;}
-
-  /* Modal */
-  .modal{max-width:640px;padding:32px;}
-  .modal-header{font-size:19px;}
-
-  /* Section title */
-  .section-title{font-size:12px;margin:24px 0 12px;}
-
-  /* User card */
-  .user-card{padding:12px;}
-  .user-name{font-size:14px;}
-  .user-level{font-size:12px;}
-  .user-avatar{width:36px;height:36px;font-size:15px;}
-
-  /* Chart tabs */
-  .chart-tab{padding:7px 16px;font-size:13px;}
-  .chart-legend{font-size:13px;}
-
-  /* Empty state */
-  .empty-state{padding:60px 20px;}
-  .empty-state .icon{font-size:48px;}
-}
-
-/* ===== LARGE DESKTOP (1280px+) ===== */
-@media(min-width:1280px){
-  .sidebar{width:280px;}
-  .main{margin-left:280px;max-width:calc(100vw - 280px);padding:36px 56px;}
-  .page-header{font-size:32px;}
-  .stat-num{font-size:42px;}
-  .streak-num{font-size:84px;}
-  /* Two column layout for main content pages */
-  #page-today .card:first-child{max-width:680px;}
-  #page-longplan .card:first-child{max-width:720px;}
-  #page-ai-plan .card:first-child{max-width:720px;}
-}
-
-/* ===== ULTRA WIDE (1600px+) ===== */
-@media(min-width:1600px){
-  .main{padding:40px 72px;}
-  .stats-row{grid-template-columns:repeat(4,1fr);max-width:900px;}
+  .chat-bubble{font-size:14px;padding:13px 17px;}
 }
 </style>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-EX58BHR0G5"></script>
@@ -377,116 +377,224 @@ tr:hover td{background:rgba(245,197,24,0.03);}
 <body>
 
 <!-- LOGIN -->
-<div id="loginOverlay" style="position:fixed;inset:0;z-index:9999;display:flex;background:#0a1628;">
-  <!-- LEFT BRANDING -->
-  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px;position:relative;overflow:hidden;">
+<style>
+  #loginOverlay{position:fixed;inset:0;z-index:9999;display:flex;background:#0a1628;overflow:hidden;}
+
+  /* === DESKTOP: split layout === */
+  .login-left{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px;position:relative;overflow:hidden;}
+  .login-right{width:480px;background:#0f1a2e;border-left:1px solid #1a3050;display:flex;align-items:center;justify-content:center;padding:44px;overflow-y:auto;flex-shrink:0;}
+
+  /* === MOBILE: full screen, no split === */
+  @media(max-width:768px){
+    #loginOverlay{flex-direction:column;overflow-y:auto;}
+    .login-left{display:none!important;}
+    .login-right{
+      width:100%!important;
+      flex:1;
+      border-left:none!important;
+      padding:0!important;
+      align-items:stretch!important;
+      background:#0a1628!important;
+    }
+    .login-inner{
+      padding:0 20px 32px!important;
+      max-width:100%!important;
+      width:100%!important;
+    }
+    .login-mobile-top{
+      display:flex!important;
+    }
+  }
+
+  /* Mobile top banner (hidden on desktop) */
+  .login-mobile-top{
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    padding:48px 24px 32px;
+    background:linear-gradient(180deg,#0d1f3c 0%,#0a1628 100%);
+    margin-bottom:8px;
+  }
+  .login-mobile-logo{
+    width:72px;height:72px;background:#f5c518;border-radius:20px;
+    display:flex;align-items:center;justify-content:center;font-size:38px;
+    margin-bottom:16px;
+    box-shadow:0 8px 32px rgba(245,197,24,0.3);
+  }
+  .login-mobile-title{font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;color:#fff;margin-bottom:6px;}
+  .login-mobile-title span{color:#f5c518;}
+  .login-mobile-sub{font-size:14px;color:#4d80b0;text-align:center;line-height:1.6;}
+
+  /* Feature pills on mobile */
+  .login-pills{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px;}
+  .login-pill{padding:6px 14px;background:rgba(77,166,255,0.1);border:1px solid rgba(77,166,255,0.2);border-radius:99px;font-size:12px;color:#6aaddf;}
+
+  /* Form card on mobile */
+  .login-inner{width:100%;max-width:360px;}
+  .login-card-title{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:6px;}
+  .login-card-sub{font-size:13px;color:#4d80b0;margin-bottom:28px;}
+
+  /* Google button */
+  .btn-google{
+    width:100%;padding:15px 16px;border-radius:12px;
+    border:1.5px solid #2a4a7f;background:#1a3050;
+    color:#e8f4ff;font-size:15px;font-weight:500;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px;
+    transition:all 0.2s;font-family:'Inter',sans-serif;
+  }
+  .btn-google:hover{border-color:#f5c518;background:#1e3a66;}
+  .btn-google:active{transform:scale(0.98);}
+
+  /* Install button */
+  .btn-install{
+    width:100%;padding:14px 16px;border-radius:12px;
+    border:1.5px solid rgba(245,197,24,0.35);background:rgba(245,197,24,0.08);
+    color:#f5c518;font-size:14px;font-weight:600;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;
+    transition:all 0.2s;font-family:'Inter',sans-serif;margin-top:12px;
+  }
+  .btn-install:hover{background:rgba(245,197,24,0.15);}
+  .btn-install:active{transform:scale(0.98);}
+
+  /* Register form inputs */
+  .reg-input{
+    width:100%;padding:14px 16px;border-radius:12px;
+    border:1.5px solid #2a4a7f;background:#1a3050;
+    color:#e8f4ff;font-size:15px;outline:none;
+    transition:border-color 0.2s;font-family:'Inter',sans-serif;
+    margin-bottom:0;
+  }
+  .reg-input:focus{border-color:#f5c518;}
+  .reg-label{font-size:11px;color:#4d80b0;display:block;margin-bottom:7px;text-transform:uppercase;letter-spacing:0.7px;font-weight:500;}
+  .reg-group{margin-bottom:16px;}
+
+  /* Age slider */
+  input[type=range]{flex:1;height:6px;border-radius:99px;accent-color:#f5c518;cursor:pointer;background:transparent;border:none;padding:0;}
+  input[type=range]::-webkit-slider-thumb{width:24px;height:24px;border-radius:50%;background:#f5c518;cursor:pointer;-webkit-appearance:none;border:2px solid #0f1a2e;box-shadow:0 2px 8px rgba(245,197,24,0.4);}
+  input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:99px;background:#2a4a7f;}
+
+  /* Boshlash button */
+  .btn-start{
+    width:100%;padding:16px;border-radius:12px;border:none;
+    background:#f5c518;color:#000;font-size:16px;font-weight:700;
+    cursor:pointer;font-family:'Space Grotesk',sans-serif;
+    transition:all 0.2s;margin-top:4px;
+  }
+  .btn-start:hover{background:#e6b800;}
+  .btn-start:active{transform:scale(0.98);}
+
+  /* Warning box */
+  .reg-warning{
+    padding:12px 14px;background:rgba(245,197,24,0.07);
+    border:1px solid rgba(245,197,24,0.2);border-radius:10px;
+    font-size:12px;color:#f5c518;margin-bottom:20px;line-height:1.5;
+  }
+</style>
+
+<div id="loginOverlay">
+  <!-- LEFT BRANDING (desktop only) -->
+  <div class="login-left">
     <div style="position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(77,166,255,0.08),transparent 70%);top:-200px;left:-200px;pointer-events:none;"></div>
     <div style="position:relative;z-index:1;text-align:center;max-width:480px;">
-      <div style="display:inline-flex;align-items:center;gap:12px;margin-bottom:28px;">
-        <div style="width:56px;height:56px;background:#f5c518;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:30px;">&#9889;</div>
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:36px;font-weight:700;color:#fff;">Study<span style="color:#f5c518;">AI</span></div>
+      <div style="display:inline-flex;align-items:center;gap:14px;margin-bottom:28px;">
+        <div style="width:60px;height:60px;background:#f5c518;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 8px 32px rgba(245,197,24,0.3);">⚡</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:38px;font-weight:700;color:#fff;">Study<span style="color:#f5c518;">AI</span></div>
       </div>
       <div style="font-size:16px;color:#4d80b0;margin-bottom:44px;line-height:1.7;">O'qishni yangi darajaga olib chiqing.<br>AI yordamida — smarter, faster, better.</div>
       <div style="display:flex;flex-direction:column;gap:16px;text-align:left;">
-        <div style="display:flex;align-items:center;gap:14px;">
-          <div style="width:42px;height:42px;background:rgba(77,166,255,0.12);border:1px solid rgba(77,166,255,0.25);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">&#128197;</div>
-          <div><div style="font-size:14px;font-weight:500;color:#e0eeff;">Kunlik rejalashtirish</div><div style="font-size:12px;color:#4d80b0;">Smart vazifa boshqaruvi</div></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:16px;background:rgba(77,166,255,0.06);border:1px solid rgba(77,166,255,0.12);border-radius:12px;">
+          <div style="width:44px;height:44px;background:rgba(77,166,255,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">📅</div>
+          <div><div style="font-size:14px;font-weight:600;color:#e0eeff;">Kunlik rejalashtirish</div><div style="font-size:12px;color:#4d80b0;margin-top:2px;">Smart vazifa boshqaruvi</div></div>
         </div>
-        <div style="display:flex;align-items:center;gap:14px;">
-          <div style="width:42px;height:42px;background:rgba(77,166,255,0.12);border:1px solid rgba(77,166,255,0.25);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">&#129302;</div>
-          <div><div style="font-size:14px;font-weight:500;color:#e0eeff;">AI yordamchi</div><div style="font-size:12px;color:#4d80b0;">24/7 shaxsiy mentor</div></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:16px;background:rgba(77,166,255,0.06);border:1px solid rgba(77,166,255,0.12);border-radius:12px;">
+          <div style="width:44px;height:44px;background:rgba(77,166,255,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🤖</div>
+          <div><div style="font-size:14px;font-weight:600;color:#e0eeff;">AI yordamchi</div><div style="font-size:12px;color:#4d80b0;margin-top:2px;">24/7 shaxsiy mentor</div></div>
         </div>
-        <div style="display:flex;align-items:center;gap:14px;">
-          <div style="width:42px;height:42px;background:rgba(77,166,255,0.12);border:1px solid rgba(77,166,255,0.25);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">&#128200;</div>
-          <div><div style="font-size:14px;font-weight:500;color:#e0eeff;">Statistika va streak</div><div style="font-size:12px;color:#4d80b0;">Progress real vaqtda</div></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:16px;background:rgba(77,166,255,0.06);border:1px solid rgba(77,166,255,0.12);border-radius:12px;">
+          <div style="width:44px;height:44px;background:rgba(77,166,255,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">📈</div>
+          <div><div style="font-size:14px;font-weight:600;color:#e0eeff;">Statistika va streak</div><div style="font-size:12px;color:#4d80b0;margin-top:2px;">Progress real vaqtda</div></div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- RIGHT FORM -->
-  <div style="width:480px;background:#0f1a2e;border-left:1px solid #1a3050;display:flex;align-items:center;justify-content:center;padding:40px 44px;overflow-y:auto;">
-    <div style="width:100%;max-width:360px;">
+  <div class="login-right">
+    <div class="login-inner">
+
+      <!-- Mobile top banner -->
+      <div class="login-mobile-top">
+        <div class="login-mobile-logo">⚡</div>
+        <div class="login-mobile-title">Study<span>AI</span></div>
+        <div class="login-mobile-sub">AI yordamida o'qishingizni<br>yangi darajaga olib chiqing</div>
+        <div class="login-pills">
+          <span class="login-pill">📅 Rejalashtirish</span>
+          <span class="login-pill">🤖 AI Chat</span>
+          <span class="login-pill">📈 Statistika</span>
+        </div>
+      </div>
 
       <!-- STEP 1: Google Login -->
       <div id="loginStep1">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;color:#fff;margin-bottom:6px;">Xush kelibsiz! &#128075;</div>
-        <div style="font-size:13px;color:#4d80b0;margin-bottom:32px;">Davom etish uchun Google bilan kiring</div>
-        <button onclick="handleGoogleLogin()" style="width:100%;padding:14px 16px;border-radius:10px;border:1px solid #2a4a7f;background:#1a3050;color:#e8f4ff;font-size:15px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px;transition:all 0.2s;" onmouseover="this.style.borderColor='#f5c518';this.style.background='#1e3a66'" onmouseout="this.style.borderColor='#2a4a7f';this.style.background='#1a3050'">
+        <div class="login-card-title">Xush kelibsiz! 👋</div>
+        <div class="login-card-sub">Davom etish uchun Google bilan kiring</div>
+
+        <button class="btn-google" onclick="handleGoogleLogin()">
           <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
           Google bilan kirish
         </button>
-        <!-- Install App Button -->
-        <div id="loginInstallBtn" style="display:none;margin-top:16px;">
-          <button onclick="installApp()" style="width:100%;padding:13px 16px;border-radius:10px;border:1px solid rgba(245,197,24,0.4);background:rgba(245,197,24,0.1);color:#f5c518;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+
+        <div id="loginInstallBtn" style="display:none;">
+          <button class="btn-install" onclick="installApp()">
             <span style="font-size:20px;">📲</span> Ilovani telefoningizga o'rnating
           </button>
-          <div style="text-align:center;font-size:11px;color:#4d80b0;margin-top:6px;">Android va iOS uchun bepul</div>
+          <div style="text-align:center;font-size:11px;color:#4d80b0;margin-top:8px;">Android va iOS uchun bepul</div>
         </div>
-        <div style="text-align:center;margin-top:16px;font-size:11px;color:#2a4060;">&#169; StudyAI &mdash; Axmadov Azizbek</div>
+
+        <div style="text-align:center;margin-top:24px;font-size:11px;color:#2a4060;">© StudyAI — Axmadov Azizbek</div>
       </div>
 
-      <!-- STEP 2: Profile Form (after Google login) -->
+      <!-- STEP 2: Profile Form -->
       <div id="loginStep2" style="display:none;">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
-          <img id="googleAvatar" src="" style="width:48px;height:48px;border-radius:50%;border:2px solid #f5c518;" onerror="this.style.display='none'">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:28px;padding:16px;background:rgba(77,166,255,0.06);border:1px solid rgba(77,166,255,0.15);border-radius:14px;">
+          <img id="googleAvatar" src="" style="width:52px;height:52px;border-radius:50%;border:2px solid #f5c518;flex-shrink:0;" onerror="this.style.display='none'">
           <div>
             <div style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:#fff;" id="googleWelcome">Salom!</div>
             <div style="font-size:13px;color:#4d80b0;">Ma'lumotlarni to'ldiring</div>
           </div>
         </div>
 
-        <div style="margin-bottom:14px;">
-          <label style="font-size:11px;color:#4d80b0;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Ism *</label>
-          <input id="regName" type="text" placeholder="Ismingiz" style="width:100%;padding:12px 14px;border-radius:9px;border:1px solid #2a4a7f;background:#1a3050;color:#e8f4ff;font-size:14px;outline:none;" onfocus="this.style.borderColor='#f5c518'" onblur="this.style.borderColor='#2a4a7f'">
+        <div class="reg-group">
+          <label class="reg-label">Ism *</label>
+          <input class="reg-input" id="regName" type="text" placeholder="Ismingiz" onfocus="this.style.borderColor='#f5c518'" onblur="this.style.borderColor='#2a4a7f'">
         </div>
 
-        <div style="margin-bottom:14px;">
-          <label style="font-size:11px;color:#4d80b0;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Familiya *</label>
-          <input id="regSurname" type="text" placeholder="Familiyangiz" style="width:100%;padding:12px 14px;border-radius:9px;border:1px solid #2a4a7f;background:#1a3050;color:#e8f4ff;font-size:14px;outline:none;" onfocus="this.style.borderColor='#f5c518'" onblur="this.style.borderColor='#2a4a7f'">
+        <div class="reg-group">
+          <label class="reg-label">Familiya *</label>
+          <input class="reg-input" id="regSurname" type="text" placeholder="Familiyangiz" onfocus="this.style.borderColor='#f5c518'" onblur="this.style.borderColor='#2a4a7f'">
         </div>
 
-        <div style="margin-bottom:8px;">
-          <label style="font-size:11px;color:#4d80b0;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Yoshingiz *</label>
-          <div style="display:flex;align-items:center;gap:12px;">
+        <div class="reg-group">
+          <label class="reg-label">Yoshingiz *</label>
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;">
             <input type="range" id="ageSlider" min="10" max="40" value="18"
-              oninput="document.getElementById('ageDisplay').textContent=this.value"
-              style="flex:1;height:6px;border-radius:99px;accent-color:#f5c518;cursor:pointer;background:transparent;border:none;padding:0;">
-            <div style="width:52px;height:44px;background:#1a3050;border:1px solid #2a4a7f;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#f5c518;flex-shrink:0;" id="ageDisplay">18</div>
+              oninput="document.getElementById('ageDisplay').textContent=this.value">
+            <div style="width:56px;height:48px;background:#1a3050;border:1.5px solid #2a4a7f;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#f5c518;flex-shrink:0;" id="ageDisplay">18</div>
           </div>
-          <div style="display:flex;justify-content:space-between;font-size:11px;color:#4d80b0;margin-top:4px;padding:0 2px;">
-            <span>10-</span><span>18</span><span>25</span><span>32</span><span>40+</span>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#4d80b0;padding:0 2px;">
+            <span>10</span><span>18</span><span>25</span><span>32</span><span>40+</span>
           </div>
         </div>
 
-        <div style="margin-bottom:24px;padding:10px 12px;background:rgba(245,197,24,0.08);border:1px solid rgba(245,197,24,0.2);border-radius:8px;font-size:12px;color:#f5c518;">
-          &#9888; Barcha maydonlarni aniq kiriting — bu ma'lumotlar AI ga yordam beradi
+        <div class="reg-warning">
+          ⚠️ Barcha maydonlarni aniq kiriting — bu ma'lumotlar AI ga yordam beradi
         </div>
 
-        <button onclick="completeRegistration()" style="width:100%;padding:14px;border-radius:10px;border:none;background:#f5c518;color:#000;font-size:15px;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:all 0.2s;" onmouseover="this.style.background='#e6b800'" onmouseout="this.style.background='#f5c518'">
-          Boshlash &#8594;
-        </button>
+        <button class="btn-start" onclick="completeRegistration()">Boshlash →</button>
       </div>
 
     </div>
   </div>
-  <style>
-    @media(max-width:768px){
-      #loginOverlay{flex-direction:column;}
-      #loginOverlay>div:first-child{display:none!important;}
-      #loginOverlay>div:last-child{width:100%!important;padding:30px 20px!important;border-left:none!important;}
-    }
-    @media(min-width:769px){
-      #loginOverlay>div:first-child{padding:60px 70px;}
-      #loginOverlay>div:last-child{width:520px;padding:50px 56px;}
-    }
-    @media(min-width:1280px){
-      #loginOverlay>div:first-child{padding:80px 90px;}
-      #loginOverlay>div:last-child{width:560px;padding:60px 64px;}
-    }
-    input[type=range]::-webkit-slider-thumb{width:22px;height:22px;border-radius:50%;background:#f5c518;cursor:pointer;-webkit-appearance:none;border:2px solid #0f1a2e;}
-    input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:99px;background:linear-gradient(to right,#f5c518 0%,#2a4a7f 0%);}
-  </style>
 </div>
 
 <div id="g_id_onload" data-client_id="189889097085-7onj5aki0q7karkvj7l4ce0gkkl63rhp.apps.googleusercontent.com" data-callback="handleGoogleCredential" data-auto_prompt="false"></div>
@@ -529,10 +637,13 @@ tr:hover td{background:rgba(245,197,24,0.03);}
 <main class="main">
 <div class="mobile-header">
   <div style="display:flex;align-items:center;gap:10px;">
-    <button class="hamburger" onclick="openSidebar()">&#9776;</button>
-    <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;">Study<span style="color:var(--gold);">AI</span></div>
+    <button class="hamburger" onclick="openSidebar()">☰</button>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div style="width:28px;height:28px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;">⚡</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:700;">Study<span style="color:var(--gold);">AI</span></div>
+    </div>
   </div>
-  <div style="font-size:12px;color:var(--text3);" id="mobileDateSmall"></div>
+  <div style="font-size:12px;color:var(--text3);background:var(--surface2);padding:5px 10px;border-radius:8px;border:1px solid var(--border);" id="mobileDateSmall"></div>
 </div>
 
 <!-- PAGE: TODAY -->
