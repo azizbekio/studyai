@@ -1040,34 +1040,34 @@ function appendMessage(role,text){
   box.appendChild(wrap);box.scrollTop=box.scrollHeight;return wrap.querySelector('.chat-bubble');
 }
 async function sendChat(){
-  const input=document.getElementById('chatInput');const btn=document.getElementById('chatSendBtn');const text=input.value.trim();if(!text)return;
-  appendMessage('user',text);chatHistory.push({role:'user',content:text});input.value='';input.style.height='auto';btn.disabled=true;
-  const loading=appendMessage('ai','Javob yozilmoqda...');
+  const input=document.getElementById('chatInput');
+  const btn=document.getElementById('chatSendBtn');
+  const text=input.value.trim();
+  if(!text) return;
+
+  // Foydalanuvchi xabarini qo'shish
+  appendMessage('user', text);
+  chatHistory.push({role:'user', content:text});
+  input.value='';
+  input.style.height='auto';
+  btn.disabled=true;
+
+  // Loading ko'rsatish
+  const loading=appendMessage('ai','...');
+
+  // Oxirgi 10 ta xabarni kontekst sifatida yuborish
   const h10=chatHistory.slice(-10).map(m=>m.role+': '+m.content).join('\n');
   const prompt="Sen StudyAI — aqlli o'quv yordamchisi. Foydalanuvchi: "+(userInfo.name||'Talaba')+". Maqsad: "+(userInfo.goal||"o'qish")+". O'zbek tilida aniq, qisqa javob ber.\n\nSuhbat:\n"+h10;
+
   try{
-    // API ga so'rov yuborish
-    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
-    const data=await res.json();
-    
-    // Javobni to'g'ri o'qish - har xil formatlarni tekshirish
-    let reply = '';
-    if(data.choices && data.choices[0] && data.choices[0].message){
-      reply = data.choices[0].message.content; // Groq/OpenAI format
-    } else if(data.candidates && data.candidates[0]){
-      reply = data.candidates[0].content.parts[0].text; // Gemini format
-    } else if(data.error){
-      reply = 'Xatolik: ' + (data.error.message || JSON.stringify(data.error));
-    } else {
-      reply = 'Javob kelmadi. API muammo: ' + JSON.stringify(data).slice(0,100);
-    }
-    
+    // callAI funksiyasi orqali API ga murojaat
+    const reply = await callAI(prompt);
     loading.textContent = reply;
     chatHistory.push({role:'assistant', content:reply});
   }catch(e){
-    // Xatoni ko'rsatish
     loading.textContent = 'Xatolik: ' + e.message;
   }
+
   btn.disabled=false;
   document.getElementById('chatMessages').scrollTop=99999;
 }
@@ -1163,3 +1163,4 @@ window.addEventListener('appinstalled', () => {
 </script>
 </body>
 </html>
+
