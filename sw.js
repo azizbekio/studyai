@@ -1,15 +1,20 @@
-const CACHE = 'studyai-v2';
+// StudyAI Service Worker - faqat GET so'rovlarni cache qiladi
+const CACHE = 'studyai-v3';
 const ASSETS = ['/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png'];
 
+// O'rnatish - asosiy fayllarni cache qilish
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE).then(c => {
-      return Promise.allSettled(ASSETS.map(url => c.add(url).catch(() => {})));
+      return Promise.allSettled(ASSETS.map(url => 
+        c.add(url).catch(() => {}) // Xato bo'lsa o'tkazib yuborish
+      ));
     })
   );
   self.skipWaiting();
 });
 
+// Faollashtirish - eski cache larni o'chirish
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -19,19 +24,26 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
+// So'rovlarni ushlash
 self.addEventListener('fetch', e => {
-  // API calls - always network
-  if(e.request.url.includes('/api/')) {
-    e.respondWith(fetch(e.request).catch(() => new Response('{"error":"offline"}', {headers:{'Content-Type':'application/json'}})));
-    return;
+  const url = new URL(e.request.url);
+  
+  // API so'rovlari va POST - HECH QACHON cache qilmaslik
+  if(e.request.method !== 'GET' || 
+     url.pathname.startsWith('/api/') ||
+     url.protocol === 'chrome-extension:') {
+    return; // Oddiy network so'rov sifatida o'tkazish
   }
   
-  // Static assets - cache first
+  // Faqat GET so'rovlarni cache qilish
   e.respondWith(
-    caches.match(e.request).then(r => {
-      return r || fetch(e.request).then(response => {
-        const clone = response.clone();
-        caches.open(CACHE).then(c => c.put(e.request, clone));
+    caches.match(e.request).then(cached => {
+      return cached || fetch(e.request).then(response => {
+        // Faqat muvaffaqiyatli javoblarni saqlash
+        if(response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+        }
         return response;
       }).catch(() => caches.match('/index.html'));
     })
