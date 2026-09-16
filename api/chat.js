@@ -1,84 +1,81 @@
-// api/chat.js — StudyAI AI endpoint (Groq)
-// Eski "llama-3.1-8b-instant" model 2026-08-16 da o'chirilgan.
-// Endi bir nechta model ketma-ket sinaladi: biri ishlamasa, keyingisiga o'tadi.
+// api/chat.js — StudyAI AI endpoint (Groq), Edge runtime
+// Ikki rejim: stream:true -> SSE oqim (javob so'zma-so'z keladi), aks holda oddiy JSON.
+export const config = { runtime: 'edge' };
 
-const FALLBACK_MODELS = [
-  "openai/gpt-oss-20b",     // tez, arzon — kundalik chat uchun
-  "openai/gpt-oss-120b",    // kuchliroq — reja va tahlil uchun
-  "qwen/qwen3.6-27b"        // zaxira
+const MODELS = [
+  "openai/gpt-oss-20b",   // tez — chat, kundalik jadval
+  "openai/gpt-oss-120b",  // kuchli — reja, test tuzish
+  "qwen/qwen3.6-27b"      // zaxira
 ];
+const URL_GROQ = "https://api.groq.com/openai/v1/chat/completions";
 
-export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  if (req.method === "OPTIONS") return res.status(200).end();
-  if (req.method !== "POST") return res.status(405).json({ error: { message: "Faqat POST" } });
+const json = (obj, status = 200) => new Response(JSON.stringify(obj), {
+  status, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+});
 
-  if (!process.env.GROQ_API_KEY) {
-    return res.status(200).json({ error: { message: "GROQ_API_KEY topilmadi. Vercel > Settings > Environment Variables ga qo'shing." } });
-  }
+export default async function handler(req) {
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: {
+    "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type" } });
+  if (req.method !== "POST") return json({ error: { message: "Faqat POST" } }, 405);
 
-  try {
-    const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
-    const { prompt, messages, system, model, max_tokens, temperature } = body;
+  const key = process.env.GROQ_API_KEY;
+  if (!key) return json({ error: { message: "GROQ_API_KEY topilmadi. Vercel > Settings > Environment Variables." } });
 
-    let msgs = Array.isArray(messages) && messages.length
-      ? messages
-      : [{ role: "user", content: String(prompt || "") }];
+  let body = {};
+  try { body = await req.json(); } catch (e) { return json({ error: { message: "Noto'g'ri so'rov" } }); }
 
-    if (system) msgs = [{ role: "system", content: String(system) }, ...msgs];
-    if (!msgs.length || !msgs[msgs.length - 1].content) {
-      return res.status(200).json({ error: { message: "Bo'sh so'rov" } });
+  const { prompt, messages, system, model, max_tokens, temperature, stream, json_mode } = body;
+
+  let msgs = Array.isArray(messages) && messages.length
+    ? messages.filter(m => m && m.content).map(m => ({ role: m.role === 'assistant' ? 'assistant' : m.role === 'system' ? 'system' : 'user', content: String(m.content).slice(0, 8000) }))
+    : [{ role: "user", content: String(prompt || "").slice(0, 8000) }];
+  if (system) msgs = [{ role: "system", content: String(system).slice(0, 4000) }, ...msgs];
+  if (!msgs.length) return json({ error: { message: "Bo'sh so'rov" } });
+
+  const chain = [...new Set([model, process.env.GROQ_MODEL, ...MODELS].filter(Boolean))];
+  let lastError = "Noma'lum xato";
+
+  for (const m of chain) {
+    const payload = {
+      model: m,
+      messages: msgs,
+      max_tokens: Math.min(Number(max_tokens) || 1400, 8000),
+      temperature: typeof temperature === "number" ? temperature : 0.7,
+      stream: !!stream
+    };
+    if (json_mode) payload.response_format = { type: "json_object" };
+
+    let r;
+    try {
+      r = await fetch(URL_GROQ, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + key },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) { lastError = e.message; continue; }
+
+    if (!r.ok) {
+      let msg = "HTTP " + r.status;
+      try { const e = await r.json(); msg = e?.error?.message || msg; } catch (_) {}
+      lastError = msg;
+      if (/model|decommission|does not exist|not found|access/i.test(msg)) continue; // keyingi model
+      if (r.status === 429) lastError = "Limit tugadi. Bir necha daqiqadan keyin urinib ko'ring.";
+      break;
     }
 
-    // Model tartibi: so'rovdagi > env dagi > standart ro'yxat
-    const preferred = [model, process.env.GROQ_MODEL].filter(Boolean);
-    const chain = [...new Set([...preferred, ...FALLBACK_MODELS])];
-
-    let lastError = "Nomaʼlum xato";
-
-    for (const m of chain) {
-      try {
-        const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + process.env.GROQ_API_KEY
-          },
-          body: JSON.stringify({
-            model: m,
-            messages: msgs,
-            max_tokens: Math.min(Number(max_tokens) || 1400, 4096),
-            temperature: typeof temperature === "number" ? temperature : 0.7
-          })
-        });
-
-        const data = await r.json();
-
-        if (!r.ok || data.error) {
-          lastError = (data.error && data.error.message) || ("HTTP " + r.status);
-          // Model muammosi bo'lsa — keyingi modelni sinaymiz
-          if (/model|decommission|does not exist|not found|access/i.test(lastError)) continue;
-          // Limit yoki server muammosi — qaytaramiz
-          break;
-        }
-
-        const text = data.choices?.[0]?.message?.content || "";
-        return res.status(200).json({
-          ok: true,
-          model: m,
-          text,
-          usage: data.usage,
-          choices: data.choices // eski frontend bilan moslik uchun
-        });
-      } catch (e) {
-        lastError = e.message;
-      }
+    if (stream) {
+      return new Response(r.body, { headers: {
+        "Content-Type": "text/event-stream; charset=utf-8",
+        "Cache-Control": "no-cache, no-transform",
+        "Connection": "keep-alive",
+        "X-Model": m,
+        "Access-Control-Allow-Origin": "*"
+      }});
     }
 
-    return res.status(200).json({ error: { message: lastError } });
-  } catch (err) {
-    return res.status(200).json({ error: { message: err.message } });
+    const data = await r.json();
+    return json({ ok: true, model: m, text: data.choices?.[0]?.message?.content || "", usage: data.usage, choices: data.choices });
   }
+
+  return json({ error: { message: lastError } });
 }
