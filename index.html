@@ -3,16 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>StudyAI — O'quv platforma</title>
+<title>StudyAI — AI o'quv platformasi</title>
+<meta name="description" content="StudyAI — AI yordamchi bilan kunlik reja, test, flashcard, statistika va streak. O'zbek talabalari uchun bepul.">
 <link rel="icon" type="image/png" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0d1b2a">
-<meta name="description" content="StudyAI — AI yordamchi bilan kunlik reja, statistika va streak. O'zbek talabalari uchun.">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="StudyAI">
+<meta property="og:title" content="StudyAI — AI o'quv platformasi">
+<meta property="og:description" content="Reja tuz, test yech, kartochka takrorla, natijangni kuzat. Bepul.">
+<meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -28,73 +31,48 @@
   --done:#2ecc71; --half:#f5c518; --undone:#ef4d5a;
   --r:14px; --shadow:0 10px 30px rgba(0,0,0,.28);
 }
-[data-theme=dark]{
-  --bg:#09090b; --surface:#111113; --surface2:#17171a; --surface3:#202024;
-  --border:#26262b; --border2:#33333a;
-  --gold:#f5c518; --gold2:#e0b207; --on-gold:#121200;
-  --gold-dim:rgba(245,197,24,.13); --gold-glow:rgba(245,197,24,.06);
-  --text:#f2f2f2; --text2:#a1a1a8; --text3:#6b6b73;
-  --done:#22c55e; --half:#f5c518; --undone:#ef4444;
-  --shadow:0 10px 30px rgba(0,0,0,.5);
-}
-[data-theme=light]{
-  --bg:#f4f6f9; --surface:#ffffff; --surface2:#f2f5f9; --surface3:#e8edf3;
-  --border:#e2e8f0; --border2:#cfd9e4;
-  --gold:#0f62d6; --gold2:#0b4fb0; --on-gold:#ffffff;
-  --gold-dim:rgba(15,98,214,.10); --gold-glow:rgba(15,98,214,.05);
-  --text:#101828; --text2:#4b5563; --text3:#8a94a4;
-  --done:#16a34a; --half:#ca8a04; --undone:#dc2626;
-  --shadow:0 8px 24px rgba(16,24,40,.08);
-}
+[data-theme=dark]{--bg:#09090b;--surface:#111113;--surface2:#17171a;--surface3:#202024;--border:#26262b;--border2:#33333a;--gold:#f5c518;--gold2:#e0b207;--on-gold:#121200;--gold-dim:rgba(245,197,24,.13);--gold-glow:rgba(245,197,24,.06);--text:#f2f2f2;--text2:#a1a1a8;--text3:#6b6b73;--done:#22c55e;--half:#f5c518;--undone:#ef4444;--shadow:0 10px 30px rgba(0,0,0,.5)}
+[data-theme=light]{--bg:#f4f6f9;--surface:#fff;--surface2:#f2f5f9;--surface3:#e8edf3;--border:#e2e8f0;--border2:#cfd9e4;--gold:#0f62d6;--gold2:#0b4fb0;--on-gold:#fff;--gold-dim:rgba(15,98,214,.10);--gold-glow:rgba(15,98,214,.05);--text:#101828;--text2:#4b5563;--text3:#8a94a4;--done:#16a34a;--half:#ca8a04;--undone:#dc2626;--shadow:0 8px 24px rgba(16,24,40,.08)}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%}
 body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;line-height:1.55;font-size:14px}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-::-webkit-scrollbar{width:9px;height:9px}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:9px}
-::-webkit-scrollbar-track{background:transparent}
-
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:9px}::-webkit-scrollbar-track{background:transparent}
 .app{display:flex;min-height:100vh}
-
-/* ---------- SIDEBAR ---------- */
 .sidebar{width:246px;background:var(--surface);border-right:1px solid var(--border);position:fixed;inset:0 auto 0 0;display:flex;flex-direction:column;z-index:500;transition:transform .28s cubic-bezier(.4,0,.2,1)}
-.sidebar-top{padding:20px 18px;border-bottom:1px solid var(--border)}
+.sidebar-top{padding:18px;border-bottom:1px solid var(--border)}
 .logo{display:flex;align-items:center;gap:11px}
 .logo-icon{width:36px;height:36px;border-radius:11px;background:var(--gold);display:grid;place-items:center;font-size:19px;flex-shrink:0}
 .logo-text{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.3px}
 .logo-text span{color:var(--gold)}
 .logo-badge{font-size:10px;color:var(--text3)}
-.sidebar-nav{padding:12px 10px;flex:1;overflow-y:auto}
+.sidebar-nav{padding:10px;flex:1;overflow-y:auto}
 .nav-section{font-size:10px;color:var(--text3);letter-spacing:.9px;padding:12px 9px 5px;font-weight:600}
 .nav-item{display:flex;align-items:center;gap:11px;padding:10px;border-radius:10px;cursor:pointer;font-size:13.5px;color:var(--text2);border:1px solid transparent;transition:background .15s,color .15s;user-select:none}
 .nav-item:hover{background:var(--surface2);color:var(--text)}
 .nav-item.active{background:var(--gold-dim);color:var(--gold);border-color:var(--gold-dim);font-weight:600}
 .nav-icon{font-size:16px;width:20px;text-align:center}
-.sidebar-bottom{padding:12px 10px;border-top:1px solid var(--border)}
+.nav-badge{margin-left:auto;background:var(--gold);color:var(--on-gold);font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:99px}
+.sidebar-bottom{padding:10px;border-top:1px solid var(--border)}
 .user-card{display:flex;align-items:center;gap:10px;padding:10px;border-radius:11px;background:var(--surface2)}
 .user-avatar{width:34px;height:34px;border-radius:50%;background:var(--gold);color:var(--on-gold);display:grid;place-items:center;font-weight:700;overflow:hidden;flex-shrink:0}
 .user-avatar img{width:100%;height:100%;object-fit:cover}
 .user-name{font-size:13px;font-weight:600}
 .user-level{font-size:11px;color:var(--text3)}
-
-/* ---------- MAIN ---------- */
-.main{margin-left:246px;flex:1;padding:26px 30px 60px;max-width:1120px}
-.page{display:none}
-.page.active{display:block}
+.xp-bar{height:4px;background:var(--surface3);border-radius:99px;margin-top:6px;overflow:hidden}
+.xp-fill{height:100%;background:var(--gold);border-radius:99px;transition:width .5s}
+.main{margin-left:246px;flex:1;padding:26px 30px 60px;max-width:1140px}
+.page{display:none}.page.active{display:block}
 .page-header{font-family:'Space Grotesk',sans-serif;font-size:25px;font-weight:700;letter-spacing:-.5px}
 .page-sub{color:var(--text2);font-size:13px;margin-bottom:22px}
-.mobile-header{display:none;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;position:sticky;top:0;background:var(--bg);padding:10px 0;z-index:100}
+.mobile-header{display:none;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;position:sticky;top:0;background:var(--bg);padding:10px 0;z-index:100}
 .hamburger{background:var(--surface2);border:1px solid var(--border);border-radius:10px;width:40px;height:40px;font-size:17px;color:var(--text);cursor:pointer}
 .mobile-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:499;opacity:0;pointer-events:none;transition:opacity .25s}
 .mobile-overlay.open{opacity:1;pointer-events:auto}
-
-/* ---------- CARDS ---------- */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px}
 .card-title{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.section-title{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.6px;margin:22px 0 10px;display:flex;align-items:center;justify-content:space-between}
-
-/* ---------- FORM ---------- */
+.section-title{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.6px;margin:22px 0 10px}
 input,textarea,select{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:11px 13px;color:var(--text);font-family:inherit;font-size:14px;outline:none;transition:border-color .15s,box-shadow .15s;resize:vertical}
 input:focus,textarea:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim)}
 input::placeholder,textarea::placeholder{color:var(--text3)}
@@ -102,37 +80,27 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
 .form-label{font-size:12px;color:var(--text2);margin-bottom:6px;display:block;font-weight:500}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .hint{font-size:11.5px;color:var(--text3);margin-top:5px}
-
-/* ---------- BUTTONS ---------- */
 .btn{padding:10px 18px;border-radius:10px;border:1px solid transparent;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:600;transition:transform .12s,background .15s,border-color .15s;display:inline-flex;align-items:center;gap:7px;justify-content:center}
 .btn:active{transform:scale(.97)}
 .btn-gold{background:var(--gold);color:var(--on-gold)}
 .btn-gold:hover{background:var(--gold2)}
-.btn-gold:disabled{opacity:.55;cursor:not-allowed}
+.btn:disabled{opacity:.55;cursor:not-allowed}
 .btn-ghost{background:transparent;color:var(--text2);border-color:var(--border2)}
 .btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
 .btn-danger{background:transparent;color:var(--undone);border-color:color-mix(in srgb,var(--undone) 35%,transparent)}
-.btn-danger:hover{background:color-mix(in srgb,var(--undone) 12%,transparent)}
 .btn-sm{padding:6px 12px;font-size:12.5px;border-radius:8px}
-.icon-btn{background:transparent;border:1px solid var(--border);color:var(--text3);width:32px;height:32px;border-radius:8px;cursor:pointer;display:grid;place-items:center;font-size:13px;transition:color .15s,border-color .15s}
+.icon-btn{background:transparent;border:1px solid var(--border);color:var(--text3);width:32px;height:32px;border-radius:8px;cursor:pointer;display:grid;place-items:center;transition:color .15s,border-color .15s}
 .icon-btn:hover{color:var(--gold);border-color:var(--gold)}
-
-/* ---------- CHIPS ---------- */
 .chips{display:flex;gap:7px;flex-wrap:wrap}
 .chip{padding:6px 13px;border-radius:99px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-size:12.5px;cursor:pointer;transition:all .15s}
 .chip:hover{border-color:var(--gold);color:var(--gold)}
 .chip.active{background:var(--gold);border-color:var(--gold);color:var(--on-gold);font-weight:600}
-
-/* ---------- TASKS ---------- */
 .task-item{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--border2);border-radius:12px;padding:13px 15px;margin-bottom:9px;animation:in .2s ease}
-.task-item.done{border-left-color:var(--done)}
-.task-item.half{border-left-color:var(--half)}
-.task-item.undone{border-left-color:var(--undone)}
+.task-item.done{border-left-color:var(--done)}.task-item.half{border-left-color:var(--half)}.task-item.undone{border-left-color:var(--undone)}
 .task-head{display:flex;align-items:flex-start;gap:10px}
 .task-title{font-size:14.5px;font-weight:600;flex:1;word-break:break-word}
-.task-item.done .task-title{color:var(--text2);text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--done) 60%,transparent)}
+.task-item.done .task-title{color:var(--text2);text-decoration:line-through}
 .task-meta{font-size:12.5px;color:var(--text3);margin-top:3px}
-.task-actions{display:flex;gap:6px;flex-shrink:0}
 .status-btns{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}
 .status-btn{padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;border:1px solid;background:transparent;opacity:.6;transition:opacity .15s,background .15s}
 .status-btn:hover,.status-btn.active{opacity:1}
@@ -142,13 +110,9 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
 .status-btn.s-half.active{background:color-mix(in srgb,var(--half) 14%,transparent)}
 .status-btn.s-undone{color:var(--undone);border-color:color-mix(in srgb,var(--undone) 35%,transparent)}
 .status-btn.s-undone.active{background:color-mix(in srgb,var(--undone) 14%,transparent)}
-
-/* ---------- PROGRESS ---------- */
 .progress-label{display:flex;justify-content:space-between;font-size:12.5px;color:var(--text2);margin-bottom:6px}
 .progress-bar{height:8px;background:var(--surface3);border-radius:99px;overflow:hidden}
 .progress-fill{height:100%;background:var(--gold);border-radius:99px;transition:width .6s cubic-bezier(.4,0,.2,1)}
-
-/* ---------- STATS ---------- */
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px}
 .stat-num{font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:700;line-height:1.1}
@@ -167,16 +131,12 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
 .chart-box{position:relative;width:100%;height:230px}
 .legend{display:flex;gap:16px;margin-top:12px;font-size:12px;color:var(--text2);flex-wrap:wrap}
 .legend i{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:6px}
-
-/* ---------- TABLE ---------- */
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{padding:10px 12px;text-align:left;font-size:11.5px;color:var(--text2);font-weight:600;border-bottom:1px solid var(--border);white-space:nowrap}
 td{padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap}
 tr:last-child td{border:none}
-
-/* ---------- CHAT ---------- */
-.chat-shell{display:flex;flex-direction:column;height:calc(100vh - 210px);min-height:420px}
+.chat-shell{display:flex;flex-direction:column;height:calc(100vh - 215px);min-height:420px}
 .chat-messages{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding:4px 2px 16px}
 .msg{display:flex;flex-direction:column;max-width:82%;animation:in .2s ease}
 .msg.me{align-self:flex-end;align-items:flex-end}
@@ -185,12 +145,11 @@ tr:last-child td{border:none}
 .bubble{padding:12px 15px;border-radius:14px;font-size:14px;line-height:1.7;word-break:break-word}
 .msg.me .bubble{background:var(--gold);color:var(--on-gold);border-bottom-right-radius:4px;font-weight:500}
 .msg.ai .bubble{background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:4px}
-.bubble h3{font-size:14.5px;margin:10px 0 5px;color:var(--gold);font-family:'Space Grotesk',sans-serif}
-.bubble p{margin:0 0 8px}.bubble p:last-child{margin:0}
-.bubble ul,.bubble ol{margin:6px 0 8px 20px}
-.bubble li{margin-bottom:4px}
-.bubble code{background:var(--surface3);padding:2px 6px;border-radius:5px;font-size:12.5px;font-family:ui-monospace,monospace}
-.bubble strong{color:var(--text);font-weight:700}
+.bubble h3,.ai-content h3{font-size:14.5px;margin:10px 0 5px;color:var(--gold);font-family:'Space Grotesk',sans-serif}
+.bubble p,.ai-content p{margin:0 0 8px}.bubble p:last-child{margin:0}
+.bubble ul,.bubble ol,.ai-content ul,.ai-content ol{margin:6px 0 8px 20px}
+.bubble li,.ai-content li{margin-bottom:4px}
+.bubble code,.ai-content code{background:var(--surface3);padding:2px 6px;border-radius:5px;font-size:12.5px;font-family:ui-monospace,monospace}
 .msg-tools{display:flex;gap:8px;margin-top:6px;opacity:0;transition:opacity .15s}
 .msg:hover .msg-tools,.msg:focus-within .msg-tools{opacity:1}
 .msg-tool{background:none;border:none;color:var(--text3);font-size:11.5px;cursor:pointer;padding:2px 4px}
@@ -201,139 +160,127 @@ tr:last-child td{border:none}
 .chat-send:disabled{opacity:.45;cursor:not-allowed}
 .typing{display:inline-flex;gap:5px;align-items:center;height:22px}
 .typing i{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:bounce 1.2s infinite}
-.typing i:nth-child(2){animation-delay:.18s}
-.typing i:nth-child(3){animation-delay:.36s}
-
-/* ---------- AI BOX ---------- */
+.typing i:nth-child(2){animation-delay:.18s}.typing i:nth-child(3){animation-delay:.36s}
 .ai-box{background:var(--gold-glow);border:1px solid var(--gold-dim);border-radius:var(--r);padding:18px;margin-top:14px;display:none}
 .ai-box.visible{display:block;animation:in .25s ease}
-.ai-head{display:flex;align-items:center;justify-content:space-between;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;color:var(--gold);margin-bottom:12px}
+.ai-head{display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;color:var(--gold);margin-bottom:12px;flex-wrap:wrap}
 .ai-content{font-size:14px;line-height:1.75}
-.ai-content h3{font-size:14.5px;margin:12px 0 6px;color:var(--gold);font-family:'Space Grotesk',sans-serif}
-.ai-content ul,.ai-content ol{margin:6px 0 10px 20px}
-.ai-content p{margin-bottom:9px}
-.ai-content strong{font-weight:700}
-
-/* ---------- HISTORY ---------- */
 .history-item{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:9px}
 .history-date{font-size:11.5px;color:var(--text3)}
 .history-goal{font-size:14px;font-weight:600;margin-top:2px}
 .history-preview{font-size:12.5px;color:var(--text2);margin-top:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-
-/* ---------- WEEK GRID ---------- */
 .week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin-top:10px}
 .day-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 4px;text-align:center}
 .day-name{font-size:10px;color:var(--text3)}
 .day-hours{font-size:16px;font-weight:700;color:var(--gold);font-family:'Space Grotesk',sans-serif}
 .day-task{font-size:9.5px;color:var(--text3);line-height:1.3;margin-top:2px}
-
-/* ---------- FOCUS TIMER ---------- */
 .timer{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 .timer-clock{font-family:'Space Grotesk',sans-serif;font-size:42px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-1px}
 .timer-ring{--p:0;width:74px;height:74px;border-radius:50%;flex-shrink:0;background:conic-gradient(var(--gold) calc(var(--p)*1%),var(--surface3) 0);display:grid;place-items:center}
 .timer-ring div{width:60px;height:60px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-size:18px}
-
-/* ---------- EMPTY / SKELETON ---------- */
 .empty{text-align:center;padding:38px 18px;color:var(--text3)}
 .empty .ico{font-size:34px;margin-bottom:10px}
-.empty .act{margin-top:12px}
-.skeleton{background:linear-gradient(90deg,var(--surface2),var(--surface3),var(--surface2));background-size:200% 100%;animation:shimmer 1.3s infinite;border-radius:8px;height:13px;margin-bottom:9px}
-
-/* ---------- MODAL + TOAST ---------- */
 .modal-overlay{position:fixed;inset:0;background:rgba(3,8,15,.72);z-index:1000;display:none;align-items:center;justify-content:center;padding:18px}
 .modal-overlay.open{display:flex;animation:fade .18s ease}
 .modal{background:var(--surface);border:1px solid var(--border2);border-radius:18px;padding:24px;width:100%;max-width:600px;max-height:82vh;overflow-y:auto;box-shadow:var(--shadow);animation:in .22s ease}
 .modal-header{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}
 .modal-close{background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;line-height:1}
-#toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;z-index:2000;display:flex;flex-direction:column;gap:9px;align-items:center;pointer-events:none;width:calc(100% - 32px);max-width:420px}
-.toast{background:var(--surface);border:1px solid var(--border2);border-left:3px solid var(--gold);border-radius:11px;padding:12px 16px;font-size:13.5px;box-shadow:var(--shadow);animation:in .2s ease;max-width:100%}
-.toast.ok{border-left-color:var(--done)}
-.toast.err{border-left-color:var(--undone)}
-
-/* ---------- MOBILE NAV ---------- */
+#toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;z-index:2000;display:flex;flex-direction:column;gap:9px;align-items:center;pointer-events:none;width:calc(100% - 32px);max-width:430px}
+.toast{background:var(--surface);border:1px solid var(--border2);border-left:3px solid var(--gold);border-radius:11px;padding:12px 16px;font-size:13.5px;box-shadow:var(--shadow);animation:in .2s ease}
+.toast.ok{border-left-color:var(--done)}.toast.err{border-left-color:var(--undone)}
 #mobileNav{display:none;position:fixed;inset:auto 0 0 0;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(14px);border-top:1px solid var(--border);z-index:400;padding-bottom:env(safe-area-inset-bottom)}
 #mobileNav .row{display:flex}
 .mnav{flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px;color:var(--text3);font-size:9.5px;font-weight:600}
 .mnav span.i{font-size:20px}
 .mnav.active{color:var(--gold)}
-
+/* QUIZ + CARDS */
+.q-option{display:block;width:100%;text-align:left;padding:13px 15px;border-radius:11px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:14px;cursor:pointer;margin-bottom:9px;transition:border-color .15s,background .15s}
+.q-option:hover{border-color:var(--gold)}
+.q-option.right{border-color:var(--done);background:color-mix(in srgb,var(--done) 13%,transparent)}
+.q-option.wrong{border-color:var(--undone);background:color-mix(in srgb,var(--undone) 13%,transparent)}
+.q-option:disabled{cursor:default}
+.flash{perspective:1200px;height:210px;margin-bottom:14px}
+.flash-inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;cursor:pointer}
+.flash.flipped .flash-inner{transform:rotateY(180deg)}
+.flash-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);display:grid;place-items:center;padding:24px;text-align:center;font-size:16px;line-height:1.6}
+.flash-face.back{transform:rotateY(180deg);background:var(--gold-glow);border-color:var(--gold-dim)}
+.badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:10px}
+.badge{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:13px 8px;text-align:center;opacity:.4;filter:grayscale(1)}
+.badge.on{opacity:1;filter:none;border-color:var(--gold-dim);background:var(--gold-glow)}
+.badge .e{font-size:24px}
+.badge .n{font-size:11px;font-weight:600;margin-top:4px}
+.badge .d{font-size:9.5px;color:var(--text3);line-height:1.3;margin-top:2px}
 @keyframes in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-
 @media(max-width:860px){
   .sidebar{transform:translateX(-100%);width:78vw;max-width:290px;box-shadow:var(--shadow)}
   .sidebar.open{transform:none}
   .main{margin-left:0;padding:12px 15px 96px;max-width:100%}
-  .mobile-header{display:flex}
-  #mobileNav{display:block}
-  .page-header{font-size:20px}
-  .page-sub{font-size:12.5px;margin-bottom:14px}
+  .mobile-header{display:flex}#mobileNav{display:block}
+  .page-header{font-size:20px}.page-sub{font-size:12.5px;margin-bottom:14px}
   .card{padding:15px;border-radius:12px}
   .form-row{grid-template-columns:1fr}
   .stats-row{grid-template-columns:1fr 1fr;gap:9px}
-  .stat-num{font-size:25px}
-  .streak-num{font-size:46px}
-  .msg{max-width:92%}
-  .chat-shell{height:calc(100vh - 230px)}
-  .dot{width:32px;height:32px}
-  .week-grid{gap:4px}
+  .stat-num{font-size:25px}.streak-num{font-size:46px}
+  .msg{max-width:92%}.chat-shell{height:calc(100vh - 235px)}
+  .dot{width:32px;height:32px}.week-grid{gap:4px}
   th,td{padding:8px 9px;font-size:12px}
+  #landing .hero{grid-template-columns:1fr!important;padding:26px 18px!important}
+  #landing .brandcol{display:none}
 }
 </style>
 </head>
 <body>
 
-<!-- ========== LOGIN ========== -->
-<div id="loginOverlay" style="position:fixed;inset:0;z-index:9999;display:none;background:var(--bg)">
-  <div style="display:flex;width:100%;height:100%">
-    <div id="loginBrand" style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:60px;gap:34px">
+<!-- ================= LANDING / LOGIN ================= -->
+<div id="landing" style="position:fixed;inset:0;z-index:9999;display:none;background:var(--bg);overflow-y:auto">
+  <div class="hero" style="display:grid;grid-template-columns:1fr 470px;min-height:100%">
+    <div class="brandcol" style="display:flex;flex-direction:column;justify-content:center;padding:60px;gap:30px">
       <div style="display:flex;align-items:center;gap:14px">
         <div class="logo-icon" style="width:54px;height:54px;border-radius:16px;font-size:28px">&#9889;</div>
         <div style="font-family:'Space Grotesk',sans-serif;font-size:34px;font-weight:700">Study<span style="color:var(--gold)">AI</span></div>
       </div>
-      <div style="font-size:17px;color:var(--text2);max-width:420px;line-height:1.7">Har kuni nima o'qishingizni bilib turing. Reja tuzing, belgilang, natijani ko'ring — AI yoningizda.</div>
-      <div style="display:flex;flex-direction:column;gap:16px;max-width:420px">
-        <div style="display:flex;gap:13px;align-items:center"><div style="width:40px;height:40px;border-radius:11px;background:var(--gold-dim);display:grid;place-items:center;font-size:18px">&#128197;</div><div><div style="font-weight:600">Kunlik vazifalar</div><div style="font-size:12.5px;color:var(--text3)">Qo'shing, belgilang, kuzating</div></div></div>
-        <div style="display:flex;gap:13px;align-items:center"><div style="width:40px;height:40px;border-radius:11px;background:var(--gold-dim);display:grid;place-items:center;font-size:18px">&#129302;</div><div><div style="font-weight:600">AI yordamchi</div><div style="font-size:12.5px;color:var(--text3)">Savol bering, reja so'rang</div></div></div>
-        <div style="display:flex;gap:13px;align-items:center"><div style="width:40px;height:40px;border-radius:11px;background:var(--gold-dim);display:grid;place-items:center;font-size:18px">&#128293;</div><div><div style="font-weight:600">Streak va statistika</div><div style="font-size:12.5px;color:var(--text3)">Ketma-ket kunlarni yo'qotmang</div></div></div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:36px;font-weight:700;line-height:1.2;max-width:520px;letter-spacing:-1px" data-i18n="land.h1">Rejadan natijagacha — bitta joyda.</div>
+      <div style="font-size:16px;color:var(--text2);max-width:460px;line-height:1.7" data-i18n="land.sub">Kunlik vazifa qo'ying, AI'dan reja so'rang, o'zingizga test tuzdiring, kartochkalarda takrorlang va natijangizni grafikda ko'ring.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:520px">
+        <div style="display:flex;gap:12px;align-items:center"><div style="width:38px;height:38px;border-radius:11px;background:var(--gold-dim);display:grid;place-items:center">&#129302;</div><div style="font-size:13.5px;font-weight:600" data-i18n="land.f1">AI mentor va reja</div></div>
+        <div style="display:flex;gap:12px;align-items:center"><div style="width:38px;height:38px;border-radius:11px;background:var(--gold-dim);display:grid;place-items:center">&#128221;</div><div style="font-size:13.5px;font-weight:600" data-i18n="land.f2">Test va flashcard</div></div>
+        <div style="display:flex;gap:12px;align-items:center"><div style="width:38px;height:38px;border-radius:11px;background:var(--gold-dim);display:grid;place-items:center">&#128293;</div><div style="font-size:13.5px;font-weight:600" data-i18n="land.f3">Streak va XP</div></div>
+        <div style="display:flex;gap:12px;align-items:center"><div style="width:38px;height:38px;border-radius:11px;background:var(--gold-dim);display:grid;place-items:center">&#128241;</div><div style="font-size:13.5px;font-weight:600" data-i18n="land.f4">Offline ishlaydi</div></div>
       </div>
     </div>
 
-    <div style="width:470px;max-width:100%;background:var(--surface);border-left:1px solid var(--border);display:flex;align-items:center;justify-content:center;padding:40px;overflow-y:auto">
+    <div style="background:var(--surface);border-left:1px solid var(--border);display:flex;align-items:center;justify-content:center;padding:40px">
       <div style="width:100%;max-width:340px">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:18px">
+          <div class="chips"><button class="chip" onclick="setLang('uz')" id="lang-uz">UZ</button><button class="chip" onclick="setLang('en')" id="lang-en">EN</button></div>
+        </div>
         <div id="loginStep1">
-          <div style="font-family:'Space Grotesk',sans-serif;font-size:23px;font-weight:700">Xush kelibsiz</div>
-          <div style="font-size:13.5px;color:var(--text2);margin:6px 0 26px">Davom etish uchun Google hisobingiz bilan kiring.</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:23px;font-weight:700" data-i18n="login.title">Xush kelibsiz</div>
+          <div style="font-size:13.5px;color:var(--text2);margin:6px 0 24px" data-i18n="login.sub">Hisob oching — natijalaringiz saqlanib boradi.</div>
           <button class="btn" onclick="handleGoogleLogin()" style="width:100%;padding:14px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:14.5px">
             <svg width="19" height="19" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09A6.6 6.6 0 0 1 5.49 12c0-.73.13-1.43.35-2.09V7.07H2.18A11 11 0 0 0 1 12c0 1.78.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            Google bilan kirish
+            <span data-i18n="login.google">Google bilan kirish</span>
           </button>
-          <button class="btn btn-ghost" onclick="guestLogin()" style="width:100%;margin-top:10px">Hisobsiz davom etish</button>
+          <button class="btn btn-ghost" onclick="guestLogin()" style="width:100%;margin-top:10px" data-i18n="login.guest">Hisobsiz sinab ko'rish</button>
           <div id="loginInstallBtn" style="display:none;margin-top:18px">
-            <button class="btn btn-gold" onclick="installApp()" style="width:100%">&#128242; Ilovani o'rnatish</button>
-            <div style="text-align:center;font-size:11.5px;color:var(--text3);margin-top:6px">Android va iOS uchun bepul</div>
+            <button class="btn btn-gold" onclick="installApp()" style="width:100%" data-i18n="login.install">&#128242; Ilovani o'rnatish</button>
           </div>
-          <div style="text-align:center;font-size:11px;color:var(--text3);margin-top:26px">&#169; StudyAI — Axmadov Azizbek</div>
+          <div style="text-align:center;font-size:11px;color:var(--text3);margin-top:24px">&#169; StudyAI — Axmadov Azizbek</div>
         </div>
-
         <div id="loginStep2" style="display:none">
-          <div style="display:flex;align-items:center;gap:13px;margin-bottom:22px">
+          <div style="display:flex;align-items:center;gap:13px;margin-bottom:20px">
             <div class="user-avatar" id="googleAvatar" style="width:46px;height:46px">A</div>
-            <div>
-              <div style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700" id="googleWelcome">Salom!</div>
-              <div style="font-size:12.5px;color:var(--text2)">Profilingizni to'ldiring</div>
-            </div>
+            <div><div style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700" id="googleWelcome">Salom!</div>
+            <div style="font-size:12.5px;color:var(--text2)" data-i18n="login.fill">Profilingizni to'ldiring</div></div>
           </div>
-          <div class="form-group"><label class="form-label">Ism</label><input id="regName" placeholder="Azizbek"></div>
-          <div class="form-group"><label class="form-label">Familiya</label><input id="regSurname" placeholder="Axmadov"></div>
-          <div class="form-group"><label class="form-label">Asosiy maqsad</label><input id="regGoal" placeholder="IELTS 7.0"></div>
-          <div class="form-group">
-            <label class="form-label">Yosh: <b id="ageDisplay" style="color:var(--gold)">18</b></label>
-            <input type="range" id="ageSlider" min="10" max="40" value="18" style="padding:0;background:transparent;border:none;accent-color:var(--gold)" oninput="document.getElementById('ageDisplay').textContent=this.value">
-          </div>
-          <button class="btn btn-gold" style="width:100%;padding:13px;margin-top:8px" onclick="completeRegistration()">Boshlash</button>
+          <div class="form-group"><label class="form-label" data-i18n="f.name">Ism</label><input id="regName" placeholder="Azizbek"></div>
+          <div class="form-group"><label class="form-label" data-i18n="f.surname">Familiya</label><input id="regSurname" placeholder="Axmadov"></div>
+          <div class="form-group"><label class="form-label" data-i18n="f.goal">Asosiy maqsad</label><input id="regGoal" placeholder="IELTS 7.0"></div>
+          <div class="form-group"><label class="form-label"><span data-i18n="f.age">Yosh</span>: <b id="ageDisplay" style="color:var(--gold)">18</b></label>
+            <input type="range" id="ageSlider" min="10" max="45" value="18" style="padding:0;background:transparent;border:none;accent-color:var(--gold)" oninput="document.getElementById('ageDisplay').textContent=this.value"></div>
+          <button class="btn btn-gold" style="width:100%;padding:13px;margin-top:6px" onclick="completeRegistration()" data-i18n="login.start">Boshlash</button>
         </div>
       </div>
     </div>
@@ -341,36 +288,37 @@ tr:last-child td{border:none}
 </div>
 
 <div id="g_id_onload" data-client_id="189889097085-7onj5aki0q7karkvj7l4ce0gkkl63rhp.apps.googleusercontent.com" data-callback="handleGoogleCredential" data-auto_prompt="false"></div>
-
 <div class="mobile-overlay" id="mobileOverlay" onclick="closeSidebar()"></div>
 
 <div class="app">
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-top">
-    <div class="logo">
-      <div class="logo-icon">&#9889;</div>
-      <div><div class="logo-text">Study<span>AI</span></div><div class="logo-badge">v4.0</div></div>
-    </div>
+    <div class="logo"><div class="logo-icon">&#9889;</div>
+      <div><div class="logo-text">Study<span>AI</span></div><div class="logo-badge">v5.0</div></div></div>
   </div>
   <nav class="sidebar-nav">
-    <div class="nav-section">Asosiy</div>
-    <div class="nav-item active" data-page="today" onclick="go('today')"><span class="nav-icon">&#128197;</span> Bugungi vazifalar</div>
-    <div class="nav-item" data-page="chat" onclick="go('chat')"><span class="nav-icon">&#128172;</span> AI chat</div>
-    <div class="nav-section">Rejalashtirish</div>
-    <div class="nav-item" data-page="longplan" onclick="go('longplan')"><span class="nav-icon">&#127919;</span> Uzoq muddatli reja</div>
-    <div class="nav-item" data-page="ai-plan" onclick="go('ai-plan')"><span class="nav-icon">&#10024;</span> Ideal reja</div>
-    <div class="nav-section">Tahlil</div>
-    <div class="nav-item" data-page="stats" onclick="go('stats')"><span class="nav-icon">&#128202;</span> Statistika</div>
-    <div class="nav-item" data-page="history" onclick="go('history')"><span class="nav-icon">&#128218;</span> Tarix</div>
-    <div class="nav-section">Tizim</div>
-    <div class="nav-item" data-page="about" onclick="go('about')"><span class="nav-icon">&#128196;</span> Platforma haqida</div>
-    <div class="nav-item" data-page="settings" onclick="go('settings')"><span class="nav-icon">&#9881;</span> Sozlamalar</div>
+    <div class="nav-section" data-i18n="nav.g1">Asosiy</div>
+    <div class="nav-item active" data-page="today" onclick="go('today')"><span class="nav-icon">&#128197;</span> <span data-i18n="nav.today">Bugun</span></div>
+    <div class="nav-item" data-page="chat" onclick="go('chat')"><span class="nav-icon">&#128172;</span> <span data-i18n="nav.chat">AI chat</span></div>
+    <div class="nav-item" data-page="learn" onclick="go('learn')"><span class="nav-icon">&#129504;</span> <span data-i18n="nav.learn">Bilim mashqi</span><span class="nav-badge" id="dueBadge" style="display:none">0</span></div>
+    <div class="nav-section" data-i18n="nav.g2">Rejalashtirish</div>
+    <div class="nav-item" data-page="plan" onclick="go('plan')"><span class="nav-icon">&#127919;</span> <span data-i18n="nav.plan">Reja</span></div>
+    <div class="nav-section" data-i18n="nav.g3">Tahlil</div>
+    <div class="nav-item" data-page="stats" onclick="go('stats')"><span class="nav-icon">&#128202;</span> <span data-i18n="nav.stats">Statistika</span></div>
+    <div class="nav-item" data-page="history" onclick="go('history')"><span class="nav-icon">&#128218;</span> <span data-i18n="nav.history">Tarix</span></div>
+    <div class="nav-section" data-i18n="nav.g4">Tizim</div>
+    <div class="nav-item" data-page="about" onclick="go('about')"><span class="nav-icon">&#128196;</span> <span data-i18n="nav.about">Loyiha haqida</span></div>
+    <div class="nav-item" data-page="settings" onclick="go('settings')"><span class="nav-icon">&#9881;</span> <span data-i18n="nav.settings">Sozlamalar</span></div>
   </nav>
   <div class="sidebar-bottom">
-    <button class="btn btn-ghost btn-sm" id="installBtn" onclick="installApp()" style="display:none;width:100%;margin-bottom:9px">&#128242; Ilovani o'rnatish</button>
+    <button class="btn btn-ghost btn-sm" id="installBtn" onclick="installApp()" style="display:none;width:100%;margin-bottom:9px" data-i18n="login.install">&#128242; Ilovani o'rnatish</button>
     <div class="user-card">
       <div class="user-avatar" id="sidebarAvatar">A</div>
-      <div style="min-width:0"><div class="user-name" id="sidebarName">Foydalanuvchi</div><div class="user-level" id="sidebarGoal">Maqsad belgilanmagan</div></div>
+      <div style="min-width:0;flex:1">
+        <div class="user-name" id="sidebarName">Foydalanuvchi</div>
+        <div class="user-level" id="sidebarLevel">1-daraja · 0 XP</div>
+        <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:0"></div></div>
+      </div>
     </div>
   </div>
 </aside>
@@ -378,7 +326,7 @@ tr:last-child td{border:none}
 <main class="main">
 <div class="mobile-header">
   <div style="display:flex;align-items:center;gap:10px">
-    <button class="hamburger" onclick="openSidebar()" aria-label="Menyu">&#9776;</button>
+    <button class="hamburger" onclick="openSidebar()" aria-label="Menu">&#9776;</button>
     <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700">Study<span style="color:var(--gold)">AI</span></div>
   </div>
   <div style="font-size:12px;color:var(--text3)" id="mobileDate"></div>
@@ -386,988 +334,1238 @@ tr:last-child td{border:none}
 
 <!-- ===== TODAY ===== -->
 <section class="page active" id="page-today">
-  <h1 class="page-header">Bugungi vazifalar</h1>
+  <h1 class="page-header" data-i18n="today.h">Bugungi vazifalar</h1>
   <div class="page-sub" id="todayDate"></div>
 
   <div class="card">
-    <div class="card-title">Yangi vazifa</div>
+    <div class="card-title" data-i18n="today.new">Yangi vazifa</div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Nomi</label><input id="taskName" placeholder="IELTS Reading" onkeydown="if(event.key==='Enter')addTask()"></div>
-      <div class="form-group"><label class="form-label">Necha soat</label><input id="taskHours" type="number" min="0.25" max="14" step="0.25" placeholder="1.5" onkeydown="if(event.key==='Enter')addTask()"></div>
+      <div class="form-group"><label class="form-label" data-i18n="f.taskname">Nomi</label><input id="taskName" placeholder="IELTS Reading" onkeydown="if(event.key==='Enter')addTask()"></div>
+      <div class="form-group"><label class="form-label" data-i18n="f.hours">Necha soat</label><input id="taskHours" type="number" min="0.25" max="14" step="0.25" placeholder="1.5" onkeydown="if(event.key==='Enter')addTask()"></div>
     </div>
-    <div class="form-group"><label class="form-label">Izoh</label><input id="taskNote" placeholder="Cambridge 18, Test 2" onkeydown="if(event.key==='Enter')addTask()"></div>
+    <div class="form-group"><label class="form-label" data-i18n="f.note">Izoh</label><input id="taskNote" placeholder="Cambridge 18, Test 2" onkeydown="if(event.key==='Enter')addTask()"></div>
     <div style="display:flex;gap:9px;flex-wrap:wrap">
-      <button class="btn btn-gold" onclick="addTask()">Vazifa qo'shish</button>
-      <button class="btn btn-ghost" id="dailyAiBtn" onclick="generateDaily()">&#129302; AI jadval tuzsin</button>
+      <button class="btn btn-gold" onclick="addTask()" data-i18n="today.add">Qo'shish</button>
+      <button class="btn btn-ghost" id="dailyAiBtn" onclick="generateDaily()" data-i18n="today.ai">&#129302; AI jadval tuzsin</button>
     </div>
   </div>
 
   <div class="ai-box" id="dailyAiBox">
-    <div class="ai-head"><span>&#129302; AI kunlik jadval</span>
+    <div class="ai-head"><span>&#129302; <span data-i18n="today.aibox">AI kunlik jadval</span></span>
       <span style="display:flex;gap:8px">
-        <button class="btn btn-ghost btn-sm" onclick="importAiTasks()">Vazifalarga qo'shish</button>
-        <button class="btn btn-ghost btn-sm" onclick="hide('dailyAiBox')">Yopish</button>
-      </span>
-    </div>
+        <button class="btn btn-ghost btn-sm" onclick="importAiTasks()" data-i18n="today.import">Vazifalarga qo'shish</button>
+        <button class="btn btn-ghost btn-sm" onclick="hide('dailyAiBox')" data-i18n="btn.close">Yopish</button>
+      </span></div>
     <div class="ai-content" id="dailyAiText"></div>
   </div>
 
   <div class="card" id="todayProgress" style="display:none">
-    <div class="card-title">Bugungi natija</div>
+    <div class="card-title" data-i18n="today.res">Bugungi natija</div>
     <div class="progress-label"><span id="progLabel">0 / 0</span><span id="progPct" style="color:var(--gold);font-weight:700">0%</span></div>
     <div class="progress-bar"><div class="progress-fill" id="progBar" style="width:0"></div></div>
     <div style="display:flex;gap:18px;margin-top:12px;font-size:12.5px;flex-wrap:wrap">
-      <span style="color:var(--done)">Bajarildi: <b id="cDone">0</b></span>
-      <span style="color:var(--half)">Yarim: <b id="cHalf">0</b></span>
-      <span style="color:var(--undone)">Bajarilmadi: <b id="cUndone">0</b></span>
-      <span style="color:var(--text2)">Rejadagi soat: <b id="cHours">0</b></span>
+      <span style="color:var(--done)"><span data-i18n="s.done">Bajarildi</span>: <b id="cDone">0</b></span>
+      <span style="color:var(--half)"><span data-i18n="s.half">Yarim</span>: <b id="cHalf">0</b></span>
+      <span style="color:var(--undone)"><span data-i18n="s.undone">Bajarilmadi</span>: <b id="cUndone">0</b></span>
+      <span style="color:var(--text2)"><span data-i18n="s.hours">Rejadagi soat</span>: <b id="cHours">0</b></span>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">Fokus taymeri</div>
+    <div class="card-title" data-i18n="today.timer">Fokus taymeri</div>
     <div class="timer">
       <div class="timer-ring" id="timerRing"><div id="timerIcon">&#127813;</div></div>
-      <div>
-        <div class="timer-clock" id="timerClock">25:00</div>
-        <div style="font-size:12.5px;color:var(--text3)" id="timerLabel">25 daqiqa diqqat, 5 daqiqa dam</div>
-      </div>
+      <div><div class="timer-clock" id="timerClock">25:00</div>
+        <div style="font-size:12.5px;color:var(--text3)" id="timerLabel" data-i18n="timer.work">25 daqiqa diqqat, 5 daqiqa dam</div></div>
       <div style="display:flex;gap:8px;margin-left:auto;flex-wrap:wrap">
-        <button class="btn btn-gold btn-sm" id="timerToggle" onclick="toggleTimer()">Boshlash</button>
-        <button class="btn btn-ghost btn-sm" onclick="resetTimer()">Qayta</button>
+        <button class="btn btn-gold btn-sm" id="timerToggle" onclick="toggleTimer()" data-i18n="timer.start">Boshlash</button>
+        <button class="btn btn-ghost btn-sm" onclick="resetTimer()" data-i18n="timer.reset">Qayta</button>
       </div>
     </div>
   </div>
 
-  <div class="section-title"><span>Ro'yxat <span id="taskCount" style="color:var(--gold)"></span></span></div>
+  <div class="section-title"><span data-i18n="today.list">Ro'yxat</span> <span id="taskCount" style="color:var(--gold)"></span></div>
   <div class="chips" style="margin-bottom:12px">
-    <button class="chip active" data-f="all" onclick="setTaskFilter('all',this)">Hammasi</button>
-    <button class="chip" data-f="pending" onclick="setTaskFilter('pending',this)">Kutilmoqda</button>
-    <button class="chip" data-f="done" onclick="setTaskFilter('done',this)">Bajarildi</button>
-    <button class="chip" data-f="undone" onclick="setTaskFilter('undone',this)">Bajarilmadi</button>
+    <button class="chip active" data-f="all" onclick="setTaskFilter('all',this)" data-i18n="f.all">Hammasi</button>
+    <button class="chip" data-f="pending" onclick="setTaskFilter('pending',this)" data-i18n="f.pending">Kutilmoqda</button>
+    <button class="chip" data-f="done" onclick="setTaskFilter('done',this)" data-i18n="s.done">Bajarildi</button>
+    <button class="chip" data-f="undone" onclick="setTaskFilter('undone',this)" data-i18n="s.undone">Bajarilmadi</button>
   </div>
   <div id="tasksList"></div>
 </section>
 
 <!-- ===== CHAT ===== -->
 <section class="page" id="page-chat">
-  <h1 class="page-header">AI chat</h1>
-  <div class="page-sub">Savol bering, reja so'rang, mavzuni tushuntirtiring.</div>
+  <h1 class="page-header" data-i18n="chat.h">AI chat</h1>
+  <div class="page-sub" data-i18n="chat.sub">Savol bering, mavzuni tushuntirtiring, reja so'rang.</div>
   <div class="card chat-shell">
     <div class="chat-messages" id="chatMessages"></div>
     <div class="chat-input-row">
-      <textarea id="chatInput" rows="1" placeholder="Savolingizni yozing…  (Enter — yuborish, Shift+Enter — yangi qator)"
-        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"
-        oninput="autoGrow(this)"></textarea>
-      <button class="chat-send" id="chatSendBtn" onclick="sendChat()" aria-label="Yuborish">&#10148;</button>
+      <textarea id="chatInput" rows="1" data-ph="chat.ph" placeholder="Savolingizni yozing…"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}" oninput="autoGrow(this)"></textarea>
+      <button class="chat-send" id="chatSendBtn" onclick="sendChat()" aria-label="Send">&#10148;</button>
     </div>
   </div>
-  <div style="display:flex;justify-content:flex-end"><button class="btn btn-ghost btn-sm" onclick="clearChat()">Suhbatni tozalash</button></div>
-</section>
-
-<!-- ===== LONG PLAN ===== -->
-<section class="page" id="page-longplan">
-  <h1 class="page-header">Uzoq muddatli reja</h1>
-  <div class="page-sub">Holatingizni tahlil qilib, real muddat va bosqichlarni beradi.</div>
-  <div class="card">
-    <div class="form-group"><label class="form-label">Maqsad</label><textarea id="goal" rows="2" placeholder="IELTS 7.0 band olish"></textarea></div>
-    <div class="form-group"><label class="form-label">Hozirgi daraja</label><textarea id="current" rows="2" placeholder="Ingliz tilim A2, grammatika zaif, kuniga 1 soat vaqtim bor"></textarea></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Kuniga soat</label><input id="hours" type="number" min="0.5" max="16" step="0.5" placeholder="3"></div>
-      <div class="form-group"><label class="form-label">Mo'ljal</label><input id="deadline" placeholder="6 oy"></div>
-    </div>
-    <div style="display:flex;gap:9px;flex-wrap:wrap">
-      <button class="btn btn-gold" id="analyzeBtn" onclick="analyzePlan()">Tahlil qilish</button>
-      <button class="btn btn-ghost" onclick="clearLongForm()">Tozalash</button>
-    </div>
-  </div>
-  <div class="ai-box" id="aiResult">
-    <div class="ai-head"><span>&#129302; Tahlil</span><button class="btn btn-ghost btn-sm" onclick="copyText('aiText')">Nusxa olish</button></div>
-    <div class="ai-content" id="aiText"></div>
+  <div style="display:flex;justify-content:flex-end;gap:8px">
+    <button class="btn btn-ghost btn-sm" onclick="clearChat()" data-i18n="chat.clear">Suhbatni tozalash</button>
   </div>
 </section>
 
-<!-- ===== IDEAL PLAN ===== -->
-<section class="page" id="page-ai-plan">
-  <h1 class="page-header">Ideal reja</h1>
-  <div class="page-sub">Oylik, haftalik va kunlik bosqichlarga bo'lingan to'liq yo'l xaritasi.</div>
-  <div class="card">
-    <div class="form-group"><label class="form-label">Maqsad</label><textarea id="idealGoal" rows="2" placeholder="Python backend dasturchi bo'lish"></textarea></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Hozirgi daraja</label><input id="idealCurrent" placeholder="Boshlang'ich"></div>
-      <div class="form-group"><label class="form-label">Muddat (oy)</label><input id="idealMonths" type="number" min="1" max="36" placeholder="6"></div>
-    </div>
-    <div class="form-group"><label class="form-label">Kuniga soat</label><input id="idealHours" type="number" min="1" max="14" step="0.5" placeholder="3"></div>
-    <button class="btn btn-gold" id="idealBtn" onclick="generateIdealPlan()">Reja yaratish</button>
+<!-- ===== LEARN (QUIZ + FLASHCARDS) ===== -->
+<section class="page" id="page-learn">
+  <h1 class="page-header" data-i18n="learn.h">Bilim mashqi</h1>
+  <div class="page-sub" data-i18n="learn.sub">O'zingizga test tuzdiring, xato javoblar avtomatik kartochkaga aylanadi.</div>
+
+  <div class="chips" style="margin-bottom:14px">
+    <button class="chip active" onclick="learnTab('quiz',this)" data-i18n="learn.tab1">Test</button>
+    <button class="chip" onclick="learnTab('cards',this)" data-i18n="learn.tab2">Kartochkalar</button>
   </div>
-  <div class="ai-box" id="idealPlanResult">
-    <div class="ai-head"><span>&#10024; Ideal reja</span><button class="btn btn-ghost btn-sm" onclick="copyText('idealPlanText')">Nusxa olish</button></div>
-    <div class="ai-content" id="idealPlanText"></div>
-    <div id="weekGridContainer"></div>
+
+  <div id="learn-quiz">
+    <div class="card" id="quizSetup">
+      <div class="card-title" data-i18n="quiz.new">Yangi test</div>
+      <div class="form-group"><label class="form-label" data-i18n="quiz.topic">Mavzu yoki matn</label>
+        <textarea id="quizTopic" rows="3" data-ph="quiz.ph" placeholder="Mavzu yozing yoki konspektingizni shu yerga tashlang"></textarea>
+        <div class="hint" data-i18n="quiz.hint">Matn qo'ysangiz, savollar aynan shu matndan tuziladi.</div></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label" data-i18n="quiz.count">Savollar soni</label>
+          <select id="quizCount"><option>5</option><option selected>8</option><option>12</option></select></div>
+        <div class="form-group"><label class="form-label" data-i18n="quiz.level">Daraja</label>
+          <select id="quizLevel"><option value="oson" data-i18n="quiz.easy">Oson</option><option value="o'rta" selected data-i18n="quiz.mid">O'rta</option><option value="qiyin" data-i18n="quiz.hard">Qiyin</option></select></div>
+      </div>
+      <button class="btn btn-gold" id="quizBtn" onclick="makeQuiz()" data-i18n="quiz.make">Test tuzish</button>
+    </div>
+
+    <div class="card" id="quizRunner" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-size:12.5px;color:var(--text3)" id="quizCounter"></div>
+        <button class="btn btn-ghost btn-sm" onclick="endQuiz(true)" data-i18n="quiz.exit">Chiqish</button>
+      </div>
+      <div class="progress-bar" style="margin-bottom:16px"><div class="progress-fill" id="quizBar" style="width:0"></div></div>
+      <div style="font-size:16.5px;font-weight:600;margin-bottom:16px;line-height:1.5" id="quizQ"></div>
+      <div id="quizOptions"></div>
+      <div id="quizWhy" style="display:none;font-size:13.5px;color:var(--text2);background:var(--surface2);border-radius:11px;padding:13px;margin-top:6px"></div>
+      <button class="btn btn-gold" id="quizNext" style="display:none;margin-top:14px" onclick="nextQuestion()" data-i18n="quiz.next">Keyingi</button>
+    </div>
+
+    <div class="card" id="quizResult" style="display:none"></div>
+  </div>
+
+  <div id="learn-cards" style="display:none">
+    <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
+      <div class="stat-card"><div class="stat-num" id="cardTotal" style="color:var(--gold)">0</div><div class="stat-label" data-i18n="cards.total">Jami kartochka</div></div>
+      <div class="stat-card"><div class="stat-num" id="cardDue" style="color:var(--half)">0</div><div class="stat-label" data-i18n="cards.due">Bugun takrorlash</div></div>
+      <div class="stat-card"><div class="stat-num" id="cardLearned" style="color:var(--done)">0</div><div class="stat-label" data-i18n="cards.learned">O'zlashtirilgan</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" data-i18n="cards.make">AI kartochka yaratsin</div>
+      <div class="form-group"><input id="cardTopic" data-ph="cards.ph" placeholder="Mavzu: Present Perfect, hujayra bo'linishi…"></div>
+      <div style="display:flex;gap:9px;flex-wrap:wrap">
+        <button class="btn btn-gold" id="cardBtn" onclick="makeCards()" data-i18n="cards.gen">Yaratish</button>
+        <button class="btn btn-ghost" onclick="openManualCard()" data-i18n="cards.manual">Qo'lda qo'shish</button>
+      </div>
+    </div>
+
+    <div id="reviewArea"></div>
+  </div>
+</section>
+
+<!-- ===== PLAN ===== -->
+<section class="page" id="page-plan">
+  <h1 class="page-header" data-i18n="plan.h">Reja</h1>
+  <div class="page-sub" data-i18n="plan.sub">Maqsadingizni real bosqichlarga bo'lib beradi.</div>
+  <div class="chips" style="margin-bottom:14px">
+    <button class="chip active" onclick="planTab('long',this)" data-i18n="plan.t1">Holat tahlili</button>
+    <button class="chip" onclick="planTab('ideal',this)" data-i18n="plan.t2">Ideal reja</button>
+  </div>
+
+  <div id="plan-long">
+    <div class="card">
+      <div class="form-group"><label class="form-label" data-i18n="f.goal">Maqsad</label><textarea id="goal" rows="2" placeholder="IELTS 7.0"></textarea></div>
+      <div class="form-group"><label class="form-label" data-i18n="f.level">Hozirgi daraja</label><textarea id="current" rows="2" placeholder="A2, grammatika zaif, kuniga 1 soat"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label" data-i18n="f.perday">Kuniga soat</label><input id="hours" type="number" min="0.5" max="16" step="0.5" placeholder="3"></div>
+        <div class="form-group"><label class="form-label" data-i18n="f.deadline">Mo'ljal</label><input id="deadline" placeholder="6 oy"></div>
+      </div>
+      <div style="display:flex;gap:9px;flex-wrap:wrap">
+        <button class="btn btn-gold" id="analyzeBtn" onclick="analyzePlan()" data-i18n="plan.run">Tahlil qilish</button>
+        <button class="btn btn-ghost" onclick="clearLongForm()" data-i18n="btn.clear">Tozalash</button>
+      </div>
+    </div>
+    <div class="ai-box" id="aiResult"><div class="ai-head"><span>&#129302; <span data-i18n="plan.t1">Holat tahlili</span></span>
+      <button class="btn btn-ghost btn-sm" onclick="copyText('aiText')" data-i18n="btn.copy">Nusxa</button></div>
+      <div class="ai-content" id="aiText"></div></div>
+  </div>
+
+  <div id="plan-ideal" style="display:none">
+    <div class="card">
+      <div class="form-group"><label class="form-label" data-i18n="f.goal">Maqsad</label><textarea id="idealGoal" rows="2" placeholder="Python backend dasturchi"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label" data-i18n="f.level">Hozirgi daraja</label><input id="idealCurrent" placeholder="Boshlang'ich"></div>
+        <div class="form-group"><label class="form-label" data-i18n="f.months">Muddat (oy)</label><input id="idealMonths" type="number" min="1" max="36" placeholder="6"></div>
+      </div>
+      <div class="form-group"><label class="form-label" data-i18n="f.perday">Kuniga soat</label><input id="idealHours" type="number" min="1" max="14" step="0.5" placeholder="3"></div>
+      <button class="btn btn-gold" id="idealBtn" onclick="generateIdealPlan()" data-i18n="plan.make">Reja yaratish</button>
+    </div>
+    <div class="ai-box" id="idealPlanResult"><div class="ai-head"><span>&#10024; <span data-i18n="plan.t2">Ideal reja</span></span>
+      <button class="btn btn-ghost btn-sm" onclick="copyText('idealPlanText')" data-i18n="btn.copy">Nusxa</button></div>
+      <div class="ai-content" id="idealPlanText"></div><div id="weekGridContainer"></div></div>
   </div>
 </section>
 
 <!-- ===== STATS ===== -->
 <section class="page" id="page-stats">
-  <h1 class="page-header">Statistika</h1>
-  <div class="page-sub">Streak, grafiklar va kunlik natijalar.</div>
+  <h1 class="page-header" data-i18n="stats.h">Statistika</h1>
+  <div class="page-sub" data-i18n="stats.sub">Streak, daraja, nishonlar va grafiklar.</div>
   <div class="stats-row">
-    <div class="stat-card"><div class="stat-num" id="st1" style="color:var(--gold)">0</div><div class="stat-label">Jami vazifa</div></div>
-    <div class="stat-card"><div class="stat-num" id="st2" style="color:var(--done)">0</div><div class="stat-label">Bajarildi</div></div>
-    <div class="stat-card"><div class="stat-num" id="st3" style="color:var(--half)">0</div><div class="stat-label">Yarim</div></div>
-    <div class="stat-card"><div class="stat-num" id="st4" style="color:var(--undone)">0</div><div class="stat-label">Bajarilmadi</div></div>
+    <div class="stat-card"><div class="stat-num" id="st1" style="color:var(--gold)">0</div><div class="stat-label" data-i18n="stats.total">Jami vazifa</div></div>
+    <div class="stat-card"><div class="stat-num" id="st2" style="color:var(--done)">0</div><div class="stat-label" data-i18n="s.done">Bajarildi</div></div>
+    <div class="stat-card"><div class="stat-num" id="st3" style="color:var(--half)">0</div><div class="stat-label" data-i18n="s.half">Yarim</div></div>
+    <div class="stat-card"><div class="stat-num" id="st4" style="color:var(--undone)">0</div><div class="stat-label" data-i18n="s.undone">Bajarilmadi</div></div>
   </div>
 
   <div class="card">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap">
-      <div>
-        <div style="font-size:12px;color:var(--text3);font-weight:600">&#128293; Streak</div>
-        <div style="display:flex;align-items:baseline;gap:10px"><span class="streak-num" id="streakCount">0</span><span style="color:var(--text2)">kun ketma-ket</span></div>
-        <div style="font-size:13px;color:var(--text2);margin-top:4px" id="streakMsg"></div>
-      </div>
-      <div class="streak-best"><div class="streak-best-num" id="bestStreak">0</div><div style="font-size:10.5px;color:var(--text2)">Rekord</div></div>
+      <div><div style="font-size:12px;color:var(--text3);font-weight:600">&#128293; Streak</div>
+        <div style="display:flex;align-items:baseline;gap:10px"><span class="streak-num" id="streakCount">0</span>
+          <span style="color:var(--text2)" data-i18n="stats.days">kun ketma-ket</span></div>
+        <div style="font-size:13px;color:var(--text2);margin-top:4px" id="streakMsg"></div></div>
+      <div class="streak-best"><div class="streak-best-num" id="bestStreak">0</div><div style="font-size:10.5px;color:var(--text2)" data-i18n="stats.record">Rekord</div></div>
     </div>
     <div class="week-dots" id="streakDots"></div>
   </div>
 
   <div class="card">
-    <div class="card-title">Faollik</div>
+    <div class="card-title" data-i18n="stats.badges">Nishonlar</div>
+    <div class="badge-grid" id="badgeGrid"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" data-i18n="stats.activity">Faollik</div>
     <div class="chips" style="margin-bottom:14px">
-      <button class="chip active" onclick="switchChart('week',this)">7 kun</button>
-      <button class="chip" onclick="switchChart('month',this)">4 hafta</button>
+      <button class="chip active" onclick="switchChart('week',this)">7</button>
+      <button class="chip" onclick="switchChart('month',this)">4</button>
     </div>
     <div class="chart-box"><canvas id="activityChart"></canvas></div>
-    <div class="legend">
-      <span><i style="background:var(--done)"></i>Bajarildi</span>
-      <span><i style="background:var(--half)"></i>Yarim</span>
-      <span><i style="background:var(--undone)"></i>Bajarilmadi</span>
-    </div>
+    <div class="legend"><span><i style="background:var(--done)"></i><span data-i18n="s.done">Bajarildi</span></span>
+      <span><i style="background:var(--half)"></i><span data-i18n="s.half">Yarim</span></span>
+      <span><i style="background:var(--undone)"></i><span data-i18n="s.undone">Bajarilmadi</span></span></div>
   </div>
 
-  <div class="card">
-    <div class="card-title">Bajarilish foizi</div>
-    <div class="chart-box" style="height:190px"><canvas id="pctChart"></canvas></div>
-  </div>
+  <div class="card"><div class="card-title" data-i18n="stats.pct">Bajarilish foizi</div>
+    <div class="chart-box" style="height:190px"><canvas id="pctChart"></canvas></div></div>
 
-  <div class="card">
-    <div class="card-title">Kunlik jadval</div>
-    <div class="table-wrap"><table><thead><tr><th>Sana</th><th>Jami</th><th>Bajarildi</th><th>Yarim</th><th>Bajarilmadi</th><th>Foiz</th></tr></thead><tbody id="statsBody"></tbody></table></div>
-  </div>
+  <div class="card"><div class="card-title" data-i18n="stats.table">Kunlik jadval</div>
+    <div class="table-wrap"><table><thead><tr><th data-i18n="th.date">Sana</th><th data-i18n="th.all">Jami</th><th data-i18n="s.done">Bajarildi</th><th data-i18n="s.half">Yarim</th><th data-i18n="s.undone">Bajarilmadi</th><th data-i18n="th.pct">Foiz</th></tr></thead><tbody id="statsBody"></tbody></table></div></div>
 
-  <div class="card">
-    <div class="card-title">AI tahlili</div>
-    <button class="btn btn-gold" id="statsAiBtn" onclick="analyzeStats()">Haftalik tahlil olish</button>
-    <div class="ai-box" id="statsAiBox"><div class="ai-head"><span>&#129302; Haftalik tahlil</span></div><div class="ai-content" id="statsAiText"></div></div>
-  </div>
+  <div class="card"><div class="card-title" data-i18n="stats.ai">AI tahlili</div>
+    <button class="btn btn-gold" id="statsAiBtn" onclick="analyzeStats()" data-i18n="stats.aibtn">Haftalik tahlil olish</button>
+    <div class="ai-box" id="statsAiBox"><div class="ai-head"><span>&#129302; <span data-i18n="stats.ai">AI tahlili</span></span></div>
+      <div class="ai-content" id="statsAiText"></div></div></div>
 </section>
 
 <!-- ===== HISTORY ===== -->
 <section class="page" id="page-history">
-  <h1 class="page-header">Tarix</h1>
-  <div class="page-sub">Saqlangan tahlil va rejalar.</div>
-  <div class="form-group"><input id="historySearch" placeholder="Qidirish…" oninput="renderHistory()"></div>
+  <h1 class="page-header" data-i18n="hist.h">Tarix</h1>
+  <div class="page-sub" data-i18n="hist.sub">Saqlangan tahlil, reja va testlar.</div>
+  <div class="form-group"><input id="historySearch" data-ph="hist.search" placeholder="Qidirish…" oninput="renderHistory()"></div>
   <div class="chips" style="margin-bottom:14px">
-    <button class="chip active" onclick="filterHistory('all',this)">Hammasi</button>
-    <button class="chip" onclick="filterHistory('analysis',this)">Tahlillar</button>
-    <button class="chip" onclick="filterHistory('ideal-plan',this)">Ideal rejalar</button>
-    <button class="chip" onclick="filterHistory('daily',this)">Kunlik jadvallar</button>
+    <button class="chip active" onclick="filterHistory('all',this)" data-i18n="f.all">Hammasi</button>
+    <button class="chip" onclick="filterHistory('analysis',this)" data-i18n="plan.t1">Holat tahlili</button>
+    <button class="chip" onclick="filterHistory('ideal-plan',this)" data-i18n="plan.t2">Ideal reja</button>
+    <button class="chip" onclick="filterHistory('daily',this)" data-i18n="today.aibox">Kunlik jadval</button>
+    <button class="chip" onclick="filterHistory('quiz',this)" data-i18n="learn.tab1">Test</button>
   </div>
   <div id="historyList"></div>
 </section>
 
 <!-- ===== ABOUT ===== -->
 <section class="page" id="page-about">
-  <h1 class="page-header">Platforma haqida</h1>
-  <div class="page-sub">StudyAI nima qiladi va kim yaratgan.</div>
+  <h1 class="page-header" data-i18n="about.h">Loyiha haqida</h1>
+  <div class="page-sub" data-i18n="about.sub">StudyAI nima qiladi, qanday qurilgan va kim yaratgan.</div>
   <div class="card" style="text-align:center;padding:30px">
     <div class="logo-icon" style="width:72px;height:72px;border-radius:20px;font-size:34px;margin:0 auto 14px">&#9889;</div>
     <div style="font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700">Study<span style="color:var(--gold)">AI</span></div>
-    <div style="color:var(--text2);font-size:13px;margin-top:4px">v4.0 — bepul foydalanish</div>
+    <div style="color:var(--text2);font-size:13px;margin-top:4px">v5.0</div>
+    <div style="display:flex;gap:9px;justify-content:center;margin-top:16px;flex-wrap:wrap">
+      <button class="btn btn-gold btn-sm" onclick="shareApp()" data-i18n="about.share">Do'stga ulashish</button>
+      <a class="btn btn-ghost btn-sm" href="https://t.me/StudyAI_io" target="_blank" rel="noopener">Telegram</a>
+    </div>
   </div>
-  <div class="card">
-    <div class="card-title">Dasturchi</div>
+  <div class="card"><div class="card-title" data-i18n="about.dev">Dasturchi</div>
     <div style="display:flex;align-items:center;gap:14px">
       <div class="user-avatar" style="width:48px;height:48px;font-size:18px">A</div>
-      <div><div style="font-weight:600;font-size:15px">Axmadov Azizbek</div><div style="font-size:13px;color:var(--text2)">Full-stack developer</div></div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">Aloqa</div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <a href="https://t.me/Azizbek_Axmadov" target="_blank" rel="noopener" style="display:flex;gap:12px;align-items:center;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:11px;text-decoration:none;color:var(--text)">
-        <div style="width:38px;height:38px;border-radius:10px;background:var(--gold-dim);display:grid;place-items:center">&#9992;</div>
-        <div><div style="font-weight:600;font-size:13.5px">Telegram</div><div style="font-size:12px;color:var(--text3)">@Azizbek_Axmadov</div></div>
-      </a>
-      <a href="https://t.me/StudyAI_io" target="_blank" rel="noopener" style="display:flex;gap:12px;align-items:center;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:11px;text-decoration:none;color:var(--text)">
-        <div style="width:38px;height:38px;border-radius:10px;background:var(--gold-dim);display:grid;place-items:center">&#128226;</div>
-        <div><div style="font-weight:600;font-size:13.5px">StudyAI kanali</div><div style="font-size:12px;color:var(--text3)">t.me/StudyAI_io</div></div>
-      </a>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">Qisqacha</div>
-    <div style="font-size:13.5px;color:var(--text2);line-height:1.75">StudyAI — O'zbekistondagi talabalar uchun AI yordamchili o'quv platforma. Kunlik vazifalar, uzoq muddatli reja, statistika va streak bir joyda. Barcha ma'lumotlaringiz qurilmangizda saqlanadi.</div>
-  </div>
+      <div><div style="font-weight:600;font-size:15px">Axmadov Azizbek</div>
+        <div style="font-size:13px;color:var(--text2)">Full-stack developer · <a href="https://t.me/Azizbek_Axmadov" target="_blank" rel="noopener" style="color:var(--gold)">@Azizbek_Axmadov</a></div></div></div></div>
+  <div class="card"><div class="card-title" data-i18n="about.stack">Texnologiyalar</div>
+    <div style="font-size:13.5px;color:var(--text2);line-height:1.9">
+      Vanilla JavaScript (framework'siz, bitta fayl) · Chart.js · PWA + Service Worker (offline) ·
+      Vercel Serverless va Edge Functions · Groq LLM API (oqimli javob) · Google Identity Services ·
+      localStorage + ixtiyoriy bulut zaxira · Interval takrorlash algoritmi (Leitner)
+    </div></div>
+  <div class="card"><div class="card-title" data-i18n="about.what">Qisqacha</div>
+    <div style="font-size:13.5px;color:var(--text2);line-height:1.75" data-i18n="about.text">
+      StudyAI — talabalar uchun AI yordamchili o'quv platforma: kunlik vazifalar, AI mentor, o'z-o'zini tekshirish testlari, interval takrorlash kartochkalari, statistika, streak va daraja tizimi. Ma'lumotlar qurilmangizda saqlanadi, bulut zaxirasi ixtiyoriy.
+    </div></div>
 </section>
 
 <!-- ===== SETTINGS ===== -->
 <section class="page" id="page-settings">
-  <h1 class="page-header">Sozlamalar</h1>
-  <div class="page-sub">Profil, ko'rinish va ma'lumotlar.</div>
+  <h1 class="page-header" data-i18n="set.h">Sozlamalar</h1>
+  <div class="page-sub" data-i18n="set.sub">Profil, ko'rinish, til va ma'lumotlar.</div>
 
-  <div class="card">
-    <div class="card-title">Ko'rinish</div>
-    <div class="chips">
-      <button class="chip" id="theme-blue" onclick="setTheme('blue')">Ko'k</button>
-      <button class="chip" id="theme-dark" onclick="setTheme('dark')">Qora</button>
-      <button class="chip" id="theme-light" onclick="setTheme('light')">Oq</button>
-    </div>
-  </div>
+  <div class="card"><div class="card-title" data-i18n="set.lang">Til</div>
+    <div class="chips"><button class="chip" id="s-lang-uz" onclick="setLang('uz')">O'zbekcha</button>
+      <button class="chip" id="s-lang-en" onclick="setLang('en')">English</button></div>
+    <div class="hint" data-i18n="set.langhint">AI ham tanlangan tilda javob beradi.</div></div>
 
-  <div class="card">
-    <div class="card-title">Profil</div>
+  <div class="card"><div class="card-title" data-i18n="set.theme">Ko'rinish</div>
+    <div class="chips"><button class="chip" id="theme-blue" onclick="setTheme('blue')" data-i18n="set.blue">Ko'k</button>
+      <button class="chip" id="theme-dark" onclick="setTheme('dark')" data-i18n="set.dark">Qora</button>
+      <button class="chip" id="theme-light" onclick="setTheme('light')" data-i18n="set.light">Oq</button></div></div>
+
+  <div class="card"><div class="card-title" data-i18n="set.profile">Profil</div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Ism</label><input id="userName" placeholder="Ismingiz"></div>
-      <div class="form-group"><label class="form-label">Maqsad</label><input id="userGoal" placeholder="IELTS 7.0"></div>
+      <div class="form-group"><label class="form-label" data-i18n="f.name">Ism</label><input id="userName"></div>
+      <div class="form-group"><label class="form-label" data-i18n="f.goal">Maqsad</label><input id="userGoal" placeholder="IELTS 7.0"></div>
     </div>
-    <div class="form-group"><label class="form-label">Kunlik soat maqsadi</label><input id="userTarget" type="number" min="1" max="16" step="0.5" placeholder="3"><div class="hint">AI reja tuzayotganda shu raqamdan foydalanadi.</div></div>
-    <button class="btn btn-gold" onclick="saveUserInfo()">Saqlash</button>
-  </div>
+    <div class="form-group"><label class="form-label" data-i18n="set.target">Kunlik soat maqsadi</label><input id="userTarget" type="number" min="1" max="16" step="0.5" placeholder="3"></div>
+    <button class="btn btn-gold" onclick="saveUserInfo()" data-i18n="btn.save">Saqlash</button></div>
 
-  <div class="card">
-    <div class="card-title">AI holati</div>
-    <div id="aiStatus" style="font-size:13.5px;color:var(--text2)">Tekshirilmagan</div>
-    <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="pingAI()">Ulanishni tekshirish</button>
-  </div>
+  <div class="card"><div class="card-title" data-i18n="set.cloud">Bulut zaxirasi</div>
+    <div id="syncInfo" style="font-size:13px;color:var(--text2)"></div>
+    <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:12px">
+      <button class="btn btn-ghost btn-sm" onclick="cloudPush()" data-i18n="set.push">Bulutga saqlash</button>
+      <button class="btn btn-ghost btn-sm" onclick="cloudPull()" data-i18n="set.pull">Bulutdan yuklash</button>
+    </div>
+    <div class="hint" data-i18n="set.cloudhint">Google bilan kirgan bo'lsangiz, boshqa qurilmada ham shu ma'lumotni ochasiz.</div></div>
 
-  <div class="card">
-    <div class="card-title">Ma'lumotlar</div>
+  <div class="card"><div class="card-title" data-i18n="set.ai">AI holati</div>
+    <div id="aiStatus" style="font-size:13.5px;color:var(--text2)" data-i18n="set.aiunknown">Tekshirilmagan</div>
+    <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="pingAI()" data-i18n="set.aicheck">Ulanishni tekshirish</button></div>
+
+  <div class="card"><div class="card-title" data-i18n="set.data">Ma'lumotlar</div>
     <div style="display:flex;gap:9px;flex-wrap:wrap">
-      <button class="btn btn-ghost btn-sm" onclick="exportData()">Zaxira nusxa yuklab olish</button>
-      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('importFile').click()">Zaxiradan tiklash</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportData()" data-i18n="set.export">Zaxira yuklab olish</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('importFile').click()" data-i18n="set.import">Zaxiradan tiklash</button>
       <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importData(this)">
-    </div>
-    <div class="hint">Barcha vazifa, tarix va sozlamalar JSON fayl sifatida saqlanadi.</div>
-  </div>
+    </div></div>
 
   <div class="card" style="border-color:color-mix(in srgb,var(--undone) 30%,transparent)">
-    <div class="card-title" style="color:var(--undone)">Xavfli zona</div>
-    <button class="btn btn-danger btn-sm" onclick="clearAllData()">Barcha ma'lumotlarni o'chirish</button>
-  </div>
+    <div class="card-title" style="color:var(--undone)" data-i18n="set.danger">Xavfli zona</div>
+    <button class="btn btn-danger btn-sm" onclick="clearAllData()" data-i18n="set.wipe">Barcha ma'lumotlarni o'chirish</button></div>
 </section>
 
 </main>
 </div>
 
-<nav id="mobileNav">
-  <div class="row">
-    <button class="mnav active" data-page="today" onclick="go('today')"><span class="i">&#128197;</span>Vazifa</button>
-    <button class="mnav" data-page="chat" onclick="go('chat')"><span class="i">&#128172;</span>Chat</button>
-    <button class="mnav" data-page="ai-plan" onclick="go('ai-plan')"><span class="i">&#10024;</span>Reja</button>
-    <button class="mnav" data-page="stats" onclick="go('stats')"><span class="i">&#128202;</span>Statistika</button>
-    <button class="mnav" data-page="settings" onclick="go('settings')"><span class="i">&#9881;</span>Sozlama</button>
-  </div>
-</nav>
+<nav id="mobileNav"><div class="row">
+  <button class="mnav active" data-page="today" onclick="go('today')"><span class="i">&#128197;</span><span data-i18n="nav.today">Bugun</span></button>
+  <button class="mnav" data-page="chat" onclick="go('chat')"><span class="i">&#128172;</span><span data-i18n="nav.chat">Chat</span></button>
+  <button class="mnav" data-page="learn" onclick="go('learn')"><span class="i">&#129504;</span><span data-i18n="nav.learn">Mashq</span></button>
+  <button class="mnav" data-page="stats" onclick="go('stats')"><span class="i">&#128202;</span><span data-i18n="nav.stats">Statistika</span></button>
+  <button class="mnav" data-page="settings" onclick="go('settings')"><span class="i">&#9881;</span><span data-i18n="nav.settings">Sozlama</span></button>
+</div></nav>
 
 <div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <div class="modal-header"><span id="modalTitle"></span><button class="modal-close" onclick="closeModal()">&#10005;</button></div>
-    <div class="ai-content" id="modalContent"></div>
-  </div>
+  <div class="modal"><div class="modal-header"><span id="modalTitle"></span>
+    <button class="modal-close" onclick="closeModal()">&#10005;</button></div>
+    <div id="modalContent" class="ai-content"></div></div>
 </div>
 
 <div id="toasts"></div>
 
 <script>
-/* ================== STATE ================== */
+/* ==================== I18N ==================== */
+const I18N = {
+ uz:{}, // uz — HTML'dagi matnlar standart
+ en:{
+  'nav.g1':'Main','nav.g2':'Planning','nav.g3':'Insights','nav.g4':'System',
+  'nav.today':'Today','nav.chat':'AI chat','nav.learn':'Practice','nav.plan':'Plan',
+  'nav.stats':'Stats','nav.history':'History','nav.about':'About','nav.settings':'Settings',
+  'land.h1':'From plan to result — in one place.',
+  'land.sub':'Add daily tasks, ask AI for a study plan, quiz yourself, review flashcards and watch your progress.',
+  'land.f1':'AI mentor & plans','land.f2':'Quizzes & flashcards','land.f3':'Streaks & XP','land.f4':'Works offline',
+  'login.title':'Welcome','login.sub':'Create an account — your progress is saved.','login.google':'Continue with Google',
+  'login.guest':'Try without an account','login.install':'📲 Install the app','login.fill':'Complete your profile','login.start':'Start',
+  'f.name':'First name','f.surname':'Last name','f.goal':'Main goal','f.age':'Age','f.taskname':'Title','f.hours':'Hours','f.note':'Note',
+  'f.all':'All','f.pending':'Pending','f.level':'Current level','f.perday':'Hours per day','f.deadline':'Target date','f.months':'Months',
+  's.done':'Done','s.half':'Partial','s.undone':'Missed','s.hours':'Planned hours',
+  'today.h':'Today','today.new':'New task','today.add':'Add task','today.ai':'🤖 Let AI build a schedule',
+  'today.aibox':'AI daily schedule','today.import':'Add to tasks','today.res':'Today\u2019s result','today.timer':'Focus timer','today.list':'Tasks',
+  'timer.work':'25 minutes of focus, 5 minutes of rest','timer.break':'Break time — 5 minutes','timer.start':'Start','timer.pause':'Pause','timer.resume':'Resume','timer.reset':'Reset',
+  'chat.h':'AI chat','chat.sub':'Ask anything, get explanations, request a plan.','chat.ph':'Type your question…','chat.clear':'Clear chat',
+  'learn.h':'Practice','learn.sub':'Quiz yourself — wrong answers turn into flashcards automatically.',
+  'learn.tab1':'Quiz','learn.tab2':'Flashcards',
+  'quiz.new':'New quiz','quiz.topic':'Topic or text','quiz.ph':'Type a topic or paste your notes here',
+  'quiz.hint':'If you paste text, questions come from that text.','quiz.count':'Questions','quiz.level':'Difficulty',
+  'quiz.easy':'Easy','quiz.mid':'Medium','quiz.hard':'Hard','quiz.make':'Build quiz','quiz.next':'Next','quiz.exit':'Exit',
+  'cards.total':'Total cards','cards.due':'Due today','cards.learned':'Mastered','cards.make':'Let AI create cards',
+  'cards.ph':'Topic: Present Perfect, cell division…','cards.gen':'Create','cards.manual':'Add manually',
+  'plan.h':'Plan','plan.sub':'Turns your goal into realistic steps.','plan.t1':'Situation analysis','plan.t2':'Ideal plan',
+  'plan.run':'Analyse','plan.make':'Build plan',
+  'stats.h':'Statistics','stats.sub':'Streak, level, badges and charts.','stats.total':'Total tasks','stats.days':'days in a row',
+  'stats.record':'Record','stats.badges':'Badges','stats.activity':'Activity','stats.pct':'Completion rate','stats.table':'Daily log',
+  'stats.ai':'AI review','stats.aibtn':'Get weekly review',
+  'th.date':'Date','th.all':'Total','th.pct':'Rate',
+  'hist.h':'History','hist.sub':'Saved analyses, plans and quizzes.','hist.search':'Search…',
+  'about.h':'About','about.sub':'What StudyAI does, how it is built and who made it.','about.share':'Share with a friend',
+  'about.dev':'Developer','about.stack':'Tech stack','about.what':'Summary',
+  'about.text':'StudyAI is an AI-assisted study platform for students: daily tasks, an AI mentor, self-testing quizzes, spaced-repetition flashcards, statistics, streaks and levels. Data lives on your device; cloud backup is optional.',
+  'set.h':'Settings','set.sub':'Profile, appearance, language and data.','set.lang':'Language','set.langhint':'The AI replies in the selected language.',
+  'set.theme':'Appearance','set.blue':'Blue','set.dark':'Dark','set.light':'Light','set.profile':'Profile','set.target':'Daily hour goal',
+  'set.cloud':'Cloud backup','set.push':'Save to cloud','set.pull':'Load from cloud','set.cloudhint':'Signed in with Google? Open the same data on any device.',
+  'set.ai':'AI status','set.aiunknown':'Not checked','set.aicheck':'Check connection','set.data':'Data','set.export':'Download backup',
+  'set.import':'Restore from backup','set.danger':'Danger zone','set.wipe':'Delete all data',
+  'btn.save':'Save','btn.copy':'Copy','btn.clear':'Clear','btn.close':'Close'
+ }
+};
+let lang = localStorage.getItem('sai-lang') || 'uz';
+const T = k => (lang === 'uz' ? null : I18N.en[k]) || DEFAULTS[k] || k;
+const DEFAULTS = {};
+function captureDefaults(){
+  document.querySelectorAll('[data-i18n]').forEach(e => { if (!DEFAULTS[e.dataset.i18n]) DEFAULTS[e.dataset.i18n] = e.innerHTML; });
+  document.querySelectorAll('[data-ph]').forEach(e => { if (!DEFAULTS[e.dataset.ph]) DEFAULTS[e.dataset.ph] = e.placeholder; });
+}
+function setLang(l){
+  lang = l; localStorage.setItem('sai-lang', l);
+  document.documentElement.lang = l;
+  document.querySelectorAll('[data-i18n]').forEach(e => e.innerHTML = T(e.dataset.i18n));
+  document.querySelectorAll('[data-ph]').forEach(e => e.placeholder = T(e.dataset.ph));
+  ['uz','en'].forEach(x => {
+    ['lang-','s-lang-'].forEach(p => { const b = $(p + x); if (b) b.classList.toggle('active', x === l); });
+  });
+  renderTasks(); renderChat(); renderCards(); if ($('page-stats').classList.contains('active')) renderStats();
+}
+/* Dinamik matnlar */
+const S = {
+  added:['Vazifa qo\u2019shildi','Task added'], deleted:['O\u2019chirildi — bekor qilish uchun bosing','Deleted — tap to undo'],
+  saved:['Saqlandi','Saved'], copied:['Nusxa olindi','Copied'], emptyTasks:['Bugungi ro\u2019yxat bo\u2019sh. Birinchi vazifani qo\u2019shing.','Your list is empty. Add the first task.'],
+  emptyFilter:['Bu filtrda vazifa yo\u2019q.','Nothing matches this filter.'], needName:['Vazifa nomini yozing','Enter a task name'],
+  fillAll:['Barcha maydonlarni to\u2019ldiring','Fill in every field'], noNet:['Internet aloqasi yo\u2019q.','No internet connection.'],
+  timeout:['Javob juda uzoq kutildi.','The request timed out.'], chatStart:['Nimadan boshlaymiz?','Where shall we start?'],
+  cleared:['Suhbat tozalandi','Chat cleared'], quizDone:['Test tugadi','Quiz finished'], correct:['To\u2019g\u2019ri','Correct'],
+  wrong:['Xato','Wrong'], cardsAdded:['ta kartochka qo\u2019shildi','cards added'], noDue:['Bugun takrorlash uchun karta yo\u2019q. Yangi mavzu qo\u2019shing.','No cards due today. Add a new topic.'],
+  reviewDone:['Bugungi takrorlash tugadi.','Today\u2019s review is done.'], level:['daraja','Level'], xp:['XP','XP'],
+  badgeNew:['Yangi nishon:','New badge:'], cloudOff:['Bulut uchun avval Google bilan kiring.','Sign in with Google to use the cloud.'],
+  pushed:['Bulutga saqlandi','Saved to cloud'], pulled:['Bulutdan yuklandi','Loaded from cloud'], nothing:['Bulutda ma\u2019lumot yo\u2019q','Nothing stored in the cloud'],
+  streak0:['Bugun bitta vazifani bajaring — streak shu yerdan boshlanadi.','Complete one task today — that is where the streak starts.'],
+  streak1:['Yaxshi boshlanish. Ertaga ham davom eting.','Good start. Keep it up tomorrow.'],
+  streak2:['ketma-ket kun. Ritm tutildi.','days in a row. You have a rhythm.'],
+  streak3:['Rekord darajasida ishlayapsiz.','You are working at record level.']
+};
+const s = k => S[k][lang === 'en' ? 1 : 0];
+
+/* ==================== STATE ==================== */
 const LS = {
-  get(k, d){ try{ return JSON.parse(localStorage.getItem(k)) ?? d; }catch(e){ return d; } },
-  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){ toast("Xotira to'lgan — eski ma'lumotlarni o'chiring","err"); } }
+  get(k,d){ try{ const v = JSON.parse(localStorage.getItem(k)); return v === null ? d : v; }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){ toast('Storage full','err'); } }
 };
 let allTasks = LS.get('sai-alltasks', []);
 let history  = LS.get('sai-history', []);
 let userInfo = LS.get('sai-user', {});
 let chatLog  = LS.get('sai-chat', []);
-let taskFilter = 'all', histFilter = 'all', actChart = null, pctChart = null, deferredPrompt = null;
-
-const todayKey = () => new Date().toISOString().slice(0,10);
+let cards    = LS.get('sai-cards', []);
+let xp       = LS.get('sai-xp', 0);
+let earned   = LS.get('sai-badges', []);
+let taskFilter='all', histFilter='all', actChart=null, pctChart=null, deferredPrompt=null;
 const $ = id => document.getElementById(id);
+const todayKey = () => new Date().toISOString().slice(0,10);
 
-/* ================== UI HELPERS ================== */
+/* ==================== HELPERS ==================== */
 function toast(msg, type){
-  const t = document.createElement('div');
-  t.className = 'toast ' + (type || '');
-  t.textContent = msg;
-  $('toasts').appendChild(t);
-  setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(()=>t.remove(), 300); }, 3200);
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type || '');
+  el.textContent = msg;
+  $('toasts').appendChild(el);
+  setTimeout(() => { el.style.transition='opacity .3s'; el.style.opacity='0'; setTimeout(()=>el.remove(),300); }, 3200);
+  return el;
 }
 function hide(id){ $(id).classList.remove('visible'); }
-function autoGrow(el){ el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 140) + 'px'; }
-function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-/* Oddiy markdown -> HTML */
+function autoGrow(el){ el.style.height='auto'; el.style.height = Math.min(el.scrollHeight,140)+'px'; }
+function esc(x){ return String(x).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function md(text){
-  const lines = esc(text || '').split('\n');
-  let out = '', list = null;
-  const inline = s => s
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/`([^`]+)`/g, '<code>$1</code>');
-  for (let raw of lines){
+  const lines = esc(text||'').split('\n'); let out='', list=null;
+  const inline = x => x.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<code>$1</code>');
+  for (const raw of lines){
     const line = raw.trim();
-    if (!line){ if(list){ out += '</'+list+'>'; list=null; } continue; }
-    const h = line.match(/^#{1,4}\s*(.+)/);
-    const ul = line.match(/^[-*•]\s+(.+)/);
-    const ol = line.match(/^(\d+)[.)]\s+(.+)/);
-    if (h){ if(list){out+='</'+list+'>';list=null;} out += '<h3>'+inline(h[1])+'</h3>'; continue; }
-    if (ul){ if(list!=='ul'){ if(list)out+='</'+list+'>'; out+='<ul>'; list='ul'; } out += '<li>'+inline(ul[1])+'</li>'; continue; }
-    if (ol){ if(list!=='ol'){ if(list)out+='</'+list+'>'; out+='<ol>'; list='ol'; } out += '<li>'+inline(ol[2])+'</li>'; continue; }
-    if (list){ out += '</'+list+'>'; list = null; }
+    if (!line){ if(list){out+='</'+list+'>';list=null;} continue; }
+    const h=line.match(/^#{1,4}\s*(.+)/), ul=line.match(/^[-*•]\s+(.+)/), ol=line.match(/^(\d+)[.)]\s+(.+)/);
+    if (h){ if(list){out+='</'+list+'>';list=null;} out+='<h3>'+inline(h[1])+'</h3>'; continue; }
+    if (ul){ if(list!=='ul'){ if(list)out+='</'+list+'>'; out+='<ul>'; list='ul'; } out+='<li>'+inline(ul[1])+'</li>'; continue; }
+    if (ol){ if(list!=='ol'){ if(list)out+='</'+list+'>'; out+='<ol>'; list='ol'; } out+='<li>'+inline(ol[2])+'</li>'; continue; }
+    if (list){ out+='</'+list+'>'; list=null; }
     out += '<p>'+inline(line)+'</p>';
   }
-  if (list) out += '</'+list+'>';
+  if (list) out+='</'+list+'>';
   return out;
 }
-function copyText(id){
-  navigator.clipboard.writeText($(id).innerText).then(()=>toast('Nusxa olindi','ok')).catch(()=>toast('Nusxa olinmadi','err'));
+function copyText(id){ navigator.clipboard.writeText($(id).innerText).then(()=>toast(s('copied'),'ok')); }
+function busy(btn,on,html){ btn.disabled=on; if(on){ btn.dataset.old=btn.innerHTML; btn.innerHTML='<span class="typing"><i></i><i></i><i></i></span>'; } else btn.innerHTML = html || btn.dataset.old; }
+function shareApp(){
+  const data = { title:'StudyAI', text:'AI yordamchili o\u2019quv platforma', url: location.origin };
+  if (navigator.share) navigator.share(data).catch(()=>{});
+  else navigator.clipboard.writeText(location.origin).then(()=>toast(s('copied'),'ok'));
 }
 
-/* ================== AI ================== */
+/* ==================== AI ==================== */
+function aiProfile(){
+  const L = lang === 'en' ? "Always answer in English." : "Har doim O'zbek tilida yoz.";
+  return "You are StudyAI, a study mentor for students. " + L +
+    " Be concise and concrete, use short headings and lists. Student: " + (userInfo.name || 'student') +
+    ". Goal: " + (userInfo.goal || 'general study') + ". Daily time: " + (userInfo.target || '?') + " hours.";
+}
 async function callAI(messages, opts){
   opts = opts || {};
   const payload = {
     messages: Array.isArray(messages) ? messages : [{role:'user', content:String(messages)}],
     prompt: Array.isArray(messages) ? messages[messages.length-1].content : String(messages),
-    system: opts.system,
-    model: opts.model,
-    max_tokens: opts.max_tokens || 1400
+    system: opts.system || aiProfile(), model: opts.model,
+    max_tokens: opts.max_tokens || 1400, json_mode: opts.json_mode
   };
-  const ctrl = new AbortController();
-  const timer = setTimeout(()=>ctrl.abort(), 60000);
+  const ctrl = new AbortController(); const timer = setTimeout(()=>ctrl.abort(), 70000);
   let res;
-  try{
-    res = await fetch('/api/chat', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(payload), signal: ctrl.signal
-    });
-  }catch(e){
-    clearTimeout(timer);
-    throw new Error(e.name === 'AbortError' ? "Javob juda uzoq kutildi. Qayta urinib ko'ring." : "Internet aloqasi yo'q.");
-  }
+  try{ res = await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:ctrl.signal}); }
+  catch(e){ clearTimeout(timer); throw new Error(e.name==='AbortError' ? s('timeout') : s('noNet')); }
   clearTimeout(timer);
   const raw = await res.text();
-  let data;
-  try{ data = JSON.parse(raw); }
-  catch(e){ throw new Error('Server javobi noto\u2019g\u2019ri: ' + raw.slice(0,120)); }
-  if (data.error) throw new Error(data.error.message || 'AI xatosi');
-  const text = data.text || (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content);
-  if (!text) throw new Error('Javob bo\u2019sh keldi');
+  let data; try{ data = JSON.parse(raw); }catch(e){ throw new Error('Server: ' + raw.slice(0,120)); }
+  if (data.error) throw new Error(data.error.message || 'AI error');
+  const text = data.text || data.choices?.[0]?.message?.content;
+  if (!text) throw new Error('Empty response');
   return text;
 }
-function aiProfile(){
-  const name = userInfo.name || 'talaba';
-  const goal = userInfo.goal || "umumiy o\u2019qish";
-  const target = userInfo.target ? userInfo.target + ' soat' : "noma\u2019lum";
-  return "Sen StudyAI — o'zbek talabalari uchun o'quv mentorisan. Har doim O'zbek tilida, sodda va aniq yoz. Javoblarni qisqa sarlavha va ro'yxatlar bilan tuzilgan holda ber. Foydalanuvchi: " + name + ". Maqsad: " + goal + ". Kunlik vaqti: " + target + ".";
+/* Oqimli (streaming) javob — chat uchun */
+async function streamAI(messages, onDelta, system){
+  const res = await fetch('/api/chat', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ messages, system: system || aiProfile(), stream:true, max_tokens:1400 })
+  });
+  const ct = res.headers.get('content-type') || '';
+  if (!ct.includes('event-stream')){
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const txt = data.text || data.choices?.[0]?.message?.content || '';
+    onDelta(txt, txt); return txt;
+  }
+  const reader = res.body.getReader(), dec = new TextDecoder();
+  let buf = '', full = '';
+  while (true){
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream:true });
+    const parts = buf.split('\n');
+    buf = parts.pop();
+    for (const line of parts){
+      const l = line.trim();
+      if (!l.startsWith('data:')) continue;
+      const payload = l.slice(5).trim();
+      if (payload === '[DONE]') continue;
+      try{
+        const j = JSON.parse(payload);
+        const d = j.choices?.[0]?.delta?.content;
+        if (d){ full += d; onDelta(d, full); }
+      }catch(e){}
+    }
+  }
+  if (!full) throw new Error('Empty response');
+  return full;
+}
+function parseJSONBlock(text){
+  let t = text.trim().replace(/^```(json)?/i,'').replace(/```$/,'').trim();
+  const i = Math.min(...[t.indexOf('{'), t.indexOf('[')].filter(x => x >= 0));
+  if (isFinite(i) && i > 0) t = t.slice(i);
+  return JSON.parse(t);
 }
 async function pingAI(){
-  $('aiStatus').textContent = 'Tekshirilmoqda…';
-  try{ await callAI('Bir so\u2019z bilan javob ber: OK', {max_tokens:10}); $('aiStatus').innerHTML = '<span style="color:var(--done)">Ulangan — AI ishlayapti</span>'; }
-  catch(e){ $('aiStatus').innerHTML = '<span style="color:var(--undone)">Ulanmadi: ' + esc(e.message) + '</span>'; }
-}
-function busy(btn, on, label){
-  btn.disabled = on;
-  if (on){ btn.dataset.old = btn.innerHTML; btn.innerHTML = '<span class="typing"><i></i><i></i><i></i></span>'; }
-  else btn.innerHTML = label || btn.dataset.old;
+  $('aiStatus').textContent = '…';
+  try{ await callAI('Reply with one word: OK', {max_tokens:10}); $('aiStatus').innerHTML='<span style="color:var(--done)">OK</span>'; }
+  catch(e){ $('aiStatus').innerHTML='<span style="color:var(--undone)">'+esc(e.message)+'</span>'; }
 }
 
-/* ================== NAVIGATION ================== */
+/* ==================== XP / BADGES ==================== */
+const LEVELS = ['Yangi boshlovchi','Izlanuvchi','Mustahkamlovchi','Barqaror','Tajribali','Ustoz','Chempion'];
+const LEVELS_EN = ['Beginner','Explorer','Builder','Consistent','Experienced','Mentor','Champion'];
+function levelOf(x){ return Math.min(LEVELS.length, Math.floor(x/250)+1); }
+function addXP(n){
+  xp += n; LS.set('sai-xp', xp);
+  paintUser(); checkBadges();
+}
+const BADGES = [
+  {id:'first', e:'🌱', uz:'Ilk qadam', en:'First step', duz:'Birinchi vazifa', den:'First task', ok:st=>st.total>=1},
+  {id:'ten', e:'📘', uz:'10 vazifa', en:'10 tasks', duz:'10 ta bajarildi', den:'10 completed', ok:st=>st.done>=10},
+  {id:'fifty', e:'📚', uz:'50 vazifa', en:'50 tasks', duz:'50 ta bajarildi', den:'50 completed', ok:st=>st.done>=50},
+  {id:'s3', e:'🔥', uz:'3 kun', en:'3 days', duz:'3 kun streak', den:'3-day streak', ok:st=>st.best>=3},
+  {id:'s7', e:'⚡', uz:'1 hafta', en:'1 week', duz:'7 kun streak', den:'7-day streak', ok:st=>st.best>=7},
+  {id:'s30', e:'🏆', uz:'30 kun', en:'30 days', duz:'30 kun streak', den:'30-day streak', ok:st=>st.best>=30},
+  {id:'quiz', e:'🧠', uz:'Sinovchi', en:'Quizzer', duz:'Birinchi test', den:'First quiz', ok:st=>st.quizzes>=1},
+  {id:'quiz10', e:'🎯', uz:'Snayper', en:'Sniper', duz:'10 ta test', den:'10 quizzes', ok:st=>st.quizzes>=10},
+  {id:'cards', e:'🃏', uz:'Kartochka', en:'Card keeper', duz:'20 ta karta', den:'20 cards', ok:st=>st.cards>=20},
+  {id:'lvl3', e:'⭐', uz:'3-daraja', en:'Level 3', duz:'750 XP', den:'750 XP', ok:st=>st.level>=3}
+];
+function badgeState(){
+  const { best } = calcStreak();
+  return {
+    total: allTasks.length, done: allTasks.filter(t=>t.status==='done').length,
+    best, quizzes: LS.get('sai-quizcount',0), cards: cards.length, level: levelOf(xp)
+  };
+}
+function checkBadges(){
+  const st = badgeState();
+  BADGES.forEach(b => {
+    if (!earned.includes(b.id) && b.ok(st)){
+      earned.push(b.id); LS.set('sai-badges', earned);
+      toast(s('badgeNew') + ' ' + b.e + ' ' + (lang==='en'?b.en:b.uz), 'ok');
+    }
+  });
+}
+function renderBadges(){
+  const st = badgeState();
+  $('badgeGrid').innerHTML = BADGES.map(b => {
+    const on = earned.includes(b.id) || b.ok(st);
+    return '<div class="badge ' + (on?'on':'') + '"><div class="e">' + b.e + '</div><div class="n">' +
+      (lang==='en'?b.en:b.uz) + '</div><div class="d">' + (lang==='en'?b.den:b.duz) + '</div></div>';
+  }).join('');
+}
+
+/* ==================== NAV ==================== */
 function go(page){
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  $('page-' + page).classList.add('active');
+  const el = $('page-'+page); if (!el) return;
+  el.classList.add('active');
   document.querySelectorAll('[data-page]').forEach(n => n.classList.toggle('active', n.dataset.page === page));
-  if (page === 'stats') renderStats();
-  if (page === 'history') renderHistory();
-  if (page === 'chat') setTimeout(()=>{ const b=$('chatMessages'); b.scrollTop=b.scrollHeight; $('chatInput').focus(); }, 50);
-  closeSidebar();
-  window.scrollTo(0,0);
-  location.hash = page;
+  if (page==='stats'){ renderStats(); renderBadges(); }
+  if (page==='history') renderHistory();
+  if (page==='learn') renderCards();
+  if (page==='settings') paintSync();
+  if (page==='chat') setTimeout(()=>{ const b=$('chatMessages'); b.scrollTop=b.scrollHeight; }, 40);
+  closeSidebar(); window.scrollTo(0,0); location.hash = page;
 }
 function openSidebar(){ $('sidebar').classList.add('open'); $('mobileOverlay').classList.add('open'); }
 function closeSidebar(){ $('sidebar').classList.remove('open'); $('mobileOverlay').classList.remove('open'); }
+function learnTab(x, el){
+  el.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); el.classList.add('active');
+  $('learn-quiz').style.display = x==='quiz'?'block':'none';
+  $('learn-cards').style.display = x==='cards'?'block':'none';
+  if (x==='cards') renderCards();
+}
+function planTab(x, el){
+  el.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); el.classList.add('active');
+  $('plan-long').style.display = x==='long'?'block':'none';
+  $('plan-ideal').style.display = x==='ideal'?'block':'none';
+}
 
-/* ================== TASKS ================== */
+/* ==================== TASKS ==================== */
 function addTask(){
   const name = $('taskName').value.trim();
-  if (!name){ toast('Vazifa nomini yozing','err'); $('taskName').focus(); return; }
-  const t = {
-    id: Date.now(), name,
-    hours: parseFloat($('taskHours').value) || 0,
-    note: $('taskNote').value.trim(),
-    status: 'pending',
-    dateKey: todayKey(),
-    date: new Date().toLocaleDateString('uz-UZ')
-  };
-  allTasks.unshift(t);
-  save();
-  ['taskName','taskHours','taskNote'].forEach(i => $(i).value = '');
-  $('taskName').focus();
-  renderTasks();
-  toast('Vazifa qo\u2019shildi','ok');
+  if (!name){ toast(s('needName'),'err'); $('taskName').focus(); return; }
+  allTasks.unshift({ id:Date.now(), name, hours:parseFloat($('taskHours').value)||0, note:$('taskNote').value.trim(),
+    status:'pending', dateKey:todayKey(), date:new Date().toLocaleDateString('uz-UZ') });
+  save(); ['taskName','taskHours','taskNote'].forEach(i=>$(i).value='');
+  $('taskName').focus(); renderTasks(); toast(s('added'),'ok'); checkBadges();
 }
 function setStatus(id, status){
-  const t = allTasks.find(x => x.id === id);
-  if (!t) return;
-  t.status = (t.status === status) ? 'pending' : status;
+  const t = allTasks.find(x=>x.id===id); if (!t) return;
+  const was = t.status;
+  t.status = (was===status) ? 'pending' : status;
+  if (was!=='done' && t.status==='done') addXP(10);
+  if (was!=='half' && t.status==='half') addXP(5);
   save(); renderTasks();
 }
 function deleteTask(id){
-  const t = allTasks.find(x => x.id === id);
-  allTasks = allTasks.filter(x => x.id !== id);
-  save(); renderTasks();
-  toast('O\u2019chirildi — bekor qilish uchun bosing');
-  const last = $('toasts').lastChild;
-  if (last && t){
-    last.style.pointerEvents = 'auto'; last.style.cursor = 'pointer';
-    last.onclick = () => { allTasks.unshift(t); save(); renderTasks(); last.remove(); };
-  }
+  const t = allTasks.find(x=>x.id===id);
+  allTasks = allTasks.filter(x=>x.id!==id); save(); renderTasks();
+  const el = toast(s('deleted'));
+  if (el && t){ el.style.pointerEvents='auto'; el.style.cursor='pointer';
+    el.onclick = () => { allTasks.unshift(t); save(); renderTasks(); el.remove(); }; }
 }
 function setTaskFilter(f, el){
-  taskFilter = f;
-  document.querySelectorAll('[data-f]').forEach(c => c.classList.toggle('active', c === el));
-  renderTasks();
+  taskFilter=f; document.querySelectorAll('[data-f]').forEach(c=>c.classList.toggle('active', c===el)); renderTasks();
 }
-function save(){ LS.set('sai-alltasks', allTasks); }
+function save(){ LS.set('sai-alltasks', allTasks); queueSync(); }
 function renderTasks(){
-  const today = allTasks.filter(t => t.dateKey === todayKey());
-  const shown = taskFilter === 'all' ? today : today.filter(t => t.status === taskFilter);
-  $('taskCount').textContent = today.length ? '(' + today.length + ')' : '';
-  const list = $('tasksList');
-
-  if (!shown.length){
-    list.innerHTML = '<div class="empty"><div class="ico">&#128203;</div><div>' +
-      (today.length ? 'Bu filtrda vazifa yo\u2019q.' : 'Bugungi ro\u2019yxat bo\u2019sh. Birinchi vazifani qo\u2019shing.') +
+  const today = allTasks.filter(t=>t.dateKey===todayKey());
+  const shown = taskFilter==='all' ? today : today.filter(t=>t.status===taskFilter);
+  $('taskCount').textContent = today.length ? '('+today.length+')' : '';
+  $('tasksList').innerHTML = shown.length ? shown.map(t=>{
+    const meta = [t.hours?t.hours+'h':'', t.note].filter(Boolean).join(' · ');
+    return '<div class="task-item '+(t.status!=='pending'?t.status:'')+'"><div class="task-head"><div style="flex:1">' +
+      '<div class="task-title">'+esc(t.name)+'</div>'+(meta?'<div class="task-meta">'+esc(meta)+'</div>':'')+'</div>'+
+      '<button class="icon-btn" onclick="deleteTask('+t.id+')">&#10005;</button></div><div class="status-btns">'+
+      '<button class="status-btn s-done '+(t.status==='done'?'active':'')+'" onclick="setStatus('+t.id+',\'done\')">'+T('s.done')+'</button>'+
+      '<button class="status-btn s-half '+(t.status==='half'?'active':'')+'" onclick="setStatus('+t.id+',\'half\')">'+T('s.half')+'</button>'+
+      '<button class="status-btn s-undone '+(t.status==='undone'?'active':'')+'" onclick="setStatus('+t.id+',\'undone\')">'+T('s.undone')+'</button>'+
       '</div></div>';
-  } else {
-    list.innerHTML = shown.map(t => {
-      const cls = t.status !== 'pending' ? t.status : '';
-      const meta = [t.hours ? t.hours + ' soat' : '', t.note].filter(Boolean).join(' · ');
-      return '<div class="task-item ' + cls + '">' +
-        '<div class="task-head"><div style="flex:1"><div class="task-title">' + esc(t.name) + '</div>' +
-        (meta ? '<div class="task-meta">' + esc(meta) + '</div>' : '') + '</div>' +
-        '<div class="task-actions"><button class="icon-btn" onclick="deleteTask(' + t.id + ')" aria-label="O\u2019chirish">&#10005;</button></div></div>' +
-        '<div class="status-btns">' +
-        '<button class="status-btn s-done ' + (t.status==='done'?'active':'') + '" onclick="setStatus(' + t.id + ',\'done\')">Bajarildi</button>' +
-        '<button class="status-btn s-half ' + (t.status==='half'?'active':'') + '" onclick="setStatus(' + t.id + ',\'half\')">Yarim</button>' +
-        '<button class="status-btn s-undone ' + (t.status==='undone'?'active':'') + '" onclick="setStatus(' + t.id + ',\'undone\')">Bajarilmadi</button>' +
-        '</div></div>';
-    }).join('');
-  }
+  }).join('') : '<div class="empty"><div class="ico">&#128203;</div><div>'+(today.length?s('emptyFilter'):s('emptyTasks'))+'</div></div>';
 
-  const done = today.filter(t=>t.status==='done').length;
-  const half = today.filter(t=>t.status==='half').length;
-  const undone = today.filter(t=>t.status==='undone').length;
-  const hours = today.reduce((s,t)=>s+(t.hours||0),0);
-  const pct = today.length ? Math.round(((done + half*0.5) / today.length) * 100) : 0;
-  $('todayProgress').style.display = today.length ? 'block' : 'none';
-  $('progLabel').textContent = (done + half) + ' / ' + today.length + ' vazifa';
-  $('progPct').textContent = pct + '%';
-  $('progBar').style.width = pct + '%';
-  $('cDone').textContent = done; $('cHalf').textContent = half; $('cUndone').textContent = undone;
-  $('cHours').textContent = hours ? hours.toFixed(1).replace('.0','') : '0';
+  const done=today.filter(t=>t.status==='done').length, half=today.filter(t=>t.status==='half').length,
+        undone=today.filter(t=>t.status==='undone').length, hours=today.reduce((a,t)=>a+(t.hours||0),0);
+  const pct = today.length ? Math.round(((done+half*0.5)/today.length)*100) : 0;
+  $('todayProgress').style.display = today.length ? 'block':'none';
+  $('progLabel').textContent = (done+half)+' / '+today.length;
+  $('progPct').textContent = pct+'%'; $('progBar').style.width = pct+'%';
+  $('cDone').textContent=done; $('cHalf').textContent=half; $('cUndone').textContent=undone;
+  $('cHours').textContent = hours ? (Math.round(hours*10)/10) : 0;
 }
 
-/* ================== AI: KUNLIK JADVAL ================== */
-let lastDailyText = '';
+/* ==================== DAILY AI ==================== */
+let lastDailyText='';
 async function generateDaily(){
-  const btn = $('dailyAiBtn');
-  const subject = $('taskName').value.trim() || userInfo.goal || "umumiy o\u2019qish";
-  const hours = userInfo.target || 3;
-  busy(btn, true);
+  const btn=$('dailyAiBtn'), subject=$('taskName').value.trim()||userInfo.goal||'general study', h=userInfo.target||3;
+  busy(btn,true);
   try{
-    const text = await callAI(
-      "Bugun uchun " + hours + " soatlik o'quv jadvali tuz. Mavzu: " + subject +
-      ". Aniq 5-6 ta qatordan iborat ro'yxat ber, har biri shu ko'rinishda: 09:00-09:45 — vazifa nomi (qisqa izoh). Ortiqcha gap yozma.",
-      { system: aiProfile(), max_tokens: 700 }
-    );
+    const text = await callAI("Build a " + h + "-hour study schedule for today. Topic: " + subject +
+      ". Return only 5-6 lines in this exact format: 09:00-09:45 — task name (short note). No intro, no outro.", {max_tokens:700});
     lastDailyText = text;
-    $('dailyAiText').innerHTML = md(text);
-    $('dailyAiBox').classList.add('visible');
-    history.unshift({ id:Date.now(), date:new Date().toLocaleDateString('uz-UZ'), goal:'Kunlik jadval: ' + subject, result:text, type:'daily' });
-    LS.set('sai-history', history);
-  }catch(e){
-    $('dailyAiText').innerHTML = '<p style="color:var(--undone)">' + esc(e.message) + '</p>';
-    $('dailyAiBox').classList.add('visible');
-  }
-  busy(btn, false, "&#129302; AI jadval tuzsin");
+    $('dailyAiText').innerHTML = md(text); $('dailyAiBox').classList.add('visible');
+    history.unshift({id:Date.now(),date:new Date().toLocaleDateString('uz-UZ'),goal:subject,result:text,type:'daily'});
+    LS.set('sai-history',history); addXP(5);
+  }catch(e){ $('dailyAiText').innerHTML='<p style="color:var(--undone)">'+esc(e.message)+'</p>'; $('dailyAiBox').classList.add('visible'); }
+  busy(btn,false,T('today.ai'));
 }
 function importAiTasks(){
-  if (!lastDailyText){ toast('Avval jadval tuzdiring','err'); return; }
-  let added = 0;
-  lastDailyText.split('\n').forEach(line => {
+  if (!lastDailyText) return;
+  let n=0;
+  lastDailyText.split('\n').forEach(line=>{
     const m = line.match(/(\d{1,2}[:.]\d{2})\s*[-–—]\s*(\d{1,2}[:.]\d{2})\s*[—\-–:]*\s*(.+)/);
     if (!m) return;
-    const name = m[3].replace(/^[*\-•\s]+/, '').replace(/\*\*/g,'').trim();
-    if (!name) return;
-    const [h1,m1] = m[1].replace('.',':').split(':').map(Number);
-    const [h2,m2] = m[2].replace('.',':').split(':').map(Number);
-    let dur = ((h2*60+m2) - (h1*60+m1)) / 60;
-    if (!(dur > 0) || dur > 8) dur = 1;
-    allTasks.unshift({ id: Date.now()+added, name, hours: Math.round(dur*4)/4, note: m[1] + '-' + m[2], status:'pending', dateKey: todayKey(), date: new Date().toLocaleDateString('uz-UZ') });
-    added++;
+    const name = m[3].replace(/^[*\-•\s]+/,'').replace(/\*\*/g,'').trim(); if (!name) return;
+    const [h1,m1]=m[1].replace('.',':').split(':').map(Number), [h2,m2]=m[2].replace('.',':').split(':').map(Number);
+    let d=((h2*60+m2)-(h1*60+m1))/60; if(!(d>0)||d>8) d=1;
+    allTasks.unshift({id:Date.now()+n,name,hours:Math.round(d*4)/4,note:m[1]+'-'+m[2],status:'pending',dateKey:todayKey(),date:new Date().toLocaleDateString('uz-UZ')});
+    n++;
   });
-  if (!added){ toast("Jadvaldan vazifa ajratilmadi",'err'); return; }
-  save(); renderTasks();
-  toast(added + ' ta vazifa qo\u2019shildi','ok');
+  if (!n){ toast('—','err'); return; }
+  save(); renderTasks(); toast(n+' ✓','ok');
 }
 
-/* ================== AI: PLANS ================== */
+/* ==================== PLANS ==================== */
 async function analyzePlan(){
-  const goal=$('goal').value.trim(), current=$('current').value.trim(), hours=$('hours').value, deadline=$('deadline').value.trim();
-  if (!goal || !current || !hours || !deadline){ toast("Barcha maydonlarni to\u2019ldiring",'err'); return; }
-  const btn = $('analyzeBtn'); busy(btn, true);
-  $('aiResult').classList.remove('visible');
+  const goal=$('goal').value.trim(), cur=$('current').value.trim(), h=$('hours').value, dl=$('deadline').value.trim();
+  if (!goal||!cur||!h||!dl){ toast(s('fillAll'),'err'); return; }
+  const btn=$('analyzeBtn'); busy(btn,true); hide('aiResult');
   try{
-    const text = await callAI(
-      "Quyidagi holatni tahlil qil.\nMaqsad: " + goal + "\nHozirgi daraja: " + current + "\nKunlik vaqt: " + hours + " soat\nMo'ljallangan muddat: " + deadline +
-      "\n\nShu sarlavhalar bilan javob ber: Xulosa, Real muddat, Kunlik reja, Resurslar, Asosiy maslahatlar. Rostini ayt — muddat real bo'lmasa, ochiq yoz. 300 so'zgacha.",
-      { system: aiProfile() }
-    );
-    $('aiText').innerHTML = md(text);
-    $('aiResult').classList.add('visible');
-    history.unshift({ id:Date.now(), date:new Date().toLocaleDateString('uz-UZ'), goal, result:text, type:'analysis' });
-    LS.set('sai-history', history);
-  }catch(e){
-    $('aiText').innerHTML = '<p style="color:var(--undone)">' + esc(e.message) + '</p>';
-    $('aiResult').classList.add('visible');
-  }
-  busy(btn, false, 'Tahlil qilish');
+    const text = await callAI("Analyse this study situation.\nGoal: "+goal+"\nCurrent level: "+cur+"\nDaily time: "+h+
+      " hours\nTarget: "+dl+"\n\nUse these headings: Summary, Realistic timeline, Daily routine, Resources, Key advice. Be honest if the timeline is unrealistic. Max 300 words.");
+    $('aiText').innerHTML = md(text); $('aiResult').classList.add('visible');
+    history.unshift({id:Date.now(),date:new Date().toLocaleDateString('uz-UZ'),goal,result:text,type:'analysis'});
+    LS.set('sai-history',history); addXP(15);
+  }catch(e){ $('aiText').innerHTML='<p style="color:var(--undone)">'+esc(e.message)+'</p>'; $('aiResult').classList.add('visible'); }
+  busy(btn,false,T('plan.run'));
 }
 async function generateIdealPlan(){
-  const goal=$('idealGoal').value.trim(), current=$('idealCurrent').value.trim(), months=$('idealMonths').value, hours=$('idealHours').value;
-  if (!goal || !current || !months || !hours){ toast("Barcha maydonlarni to\u2019ldiring",'err'); return; }
-  const btn = $('idealBtn'); busy(btn, true);
+  const goal=$('idealGoal').value.trim(), cur=$('idealCurrent').value.trim(), mo=$('idealMonths').value, h=$('idealHours').value;
+  if (!goal||!cur||!mo||!h){ toast(s('fillAll'),'err'); return; }
+  const btn=$('idealBtn'); busy(btn,true);
   try{
-    const text = await callAI(
-      "Ideal o'quv rejasini tuz.\nMaqsad: " + goal + "\nDaraja: " + current + "\nMuddat: " + months + " oy\nKuniga: " + hours +
-      " soat\n\nShu sarlavhalar bilan: Oylik bosqichlar, Haftalik tartib, Kunlik jadval, Resurslar, Xatolardan saqlanish. Har bosqichda o'lchanadigan natija ko'rsat.",
-      { system: aiProfile(), max_tokens: 1800 }
-    );
+    const text = await callAI("Build an ideal study plan.\nGoal: "+goal+"\nLevel: "+cur+"\nDuration: "+mo+" months\nDaily: "+h+
+      " hours\n\nHeadings: Monthly milestones, Weekly rhythm, Daily schedule, Resources, Common mistakes. Each milestone must have a measurable outcome.", {max_tokens:1800});
     $('idealPlanText').innerHTML = md(text);
-    const h = parseFloat(hours);
-    const days = ['Du','Se','Ch','Pa','Ju','Sh','Ya'];
-    const load = [h, h, Math.max(1,h-1), h, h, h+1, Math.max(1, Math.round(h*0.5))];
-    const kind = ['Nazariya','Amaliyot','Takror','Yangi mavzu','Test','Chuqur ish','Dam'];
-    $('weekGridContainer').innerHTML = '<div class="card-title" style="margin-top:18px">Haftalik yuklama</div><div class="week-grid">' +
-      days.map((d,i) => '<div class="day-card"><div class="day-name">' + d + '</div><div class="day-hours">' + load[i] + 's</div><div class="day-task">' + kind[i] + '</div></div>').join('') + '</div>';
+    const hh=parseFloat(h), days=['Du','Se','Ch','Pa','Ju','Sh','Ya'], load=[hh,hh,Math.max(1,hh-1),hh,hh,hh+1,Math.max(1,Math.round(hh*0.5))];
+    const kindUZ=['Nazariya','Amaliyot','Takror','Yangi','Test','Chuqur','Dam'], kindEN=['Theory','Practice','Review','New','Test','Deep','Rest'];
+    const kind = lang==='en'?kindEN:kindUZ;
+    $('weekGridContainer').innerHTML = '<div class="card-title" style="margin-top:18px">'+(lang==='en'?'Weekly load':'Haftalik yuklama')+'</div><div class="week-grid">' +
+      days.map((d,i)=>'<div class="day-card"><div class="day-name">'+d+'</div><div class="day-hours">'+load[i]+'</div><div class="day-task">'+kind[i]+'</div></div>').join('')+'</div>';
     $('idealPlanResult').classList.add('visible');
-    history.unshift({ id:Date.now(), date:new Date().toLocaleDateString('uz-UZ'), goal, result:text, type:'ideal-plan' });
-    LS.set('sai-history', history);
-  }catch(e){
-    $('idealPlanText').innerHTML = '<p style="color:var(--undone)">' + esc(e.message) + '</p>';
-    $('idealPlanResult').classList.add('visible');
-  }
-  busy(btn, false, 'Reja yaratish');
+    history.unshift({id:Date.now(),date:new Date().toLocaleDateString('uz-UZ'),goal,result:text,type:'ideal-plan'});
+    LS.set('sai-history',history); addXP(20);
+  }catch(e){ $('idealPlanText').innerHTML='<p style="color:var(--undone)">'+esc(e.message)+'</p>'; $('idealPlanResult').classList.add('visible'); }
+  busy(btn,false,T('plan.make'));
 }
 async function analyzeStats(){
-  const btn = $('statsAiBtn'); busy(btn, true);
-  const total = allTasks.length;
-  const done = allTasks.filter(t=>t.status==='done').length;
-  const half = allTasks.filter(t=>t.status==='half').length;
-  const undone = allTasks.filter(t=>t.status==='undone').length;
-  const pct = total ? Math.round(((done + half*0.5)/total)*100) : 0;
-  const { streak } = calcStreak();
+  const btn=$('statsAiBtn'); busy(btn,true);
+  const total=allTasks.length, done=allTasks.filter(t=>t.status==='done').length,
+        half=allTasks.filter(t=>t.status==='half').length, undone=allTasks.filter(t=>t.status==='undone').length;
+  const pct = total?Math.round(((done+half*0.5)/total)*100):0, { streak }=calcStreak();
   try{
-    const text = await callAI(
-      "Talabaning natijalari: jami " + total + " vazifa, bajarilgan " + done + " (" + pct + "%), yarim " + half + ", bajarilmagan " + undone + ", streak " + streak +
-      " kun. Qisqa tahlil qil va aniq 3 ta amaliy maslahat ber. 150 so'zgacha.",
-      { system: aiProfile(), max_tokens: 600 }
-    );
+    const text = await callAI("Student data: "+total+" tasks, "+done+" done ("+pct+"%), "+half+" partial, "+undone+
+      " missed, streak "+streak+" days, level "+levelOf(xp)+". Give a short review and exactly 3 concrete tips. Max 150 words.", {max_tokens:600});
     $('statsAiText').innerHTML = md(text);
-  }catch(e){
-    $('statsAiText').innerHTML = '<p style="color:var(--undone)">' + esc(e.message) + '</p>';
-  }
-  $('statsAiBox').classList.add('visible');
-  busy(btn, false, 'Haftalik tahlil olish');
+  }catch(e){ $('statsAiText').innerHTML='<p style="color:var(--undone)">'+esc(e.message)+'</p>'; }
+  $('statsAiBox').classList.add('visible'); busy(btn,false,T('stats.aibtn'));
 }
 
-/* ================== CHAT ================== */
+/* ==================== CHAT (streaming) ==================== */
 function renderChat(){
   const box = $('chatMessages');
   if (!chatLog.length){
-    box.innerHTML = '<div class="empty" style="margin:auto"><div class="ico">&#129302;</div>' +
-      '<div>Nimadan boshlaymiz?</div>' +
-      '<div class="chips" style="justify-content:center;margin-top:14px">' +
-      '<button class="chip" onclick="quickChat(\'IELTS Writing Task 2 uchun tuzilma va maslahat ber\')">IELTS Writing</button>' +
-      '<button class="chip" onclick="quickChat(\'Bugun nimadan boshlashim kerak?\')">Bugungi qadam</button>' +
-      '<button class="chip" onclick="quickChat(\'Diqqatimni jamlay olmayapman, nima qilay?\')">Diqqat muammosi</button>' +
-      '</div></div>';
+    const q = lang==='en'
+      ? ['Explain this topic simply','What should I start with today?','I cannot focus, what now?']
+      : ['Mavzuni sodda tushuntir','Bugun nimadan boshlay?','Diqqatimni jamlay olmayapman'];
+    box.innerHTML = '<div class="empty" style="margin:auto"><div class="ico">&#129302;</div><div>'+s('chatStart')+'</div>'+
+      '<div class="chips" style="justify-content:center;margin-top:14px">'+
+      q.map(x=>'<button class="chip" onclick="quickChat(this.textContent)">'+esc(x)+'</button>').join('')+'</div></div>';
     return;
   }
-  box.innerHTML = chatLog.map((m,i) =>
-    '<div class="msg ' + (m.role === 'user' ? 'me' : 'ai') + '">' +
-    '<div class="msg-name">' + (m.role === 'user' ? 'Siz' : 'StudyAI') + '</div>' +
-    '<div class="bubble">' + (m.role === 'user' ? esc(m.content) : md(m.content)) + '</div>' +
-    (m.role === 'assistant' ? '<div class="msg-tools"><button class="msg-tool" onclick="copyMsg(' + i + ')">Nusxa</button></div>' : '') +
+  box.innerHTML = chatLog.map((m,i)=>
+    '<div class="msg '+(m.role==='user'?'me':'ai')+'"><div class="msg-name">'+(m.role==='user'?'·':'StudyAI')+'</div>'+
+    '<div class="bubble">'+(m.role==='user'?esc(m.content):md(m.content))+'</div>'+
+    (m.role==='assistant'?'<div class="msg-tools"><button class="msg-tool" onclick="copyMsg('+i+')">'+T('btn.copy')+'</button>'+
+      '<button class="msg-tool" onclick="cardFromMsg('+i+')">'+(lang==='en'?'Make a card':'Kartochka qil')+'</button></div>':'')+
     '</div>').join('');
   box.scrollTop = box.scrollHeight;
 }
-function copyMsg(i){ navigator.clipboard.writeText(chatLog[i].content).then(()=>toast('Nusxa olindi','ok')); }
-function quickChat(text){ $('chatInput').value = text; sendChat(); }
-function clearChat(){ chatLog = []; LS.set('sai-chat', chatLog); renderChat(); toast('Suhbat tozalandi'); }
+function copyMsg(i){ navigator.clipboard.writeText(chatLog[i].content).then(()=>toast(s('copied'),'ok')); }
+function cardFromMsg(i){
+  const q = chatLog[i-1]?.content || 'Savol';
+  addCard(q.slice(0,160), chatLog[i].content.slice(0,500));
+  toast('1 ' + s('cardsAdded'),'ok');
+}
+function quickChat(x){ $('chatInput').value = x; sendChat(); }
+function clearChat(){ chatLog=[]; LS.set('sai-chat',chatLog); renderChat(); toast(s('cleared')); }
 async function sendChat(){
-  const input = $('chatInput'), btn = $('chatSendBtn');
-  const text = input.value.trim();
+  const input=$('chatInput'), btn=$('chatSendBtn'), text=input.value.trim();
   if (!text) return;
-  chatLog.push({ role:'user', content:text });
-  input.value = ''; input.style.height = 'auto';
-  renderChat();
-  btn.disabled = true;
+  chatLog.push({role:'user',content:text});
+  input.value=''; input.style.height='auto'; renderChat(); btn.disabled=true;
 
-  const box = $('chatMessages');
-  const hold = document.createElement('div');
-  hold.className = 'msg ai';
-  hold.innerHTML = '<div class="msg-name">StudyAI</div><div class="bubble"><span class="typing"><i></i><i></i><i></i></span></div>';
-  box.appendChild(hold); box.scrollTop = box.scrollHeight;
+  const box=$('chatMessages');
+  const wrap=document.createElement('div'); wrap.className='msg ai';
+  wrap.innerHTML='<div class="msg-name">StudyAI</div><div class="bubble"><span class="typing"><i></i><i></i><i></i></span></div>';
+  box.appendChild(wrap); box.scrollTop=box.scrollHeight;
+  const bubble = wrap.querySelector('.bubble');
 
-  const todayTasks = allTasks.filter(t => t.dateKey === todayKey());
-  const ctx = todayTasks.length ? "\n\nBugungi vazifalari: " + todayTasks.map(t => t.name + ' (' + t.status + ')').join(', ') : '';
+  const todayTasks = allTasks.filter(x=>x.dateKey===todayKey());
+  const ctx = todayTasks.length ? " Today's tasks: " + todayTasks.map(x=>x.name+' ('+x.status+')').join(', ') : '';
 
   try{
-    const reply = await callAI(chatLog.slice(-12), { system: aiProfile() + ctx });
-    chatLog.push({ role:'assistant', content:reply });
-    LS.set('sai-chat', chatLog.slice(-60));
+    const full = await streamAI(chatLog.slice(-12), (d, all) => {
+      bubble.innerHTML = md(all); box.scrollTop = box.scrollHeight;
+    }, aiProfile() + ctx);
+    chatLog.push({role:'assistant',content:full});
+    LS.set('sai-chat', chatLog.slice(-60)); addXP(1);
   }catch(e){
-    chatLog.push({ role:'assistant', content:'Xatolik: ' + e.message });
+    chatLog.push({role:'assistant',content:'⚠️ '+e.message});
   }
-  hold.remove();
-  renderChat();
-  btn.disabled = false;
-  input.focus();
+  wrap.remove(); renderChat(); btn.disabled=false; queueSync();
 }
 
-/* ================== STREAK + STATS ================== */
+/* ==================== QUIZ ==================== */
+let quiz=[], qi=0, qScore=0, qTopic='';
+async function makeQuiz(){
+  const topic = $('quizTopic').value.trim();
+  if (!topic){ toast(s('fillAll'),'err'); return; }
+  const btn=$('quizBtn'); busy(btn,true);
+  qTopic = topic.slice(0,80);
+  try{
+    const raw = await callAI(
+      "Create " + $('quizCount').value + " multiple-choice questions, difficulty: " + $('quizLevel').value +
+      ", based on: " + topic.slice(0,4000) +
+      "\nReturn ONLY valid JSON, no markdown: {\"questions\":[{\"q\":\"…\",\"options\":[\"a\",\"b\",\"c\",\"d\"],\"answer\":0,\"why\":\"short explanation\"}]}" +
+      (lang==='en' ? " Write in English." : " Savollar va izohlar O'zbek tilida bo'lsin."),
+      { json_mode:true, max_tokens:2600, model:'openai/gpt-oss-120b' });
+    const data = parseJSONBlock(raw);
+    quiz = (data.questions || data).filter(q => q && q.options && q.options.length >= 2);
+    if (!quiz.length) throw new Error('—');
+    qi=0; qScore=0;
+    $('quizSetup').style.display='none'; $('quizResult').style.display='none'; $('quizRunner').style.display='block';
+    showQuestion();
+    LS.set('sai-quizcount', LS.get('sai-quizcount',0)+1); checkBadges();
+  }catch(e){ toast(e.message,'err'); }
+  busy(btn,false,T('quiz.make'));
+}
+function showQuestion(){
+  const q = quiz[qi];
+  $('quizCounter').textContent = (qi+1)+' / '+quiz.length;
+  $('quizBar').style.width = ((qi)/quiz.length*100)+'%';
+  $('quizQ').textContent = q.q;
+  $('quizWhy').style.display='none'; $('quizNext').style.display='none';
+  $('quizOptions').innerHTML = q.options.map((o,i)=>'<button class="q-option" onclick="answer('+i+')">'+esc(o)+'</button>').join('');
+}
+function answer(i){
+  const q = quiz[qi], right = Number(q.answer);
+  const btns = [...$('quizOptions').children];
+  btns.forEach((b,j)=>{ b.disabled=true; if (j===right) b.classList.add('right'); else if (j===i) b.classList.add('wrong'); });
+  if (i===right){ qScore++; addXP(5); }
+  else addCard(q.q, q.options[right] + (q.why ? ' — ' + q.why : ''));
+  if (q.why){ $('quizWhy').innerHTML = '<b>'+(i===right?s('correct'):s('wrong'))+'.</b> '+esc(q.why); $('quizWhy').style.display='block'; }
+  $('quizNext').style.display='inline-flex';
+  $('quizBar').style.width = ((qi+1)/quiz.length*100)+'%';
+}
+function nextQuestion(){ qi++; if (qi >= quiz.length) endQuiz(); else showQuestion(); }
+function endQuiz(exit){
+  $('quizRunner').style.display='none'; $('quizSetup').style.display='block';
+  if (exit) return;
+  const pct = Math.round(qScore/quiz.length*100);
+  const wrong = quiz.length - qScore;
+  $('quizResult').style.display='block';
+  $('quizResult').innerHTML = '<div style="text-align:center;padding:10px">'+
+    '<div style="font-family:\'Space Grotesk\',sans-serif;font-size:46px;font-weight:700;color:var(--gold)">'+pct+'%</div>'+
+    '<div style="color:var(--text2);margin-top:4px">'+qScore+' / '+quiz.length+' · '+s('quizDone')+'</div>'+
+    (wrong ? '<div style="font-size:13px;color:var(--text3);margin-top:8px">'+wrong+' '+s('cardsAdded')+'</div>' : '')+
+    '<div style="display:flex;gap:9px;justify-content:center;margin-top:16px;flex-wrap:wrap">'+
+    '<button class="btn btn-gold btn-sm" onclick="makeQuiz()">'+(lang==='en'?'New quiz':'Yana test')+'</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="learnTab(\'cards\',document.querySelectorAll(\'#page-learn .chip\')[1])">'+T('learn.tab2')+'</button>'+
+    '</div></div>';
+  addXP(10 + Math.round(pct/10));
+  history.unshift({id:Date.now(),date:new Date().toLocaleDateString('uz-UZ'),goal:qTopic,
+    result:'Natija: '+qScore+'/'+quiz.length+' ('+pct+'%)',type:'quiz'});
+  LS.set('sai-history',history); renderCards(); checkBadges(); queueSync();
+}
+
+/* ==================== FLASHCARDS (Leitner) ==================== */
+const STEP = [0,1,3,7,16,35];
+function addCard(front, back){
+  if (cards.some(c => c.front === front)) return;
+  cards.unshift({ id:Date.now()+Math.random(), front, back, box:0, due:todayKey() });
+  LS.set('sai-cards', cards); queueSync();
+}
+function dueCards(){ return cards.filter(c => c.due <= todayKey()); }
+function openManualCard(){
+  const f = prompt(lang==='en'?'Question / front side:':'Savol (old tomoni):'); if (!f) return;
+  const b = prompt(lang==='en'?'Answer / back side:':'Javob (orqa tomoni):'); if (!b) return;
+  addCard(f.trim(), b.trim()); renderCards(); toast('1 '+s('cardsAdded'),'ok');
+}
+async function makeCards(){
+  const topic = $('cardTopic').value.trim(); if (!topic){ toast(s('fillAll'),'err'); return; }
+  const btn=$('cardBtn'); busy(btn,true);
+  try{
+    const raw = await callAI("Create 10 flashcards about: " + topic.slice(0,3000) +
+      "\nReturn ONLY JSON: {\"cards\":[{\"front\":\"question\",\"back\":\"short answer\"}]}" +
+      (lang==='en' ? " In English." : " O'zbek tilida."), { json_mode:true, max_tokens:1600 });
+    const data = parseJSONBlock(raw);
+    const list = data.cards || data;
+    let n=0; list.forEach(c => { if (c.front && c.back){ addCard(String(c.front), String(c.back)); n++; } });
+    $('cardTopic').value=''; renderCards(); toast(n+' '+s('cardsAdded'),'ok'); addXP(5); checkBadges();
+  }catch(e){ toast(e.message,'err'); }
+  busy(btn,false,T('cards.gen'));
+}
+let curCard=null;
+function renderCards(){
+  $('cardTotal').textContent = cards.length;
+  const due = dueCards();
+  $('cardDue').textContent = due.length;
+  $('cardLearned').textContent = cards.filter(c=>c.box>=4).length;
+  const badge=$('dueBadge');
+  if (badge){ badge.style.display = due.length?'inline-block':'none'; badge.textContent = due.length; }
+  const area = $('reviewArea');
+  if (!area) return;
+  if (!cards.length){ area.innerHTML = '<div class="empty"><div class="ico">&#127183;</div><div>'+
+    (lang==='en'?'No cards yet. Generate some or take a quiz.':'Hali karta yo\u2019q. Test yeching yoki mavzu kiriting.')+'</div></div>'; return; }
+  if (!due.length){ area.innerHTML = '<div class="empty"><div class="ico">&#9989;</div><div>'+s('reviewDone')+'</div></div>'; return; }
+  curCard = due[0];
+  area.innerHTML =
+    '<div class="card"><div class="card-title">'+(lang==='en'?'Review':'Takrorlash')+' · '+due.length+'</div>'+
+    '<div class="flash" id="flash" onclick="this.classList.toggle(\'flipped\')">'+
+      '<div class="flash-inner"><div class="flash-face">'+esc(curCard.front)+'</div>'+
+      '<div class="flash-face back">'+esc(curCard.back)+'</div></div></div>'+
+    '<div style="display:flex;gap:9px;flex-wrap:wrap">'+
+      '<button class="btn btn-ghost btn-sm" style="flex:1;color:var(--undone);border-color:var(--undone)" onclick="gradeCard(0)">'+(lang==='en'?'Again':'Bilmadim')+'</button>'+
+      '<button class="btn btn-ghost btn-sm" style="flex:1" onclick="gradeCard(1)">'+(lang==='en'?'Hard':'Qiyin')+'</button>'+
+      '<button class="btn btn-gold btn-sm" style="flex:1" onclick="gradeCard(2)">'+(lang==='en'?'Good':'Bildim')+'</button>'+
+    '</div><div class="hint">'+(lang==='en'?'Tap the card to flip.':'Kartani bosib ag\u2019daring.')+'</div>'+
+    '<button class="btn btn-danger btn-sm" style="margin-top:12px" onclick="dropCard()">'+(lang==='en'?'Delete card':'Kartani o\u2019chirish')+'</button></div>';
+}
+function gradeCard(g){
+  if (!curCard) return;
+  if (g===0) curCard.box = 0;
+  else if (g===1) curCard.box = Math.max(0, curCard.box);
+  else curCard.box = Math.min(STEP.length-1, curCard.box+1);
+  const days = STEP[curCard.box] || 0;
+  const d = new Date(); d.setDate(d.getDate() + (g===0 ? 0 : Math.max(days,1)));
+  curCard.due = g===0 ? todayKey() : d.toISOString().slice(0,10);
+  if (g===0){ // bugun oxiriga surish
+    cards = cards.filter(c=>c.id!==curCard.id); cards.push(curCard);
+  }
+  LS.set('sai-cards', cards); addXP(2); renderCards(); queueSync(); checkBadges();
+}
+function dropCard(){ cards = cards.filter(c=>c.id!==curCard.id); LS.set('sai-cards',cards); renderCards(); }
+
+/* ==================== STREAK / STATS ==================== */
 function groupByDate(){
-  const g = {};
-  allTasks.forEach(t => {
-    const k = t.dateKey || t.date;
-    if (!g[k]) g[k] = { date: t.date || k, done:0, half:0, undone:0, pending:0 };
-    g[k][t.status] = (g[k][t.status] || 0) + 1;
-  });
+  const g={};
+  allTasks.forEach(t=>{ const k=t.dateKey||t.date;
+    if(!g[k]) g[k]={date:t.date||k,done:0,half:0,undone:0,pending:0};
+    g[k][t.status]=(g[k][t.status]||0)+1; });
   return g;
 }
 function calcStreak(){
-  const g = groupByDate();
-  const active = new Set(Object.keys(g).filter(k => g[k].done + g[k].half > 0));
-  let streak = 0;
-  const today = new Date();
-  for (let i = 0; i < 400; i++){
-    const d = new Date(today); d.setDate(d.getDate() - i);
-    const key = d.toISOString().slice(0,10);
-    if (active.has(key)) streak++;
-    else { if (i === 0) continue; break; }
+  const g=groupByDate();
+  const active=new Set(Object.keys(g).filter(k=>g[k].done+g[k].half>0));
+  let streak=0; const today=new Date();
+  for(let i=0;i<400;i++){
+    const d=new Date(today); d.setDate(d.getDate()-i);
+    const k=d.toISOString().slice(0,10);
+    if (active.has(k)) streak++;
+    else { if (i===0) continue; break; }
   }
-  let best = LS.get('sai-best-streak', 0);
-  if (streak > best){ best = streak; LS.set('sai-best-streak', best); }
-  return { streak, best, g };
+  let best=LS.get('sai-best-streak',0);
+  if (streak>best){ best=streak; LS.set('sai-best-streak',best); }
+  return {streak,best,g};
 }
 function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
 function renderStats(){
-  const total = allTasks.length;
-  const done = allTasks.filter(t=>t.status==='done').length;
-  const half = allTasks.filter(t=>t.status==='half').length;
-  const undone = allTasks.filter(t=>t.status==='undone').length;
-  $('st1').textContent = total; $('st2').textContent = done; $('st3').textContent = half; $('st4').textContent = undone;
-
-  const { streak, best, g } = calcStreak();
-  $('streakCount').textContent = streak;
-  $('bestStreak').textContent = best;
-  $('streakMsg').textContent = streak === 0 ? "Bugun bitta vazifani bajaring — streak shu yerdan boshlanadi."
-    : streak < 3 ? "Yaxshi boshlanish. Ertaga ham davom eting."
-    : streak < 7 ? streak + " kun ketma-ket. Ritm tutildi."
-    : "Rekord darajasida ishlayapsiz.";
-
-  const dn = ['Ya','Du','Se','Ch','Pa','Ju','Sh'];
-  let dots = '';
-  for (let i = 6; i >= 0; i--){
-    const d = new Date(); d.setDate(d.getDate() - i);
-    const k = d.toISOString().slice(0,10), data = g[k];
-    let cls = 'd-miss', label = '·';
-    if (data && data.done > 0){ cls = 'd-done'; label = data.done; }
-    else if (data && data.half > 0){ cls = 'd-half'; label = '½'; }
-    dots += '<div class="dot-wrap"><div class="dot ' + cls + (i===0?' today':'') + '">' + label + '</div><div class="dot-day">' + dn[d.getDay()] + '</div></div>';
+  const total=allTasks.length, done=allTasks.filter(t=>t.status==='done').length,
+        half=allTasks.filter(t=>t.status==='half').length, undone=allTasks.filter(t=>t.status==='undone').length;
+  $('st1').textContent=total; $('st2').textContent=done; $('st3').textContent=half; $('st4').textContent=undone;
+  const {streak,best,g}=calcStreak();
+  $('streakCount').textContent=streak; $('bestStreak').textContent=best;
+  $('streakMsg').textContent = streak===0?s('streak0') : streak<3?s('streak1') : streak<7?(streak+' '+s('streak2')) : s('streak3');
+  const dn=['Ya','Du','Se','Ch','Pa','Ju','Sh'], dnEN=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const names = lang==='en'?dnEN:dn;
+  let dots='';
+  for(let i=6;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const k=d.toISOString().slice(0,10), x=g[k];
+    let cls='d-miss', lab='·';
+    if (x&&x.done>0){cls='d-done';lab=x.done;} else if (x&&x.half>0){cls='d-half';lab='½';}
+    dots += '<div class="dot-wrap"><div class="dot '+cls+(i===0?' today':'')+'">'+lab+'</div><div class="dot-day">'+names[d.getDay()]+'</div></div>';
   }
-  $('streakDots').innerHTML = dots;
-
-  const keys = Object.keys(g).sort().reverse().slice(0,14);
-  $('statsBody').innerHTML = keys.length ? keys.map(k => {
-    const d = g[k], tot = d.done + d.half + d.undone + d.pending;
-    const pct = tot ? Math.round(((d.done + d.half*0.5)/tot)*100) : 0;
-    const col = pct >= 80 ? 'var(--done)' : pct >= 50 ? 'var(--half)' : 'var(--undone)';
-    return '<tr><td>' + esc(d.date) + '</td><td>' + tot + '</td><td style="color:var(--done)">' + d.done + '</td><td style="color:var(--half)">' + d.half + '</td><td style="color:var(--undone)">' + d.undone + '</td><td style="color:' + col + ';font-weight:700">' + pct + '%</td></tr>';
-  }).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:22px">Hali ma\u2019lumot yo\u2019q</td></tr>';
-
-  if (window.Chart){ buildActivity('week', g); buildPct(g); }
+  $('streakDots').innerHTML=dots;
+  const keys=Object.keys(g).sort().reverse().slice(0,14);
+  $('statsBody').innerHTML = keys.length ? keys.map(k=>{
+    const d=g[k], tot=d.done+d.half+d.undone+d.pending, pct=tot?Math.round(((d.done+d.half*0.5)/tot)*100):0;
+    const col=pct>=80?'var(--done)':pct>=50?'var(--half)':'var(--undone)';
+    return '<tr><td>'+esc(d.date)+'</td><td>'+tot+'</td><td style="color:var(--done)">'+d.done+'</td><td style="color:var(--half)">'+d.half+
+      '</td><td style="color:var(--undone)">'+d.undone+'</td><td style="color:'+col+';font-weight:700">'+pct+'%</td></tr>';
+  }).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:22px">—</td></tr>';
+  renderBadges();
+  if (window.Chart){ buildActivity('week',g); buildPct(g); }
 }
-function chartBase(){
-  const grid = cssVar('--border'), tick = cssVar('--text3');
-  return { grid, tick };
-}
-function buildActivity(type, g){
+function buildActivity(type,g){
   if (actChart) actChart.destroy();
-  const { grid, tick } = chartBase();
-  let labels = [], D = [], H = [], U = [];
-  if (type === 'week'){
-    const dn = ['Ya','Du','Se','Ch','Pa','Ju','Sh'];
-    for (let i = 6; i >= 0; i--){
-      const d = new Date(); d.setDate(d.getDate()-i);
-      const k = d.toISOString().slice(0,10), x = g[k] || {done:0,half:0,undone:0};
-      labels.push(dn[d.getDay()]); D.push(x.done); H.push(x.half); U.push(x.undone);
-    }
+  const tick=cssVar('--text3'), grid=cssVar('--border');
+  let labels=[],D=[],H=[],U=[];
+  const names = lang==='en'?['Su','Mo','Tu','We','Th','Fr','Sa']:['Ya','Du','Se','Ch','Pa','Ju','Sh'];
+  if (type==='week'){
+    for(let i=6;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i);
+      const k=d.toISOString().slice(0,10), x=g[k]||{done:0,half:0,undone:0};
+      labels.push(names[d.getDay()]); D.push(x.done); H.push(x.half); U.push(x.undone); }
   } else {
-    labels = ['4-hafta','3-hafta','2-hafta','Shu hafta']; D=[0,0,0,0]; H=[0,0,0,0]; U=[0,0,0,0];
-    Object.keys(g).forEach(k => {
-      const diff = Math.floor((Date.now() - new Date(k).getTime())/86400000);
-      const w = diff < 7 ? 3 : diff < 14 ? 2 : diff < 21 ? 1 : diff < 28 ? 0 : -1;
-      if (w >= 0){ D[w]+=g[k].done; H[w]+=g[k].half; U[w]+=g[k].undone; }
-    });
+    labels=['-4','-3','-2',lang==='en'?'now':'hozir']; D=[0,0,0,0];H=[0,0,0,0];U=[0,0,0,0];
+    Object.keys(g).forEach(k=>{ const diff=Math.floor((Date.now()-new Date(k).getTime())/86400000);
+      const w=diff<7?3:diff<14?2:diff<21?1:diff<28?0:-1;
+      if (w>=0){ D[w]+=g[k].done; H[w]+=g[k].half; U[w]+=g[k].undone; } });
   }
-  actChart = new Chart($('activityChart'), {
-    type:'bar',
-    data:{ labels, datasets:[
-      { label:'Bajarildi', data:D, backgroundColor:cssVar('--done'), borderRadius:5 },
-      { label:'Yarim', data:H, backgroundColor:cssVar('--half'), borderRadius:5 },
-      { label:'Bajarilmadi', data:U, backgroundColor:cssVar('--undone'), borderRadius:5 }
-    ]},
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-      scales:{ x:{stacked:true, grid:{display:false}, ticks:{color:tick}},
-               y:{stacked:true, beginAtZero:true, grid:{color:grid}, ticks:{color:tick, precision:0}} } }
-  });
+  actChart = new Chart($('activityChart'),{ type:'bar',
+    data:{labels,datasets:[{data:D,backgroundColor:cssVar('--done'),borderRadius:5},
+      {data:H,backgroundColor:cssVar('--half'),borderRadius:5},{data:U,backgroundColor:cssVar('--undone'),borderRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{stacked:true,grid:{display:false},ticks:{color:tick}},
+              y:{stacked:true,beginAtZero:true,grid:{color:grid},ticks:{color:tick,precision:0}}}} });
 }
 function buildPct(g){
   if (pctChart) pctChart.destroy();
-  const { grid, tick } = chartBase();
-  const dn = ['Ya','Du','Se','Ch','Pa','Ju','Sh'], labels = [], data = [];
-  for (let i = 6; i >= 0; i--){
-    const d = new Date(); d.setDate(d.getDate()-i);
-    const k = d.toISOString().slice(0,10), x = g[k];
-    labels.push(dn[d.getDay()]);
-    if (x){ const tot = x.done+x.half+x.undone+x.pending; data.push(tot ? Math.round(((x.done+x.half*0.5)/tot)*100) : 0); }
-    else data.push(0);
-  }
-  pctChart = new Chart($('pctChart'), {
-    type:'line',
-    data:{ labels, datasets:[{ data, borderColor:cssVar('--gold'), backgroundColor:cssVar('--gold-glow'), fill:true, tension:.38, pointRadius:4, pointBackgroundColor:cssVar('--gold'), borderWidth:2 }]},
-    options:{ responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>c.parsed.y + '%'}}},
-      scales:{ x:{grid:{display:false}, ticks:{color:tick}}, y:{min:0, max:100, grid:{color:grid}, ticks:{color:tick, callback:v=>v+'%'}} } }
-  });
+  const tick=cssVar('--text3'), grid=cssVar('--border');
+  const names = lang==='en'?['Su','Mo','Tu','We','Th','Fr','Sa']:['Ya','Du','Se','Ch','Pa','Ju','Sh'];
+  const labels=[],data=[];
+  for(let i=6;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i);
+    const k=d.toISOString().slice(0,10), x=g[k];
+    labels.push(names[d.getDay()]);
+    if (x){ const tot=x.done+x.half+x.undone+x.pending; data.push(tot?Math.round(((x.done+x.half*0.5)/tot)*100):0); } else data.push(0); }
+  pctChart = new Chart($('pctChart'),{ type:'line',
+    data:{labels,datasets:[{data,borderColor:cssVar('--gold'),backgroundColor:cssVar('--gold-glow'),fill:true,tension:.38,pointRadius:4,pointBackgroundColor:cssVar('--gold'),borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y+'%'}}},
+      scales:{x:{grid:{display:false},ticks:{color:tick}},y:{min:0,max:100,grid:{color:grid},ticks:{color:tick,callback:v=>v+'%'}}}} });
 }
-function switchChart(type, el){
-  el.parentNode.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-  buildActivity(type, groupByDate());
+function switchChart(type,el){
+  el.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); el.classList.add('active');
+  buildActivity(type,groupByDate());
 }
 
-/* ================== HISTORY ================== */
-function filterHistory(f, el){
-  histFilter = f;
-  el.parentNode.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-  renderHistory();
+/* ==================== HISTORY ==================== */
+function filterHistory(f,el){
+  histFilter=f; el.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); renderHistory();
 }
 function renderHistory(){
-  const q = ($('historySearch').value || '').toLowerCase();
-  let list = history.filter(h => histFilter === 'all' || h.type === histFilter);
-  if (q) list = list.filter(h => (h.goal + ' ' + h.result).toLowerCase().includes(q));
-  const names = { analysis:'Tahlil', 'ideal-plan':'Ideal reja', daily:'Kunlik jadval' };
-  $('historyList').innerHTML = list.length ? list.map(h =>
-    '<div class="history-item"><div class="history-date">' + esc(h.date) + ' · ' + (names[h.type] || 'Yozuv') + '</div>' +
-    '<div class="history-goal">' + esc(h.goal) + '</div>' +
-    '<div class="history-preview">' + esc((h.result||'').slice(0,160)) + '…</div>' +
-    '<div style="display:flex;gap:8px;margin-top:11px"><button class="btn btn-ghost btn-sm" onclick="openModal(' + h.id + ')">Ochish</button>' +
-    '<button class="btn btn-danger btn-sm" onclick="deleteHistory(' + h.id + ')">O\u2019chirish</button></div></div>'
-  ).join('') : '<div class="empty"><div class="ico">&#128218;</div><div>Bu yerda saqlangan tahlil va rejalar ko\u2019rinadi.</div></div>';
+  const q=($('historySearch').value||'').toLowerCase();
+  let list=history.filter(h=>histFilter==='all'||h.type===histFilter);
+  if (q) list=list.filter(h=>((h.goal||'')+' '+(h.result||'')).toLowerCase().includes(q));
+  const names={analysis:T('plan.t1'),'ideal-plan':T('plan.t2'),daily:T('today.aibox'),quiz:T('learn.tab1')};
+  $('historyList').innerHTML = list.length ? list.map(h=>
+    '<div class="history-item"><div class="history-date">'+esc(h.date)+' · '+(names[h.type]||'—')+'</div>'+
+    '<div class="history-goal">'+esc(h.goal||'')+'</div>'+
+    '<div class="history-preview">'+esc((h.result||'').slice(0,160))+'</div>'+
+    '<div style="display:flex;gap:8px;margin-top:11px"><button class="btn btn-ghost btn-sm" onclick="openModal('+h.id+')">'+(lang==='en'?'Open':'Ochish')+'</button>'+
+    '<button class="btn btn-danger btn-sm" onclick="deleteHistory('+h.id+')">&#10005;</button></div></div>'
+  ).join('') : '<div class="empty"><div class="ico">&#128218;</div><div>—</div></div>';
 }
-function deleteHistory(id){ history = history.filter(h => h.id != id); LS.set('sai-history', history); renderHistory(); toast('O\u2019chirildi'); }
+function deleteHistory(id){ history=history.filter(h=>h.id!=id); LS.set('sai-history',history); renderHistory(); }
 function openModal(id){
-  const h = history.find(x => x.id == id); if (!h) return;
-  $('modalTitle').textContent = h.goal;
-  $('modalContent').innerHTML = md(h.result);
-  $('modal').classList.add('open');
+  const h=history.find(x=>x.id==id); if(!h) return;
+  $('modalTitle').textContent=h.goal||''; $('modalContent').innerHTML=md(h.result||''); $('modal').classList.add('open');
 }
 function closeModal(){ $('modal').classList.remove('open'); }
 
-/* ================== FOCUS TIMER ================== */
-let tSec = 25*60, tTotal = 25*60, tRun = null, tBreak = false;
-function fmt(s){ return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0'); }
-function paintTimer(){
-  $('timerClock').textContent = fmt(tSec);
-  $('timerRing').style.setProperty('--p', (100 - (tSec/tTotal)*100).toFixed(1));
-}
+/* ==================== TIMER ==================== */
+let tSec=25*60, tTotal=25*60, tRun=null, tBreak=false;
+const fmt=x=>String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0');
+function paintTimer(){ $('timerClock').textContent=fmt(tSec); $('timerRing').style.setProperty('--p',(100-(tSec/tTotal)*100).toFixed(1)); }
 function toggleTimer(){
-  if (tRun){ clearInterval(tRun); tRun = null; $('timerToggle').textContent = 'Davom'; return; }
-  $('timerToggle').textContent = 'Pauza';
-  tRun = setInterval(() => {
+  if (tRun){ clearInterval(tRun); tRun=null; $('timerToggle').textContent=T('timer.resume'); return; }
+  $('timerToggle').textContent=T('timer.pause');
+  tRun=setInterval(()=>{
     tSec--; paintTimer();
-    if (tSec <= 0){
-      clearInterval(tRun); tRun = null;
-      tBreak = !tBreak;
-      tTotal = tSec = tBreak ? 5*60 : 25*60;
-      $('timerIcon').textContent = tBreak ? '☕' : '🍅';
-      $('timerLabel').textContent = tBreak ? 'Dam olish vaqti — 5 daqiqa' : '25 daqiqa diqqat, 5 daqiqa dam';
-      $('timerToggle').textContent = 'Boshlash';
-      paintTimer();
-      toast(tBreak ? 'Sessiya tugadi. 5 daqiqa dam oling.' : 'Dam tugadi. Yana ishga.', 'ok');
+    if (tSec<=0){
+      clearInterval(tRun); tRun=null; tBreak=!tBreak;
+      tTotal=tSec=tBreak?5*60:25*60;
+      $('timerIcon').textContent=tBreak?'☕':'🍅';
+      $('timerLabel').textContent=tBreak?T('timer.break'):T('timer.work');
+      $('timerToggle').textContent=T('timer.start');
+      paintTimer(); if (!tBreak) addXP(0); else addXP(8);
+      toast(tBreak?T('timer.break'):T('timer.work'),'ok');
       try{ navigator.vibrate && navigator.vibrate([200,100,200]); }catch(e){}
     }
-  }, 1000);
+  },1000);
 }
-function resetTimer(){ clearInterval(tRun); tRun = null; tBreak = false; tTotal = tSec = 25*60; $('timerIcon').textContent='🍅'; $('timerToggle').textContent = 'Boshlash'; paintTimer(); }
+function resetTimer(){ clearInterval(tRun); tRun=null; tBreak=false; tTotal=tSec=25*60; $('timerIcon').textContent='🍅'; $('timerToggle').textContent=T('timer.start'); paintTimer(); }
 
-/* ================== SETTINGS ================== */
-function setTheme(t){
-  document.documentElement.setAttribute('data-theme', t);
-  localStorage.setItem('sai-theme', t);
-  ['blue','dark','light'].forEach(x => { const b = $('theme-' + x); if (b) b.classList.toggle('active', x === t); });
-  const meta = document.querySelector('meta[name=theme-color]');
-  if (meta) meta.setAttribute('content', cssVar('--bg'));
-  if ($('page-stats').classList.contains('active')) renderStats();
+/* ==================== CLOUD SYNC ==================== */
+let syncTimer=null;
+function snapshot(){ return { tasks:allTasks, history, user:userInfo, cards, xp, badges:earned, best:LS.get('sai-best-streak',0) }; }
+function queueSync(){
+  if (!userInfo.email) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(()=>cloudPush(true), 6000);
 }
-function saveUserInfo(){
-  userInfo.name = $('userName').value.trim();
-  userInfo.goal = $('userGoal').value.trim();
-  userInfo.target = parseFloat($('userTarget').value) || null;
-  LS.set('sai-user', userInfo);
-  paintUser();
-  toast('Saqlandi','ok');
+async function cloudPush(silent){
+  if (!userInfo.email){ if(!silent) toast(s('cloudOff'),'err'); return; }
+  try{
+    const r = await fetch('/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:userInfo.email,data:snapshot()})});
+    const d = await r.json();
+    if (d.error) throw new Error(d.error.message);
+    localStorage.setItem('sai-synced', String(Date.now()));
+    if (!silent){ toast(s('pushed'),'ok'); paintSync(); }
+  }catch(e){ if(!silent) toast(e.message,'err'); }
 }
+async function cloudPull(){
+  if (!userInfo.email){ toast(s('cloudOff'),'err'); return; }
+  try{
+    const r = await fetch('/api/sync?email='+encodeURIComponent(userInfo.email));
+    const d = await r.json();
+    if (d.error) throw new Error(d.error.message);
+    if (!d.data){ toast(s('nothing'),'err'); return; }
+    const x = d.data;
+    if (Array.isArray(x.tasks)) { allTasks=x.tasks; LS.set('sai-alltasks',allTasks); }
+    if (Array.isArray(x.history)) { history=x.history; LS.set('sai-history',history); }
+    if (Array.isArray(x.cards)) { cards=x.cards; LS.set('sai-cards',cards); }
+    if (typeof x.xp==='number'){ xp=x.xp; LS.set('sai-xp',xp); }
+    if (Array.isArray(x.badges)){ earned=x.badges; LS.set('sai-badges',earned); }
+    if (x.user){ userInfo={...userInfo,...x.user}; LS.set('sai-user',userInfo); }
+    paintUser(); renderTasks(); renderCards(); toast(s('pulled'),'ok'); paintSync();
+  }catch(e){ toast(e.message,'err'); }
+}
+function paintSync(){
+  const at = localStorage.getItem('sai-synced');
+  $('syncInfo').textContent = !userInfo.email ? s('cloudOff')
+    : (at ? (lang==='en'?'Last sync: ':'Oxirgi sinxron: ') + new Date(Number(at)).toLocaleString() : (lang==='en'?'Not synced yet':'Hali sinxronlanmagan'));
+}
+
+/* ==================== USER / SETTINGS ==================== */
 function paintUser(){
   const n = userInfo.name || 'Foydalanuvchi';
   $('sidebarName').textContent = n;
-  $('sidebarGoal').textContent = userInfo.goal || 'Maqsad belgilanmagan';
+  const lv = levelOf(xp), title = (lang==='en'?LEVELS_EN:LEVELS)[lv-1];
+  $('sidebarLevel').textContent = lv + '. ' + title + ' · ' + xp + ' XP';
+  $('xpFill').style.width = ((xp % 250)/250*100) + '%';
   const av = $('sidebarAvatar');
-  if (userInfo.picture) av.innerHTML = '<img src="' + esc(userInfo.picture) + '" alt="">';
+  if (userInfo.picture) av.innerHTML = '<img src="'+esc(userInfo.picture)+'" alt="">';
   else av.textContent = n.charAt(0).toUpperCase();
-  $('userName').value = userInfo.name || '';
-  $('userGoal').value = userInfo.goal || '';
-  $('userTarget').value = userInfo.target || '';
+  $('userName').value = userInfo.name || ''; $('userGoal').value = userInfo.goal || ''; $('userTarget').value = userInfo.target || '';
+}
+function saveUserInfo(){
+  userInfo.name=$('userName').value.trim(); userInfo.goal=$('userGoal').value.trim();
+  userInfo.target=parseFloat($('userTarget').value)||null;
+  LS.set('sai-user',userInfo); paintUser(); toast(s('saved'),'ok'); queueSync();
+}
+function setTheme(x){
+  document.documentElement.setAttribute('data-theme',x); localStorage.setItem('sai-theme',x);
+  ['blue','dark','light'].forEach(k=>{ const b=$('theme-'+k); if(b) b.classList.toggle('active',k===x); });
+  const m=document.querySelector('meta[name=theme-color]'); if(m) m.setAttribute('content',cssVar('--bg'));
+  if ($('page-stats').classList.contains('active')) renderStats();
 }
 function exportData(){
-  const dump = { exported: new Date().toISOString(), tasks: allTasks, history, user: userInfo, chat: chatLog, best: LS.get('sai-best-streak',0) };
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(dump,null,2)], {type:'application/json'}));
-  a.download = 'studyai-backup-' + todayKey() + '.json';
-  a.click();
-  toast('Zaxira yuklandi','ok');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify({exported:new Date().toISOString(),...snapshot()},null,2)],{type:'application/json'}));
+  a.download='studyai-backup-'+todayKey()+'.json'; a.click(); toast(s('saved'),'ok');
 }
 function importData(input){
-  const f = input.files[0]; if (!f) return;
-  const r = new FileReader();
-  r.onload = () => {
-    try{
-      const d = JSON.parse(r.result);
-      if (Array.isArray(d.tasks)) { allTasks = d.tasks; save(); }
-      if (Array.isArray(d.history)) { history = d.history; LS.set('sai-history', history); }
-      if (d.user) { userInfo = d.user; LS.set('sai-user', userInfo); }
-      if (Array.isArray(d.chat)) { chatLog = d.chat; LS.set('sai-chat', chatLog); }
-      paintUser(); renderTasks(); renderChat();
-      toast('Tiklandi','ok');
-    }catch(e){ toast("Fayl o\u2019qilmadi",'err'); }
-  };
-  r.readAsText(f);
-  input.value = '';
+  const f=input.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{
+      const d=JSON.parse(r.result);
+      if(Array.isArray(d.tasks)){allTasks=d.tasks;LS.set('sai-alltasks',allTasks);}
+      if(Array.isArray(d.history)){history=d.history;LS.set('sai-history',history);}
+      if(Array.isArray(d.cards)){cards=d.cards;LS.set('sai-cards',cards);}
+      if(typeof d.xp==='number'){xp=d.xp;LS.set('sai-xp',xp);}
+      if(d.user){userInfo=d.user;LS.set('sai-user',userInfo);}
+      paintUser(); renderTasks(); renderCards(); toast(s('saved'),'ok');
+    }catch(e){ toast('—','err'); } };
+  r.readAsText(f); input.value='';
 }
 function clearAllData(){
-  if (!confirm("Barcha vazifa, tarix va sozlamalar o'chiriladi. Davom etasizmi?")) return;
-  localStorage.clear();
-  location.reload();
+  if (!confirm(lang==='en'?'Delete everything on this device?':"Shu qurilmadagi hamma narsa o'chiriladi. Davom etasizmi?")) return;
+  localStorage.clear(); location.reload();
 }
-function clearLongForm(){ ['goal','current','hours','deadline'].forEach(i => $(i).value = ''); hide('aiResult'); }
+function clearLongForm(){ ['goal','current','hours','deadline'].forEach(i=>$(i).value=''); hide('aiResult'); }
 
-/* ================== LOGIN ================== */
-let googleUserData = null;
-function initLogin(){
-  const saved = LS.get('sai-user-info', null);
-  if (saved){ $('loginOverlay').style.display = 'none'; return; }
-  $('loginOverlay').style.display = 'block';
-}
+/* ==================== LOGIN ==================== */
+let googleUserData=null;
+function initLogin(){ $('landing').style.display = LS.get('sai-user-info',null) ? 'none' : 'block'; }
 function handleGoogleLogin(){
-  if (!window.google){ toast('Google xizmati yuklanmadi','err'); return; }
-  google.accounts.id.initialize({
-    client_id: '189889097085-7onj5aki0q7karkvj7l4ce0gkkl63rhp.apps.googleusercontent.com',
-    callback: handleGoogleCredential
-  });
+  if (!window.google){ toast('Google SDK','err'); return; }
+  google.accounts.id.initialize({ client_id:'189889097085-7onj5aki0q7karkvj7l4ce0gkkl63rhp.apps.googleusercontent.com', callback:handleGoogleCredential });
   google.accounts.id.prompt();
 }
 async function handleGoogleCredential(response){
   try{
-    const res = await fetch('/api/auth', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ token: response.credential }) });
-    const data = await res.json();
-    if (data.error){ toast('Kirish xatosi: ' + data.error, 'err'); return; }
-    googleUserData = data;
-    $('loginStep1').style.display = 'none';
-    $('loginStep2').style.display = 'block';
-    const first = data.given_name || (data.name || '').split(' ')[0] || '';
-    $('regName').value = first;
-    $('regSurname').value = (data.name || '').split(' ').slice(1).join(' ');
-    $('googleWelcome').textContent = 'Salom, ' + (first || 'do\u2019stim') + '!';
-    if (data.picture) $('googleAvatar').innerHTML = '<img src="' + esc(data.picture) + '" alt="">';
-  }catch(e){ toast('Google bilan kirishda xato: ' + e.message, 'err'); }
+    const r = await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:response.credential})});
+    const d = await r.json();
+    if (d.error){ toast(String(d.error),'err'); return; }
+    googleUserData = d;
+    $('loginStep1').style.display='none'; $('loginStep2').style.display='block';
+    const first = d.given_name || (d.name||'').split(' ')[0] || '';
+    $('regName').value = first; $('regSurname').value = (d.name||'').split(' ').slice(1).join(' ');
+    $('googleWelcome').textContent = (lang==='en'?'Hi, ':'Salom, ') + first + '!';
+    if (d.picture) $('googleAvatar').innerHTML = '<img src="'+esc(d.picture)+'" alt="">';
+  }catch(e){ toast(e.message,'err'); }
 }
-function guestLogin(){
-  $('loginStep1').style.display = 'none';
-  $('loginStep2').style.display = 'block';
-  $('googleWelcome').textContent = 'Xush kelibsiz!';
-}
+function guestLogin(){ $('loginStep1').style.display='none'; $('loginStep2').style.display='block'; }
 function completeRegistration(){
-  const name = $('regName').value.trim();
-  if (!name){ toast('Ismingizni yozing','err'); $('regName').focus(); return; }
-  const profile = {
-    name, surname: $('regSurname').value.trim(), age: $('ageSlider').value,
-    email: googleUserData ? googleUserData.email : '', picture: googleUserData ? googleUserData.picture : ''
-  };
-  LS.set('sai-user-info', profile);
-  userInfo = { name, goal: $('regGoal').value.trim(), picture: profile.picture };
-  LS.set('sai-user', userInfo);
-  fetch('/api/saveuser', { method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ name, surname: profile.surname, birth: profile.age + ' yosh' }) }).catch(()=>{});
-  $('loginOverlay').style.display = 'none';
-  paintUser();
-  toast('Xush kelibsiz, ' + name + '!','ok');
+  const name=$('regName').value.trim();
+  if (!name){ toast(s('needName'),'err'); $('regName').focus(); return; }
+  const profile={ name, surname:$('regSurname').value.trim(), age:$('ageSlider').value,
+    email: googleUserData?googleUserData.email:'', picture: googleUserData?googleUserData.picture:'' };
+  LS.set('sai-user-info',profile);
+  userInfo={ name, goal:$('regGoal').value.trim(), picture:profile.picture, email:profile.email };
+  LS.set('sai-user',userInfo);
+  fetch('/api/saveuser',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name,surname:profile.surname,birth:profile.age+' yosh'})}).catch(()=>{});
+  $('landing').style.display='none'; paintUser();
+  if (userInfo.email) cloudPull();
+  toast((lang==='en'?'Welcome, ':'Xush kelibsiz, ')+name+'!','ok');
 }
 
-/* ================== PWA ================== */
+/* ==================== PWA ==================== */
 function installApp(){
-  if (!deferredPrompt){ toast("Brauzer menyusidan \u201CIlovani o\u2019rnatish\u201D ni tanlang"); return; }
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.finally(() => { deferredPrompt = null; });
+  if (!deferredPrompt){ toast(lang==='en'?'Use your browser menu → Install app':"Brauzer menyusidan \u201Cilovani o\u2019rnatish\u201D ni tanlang"); return; }
+  deferredPrompt.prompt(); deferredPrompt.userChoice.finally(()=>{ deferredPrompt=null; });
 }
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault(); deferredPrompt = e;
-  $('installBtn').style.display = 'flex';
-  if ($('loginOverlay').style.display !== 'none') $('loginInstallBtn').style.display = 'block';
-});
-window.addEventListener('appinstalled', () => { $('installBtn').style.display='none'; $('loginInstallBtn').style.display='none'; });
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt=e;
+  $('installBtn').style.display='flex';
+  if ($('landing').style.display !== 'none') $('loginInstallBtn').style.display='block'; });
+window.addEventListener('appinstalled', ()=>{ $('installBtn').style.display='none'; $('loginInstallBtn').style.display='none'; });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
 
-/* ================== INIT ================== */
+/* ==================== INIT ==================== */
 (function init(){
+  captureDefaults();
   setTheme(localStorage.getItem('sai-theme') || 'blue');
+  setLang(lang);
   initLogin();
-  const now = new Date();
-  const days = ['Yakshanba','Dushanba','Seshanba','Chorshanba','Payshanba','Juma','Shanba'];
-  const months = ['yanvar','fevral','mart','aprel','may','iyun','iyul','avgust','sentabr','oktabr','noyabr','dekabr'];
-  $('todayDate').textContent = days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
-  $('mobileDate').textContent = now.getDate() + ' ' + months[now.getMonth()].slice(0,3);
-  paintUser();
-  renderTasks();
-  renderChat();
-  paintTimer();
-  const hash = location.hash.slice(1);
-  if (hash && $('page-' + hash)) go(hash);
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape'){ closeModal(); closeSidebar(); }
-  });
+  const now=new Date();
+  const dUZ=['Yakshanba','Dushanba','Seshanba','Chorshanba','Payshanba','Juma','Shanba'];
+  const mUZ=['yanvar','fevral','mart','aprel','may','iyun','iyul','avgust','sentabr','oktabr','noyabr','dekabr'];
+  $('todayDate').textContent = lang==='en'
+    ? now.toDateString()
+    : dUZ[now.getDay()]+', '+now.getDate()+' '+mUZ[now.getMonth()]+' '+now.getFullYear();
+  $('mobileDate').textContent = now.getDate()+' '+mUZ[now.getMonth()].slice(0,3);
+  paintUser(); renderTasks(); renderChat(); renderCards(); paintTimer(); paintSync(); checkBadges();
+  const h=location.hash.slice(1); if (h && $('page-'+h)) go(h);
+  document.addEventListener('keydown', e => { if (e.key==='Escape'){ closeModal(); closeSidebar(); } });
+  if (userInfo.email) setTimeout(()=>cloudPull(), 800);
 })();
 </script>
 </body>
