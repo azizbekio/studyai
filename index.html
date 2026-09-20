@@ -21,6 +21,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" defer></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-EX58BHR0G5"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('js', new Date());
+  gtag('config', 'G-EX58BHR0G5', { anonymize_ip: true });
+</script>
 <style>
 :root{
   --bg:#0d1b2a; --surface:#13263a; --surface2:#182f48; --surface3:#1f3b59;
@@ -774,6 +782,16 @@ const $ = id => document.getElementById(id);
 const todayKey = () => new Date().toISOString().slice(0,10);
 
 /* ==================== HELPERS ==================== */
+function track(name, params){
+  try{ if (window.gtag) gtag('event', name, params || {}); }catch(e){}
+}
+function sendLog(type, detail){
+  try{
+    if (!userInfo.email) return; // faqat Google bilan kirganlar uchun
+    fetch('/api/log', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email: userInfo.email, type, detail: String(detail||'').slice(0,500) }) }).catch(()=>{});
+  }catch(e){}
+}
 function toast(msg, type){
   const el = document.createElement('div');
   el.className = 'toast ' + (type || '');
@@ -940,7 +958,7 @@ function go(page){
   if (page==='learn') renderCards();
   if (page==='settings') paintSync();
   if (page==='chat') setTimeout(()=>{ const b=$('chatMessages'); b.scrollTop=b.scrollHeight; }, 40);
-  closeSidebar(); window.scrollTo(0,0); location.hash = page;
+  closeSidebar(); window.scrollTo(0,0); location.hash = page; track('page_view', { page_name: page });
 }
 function openSidebar(){ $('sidebar').classList.add('open'); $('mobileOverlay').classList.add('open'); }
 function closeSidebar(){ $('sidebar').classList.remove('open'); $('mobileOverlay').classList.remove('open'); }
@@ -963,7 +981,7 @@ function addTask(){
   allTasks.unshift({ id:Date.now(), name, hours:parseFloat($('taskHours').value)||0, note:$('taskNote').value.trim(),
     status:'pending', dateKey:todayKey(), date:new Date().toLocaleDateString('uz-UZ') });
   save(); ['taskName','taskHours','taskNote'].forEach(i=>$(i).value='');
-  $('taskName').focus(); renderTasks(); toast(s('added'),'ok'); checkBadges();
+  $('taskName').focus(); renderTasks(); toast(s('added'),'ok'); checkBadges(); track('task_add'); sendLog('task_add', name);
 }
 function setStatus(id, status){
   const t = allTasks.find(x=>x.id===id); if (!t) return;
@@ -1050,7 +1068,7 @@ async function analyzePlan(){
       " hours\nTarget: "+dl+"\n\nUse these headings: Summary, Realistic timeline, Daily routine, Resources, Key advice. Be honest if the timeline is unrealistic. Max 300 words.");
     $('aiText').innerHTML = md(text); $('aiResult').classList.add('visible');
     history.unshift({id:Date.now(),date:new Date().toLocaleDateString('uz-UZ'),goal,result:text,type:'analysis'});
-    LS.set('sai-history',history); addXP(15);
+    LS.set('sai-history',history); addXP(15); track('plan_analysis_generated'); sendLog('plan_analysis', goal);
   }catch(e){ $('aiText').innerHTML='<p style="color:var(--undone)">'+esc(e.message)+'</p>'; $('aiResult').classList.add('visible'); }
   busy(btn,false,T('plan.run'));
 }
@@ -1069,7 +1087,7 @@ async function generateIdealPlan(){
       days.map((d,i)=>'<div class="day-card"><div class="day-name">'+d+'</div><div class="day-hours">'+load[i]+'</div><div class="day-task">'+kind[i]+'</div></div>').join('')+'</div>';
     $('idealPlanResult').classList.add('visible');
     history.unshift({id:Date.now(),date:new Date().toLocaleDateString('uz-UZ'),goal,result:text,type:'ideal-plan'});
-    LS.set('sai-history',history); addXP(20);
+    LS.set('sai-history',history); addXP(20); track('plan_ideal_generated'); sendLog('plan_ideal', goal);
   }catch(e){ $('idealPlanText').innerHTML='<p style="color:var(--undone)">'+esc(e.message)+'</p>'; $('idealPlanResult').classList.add('visible'); }
   busy(btn,false,T('plan.make'));
 }
@@ -1119,6 +1137,7 @@ async function sendChat(){
   if (!text) return;
   chatLog.push({role:'user',content:text});
   input.value=''; input.style.height='auto'; renderChat(); btn.disabled=true;
+  sendLog('chat_message', text);
 
   const box=$('chatMessages');
   const wrap=document.createElement('div'); wrap.className='msg ai';
@@ -1134,7 +1153,7 @@ async function sendChat(){
       bubble.innerHTML = md(all); box.scrollTop = box.scrollHeight;
     }, aiProfile() + ctx);
     chatLog.push({role:'assistant',content:full});
-    LS.set('sai-chat', chatLog.slice(-60)); addXP(1);
+    LS.set('sai-chat', chatLog.slice(-60)); addXP(1); track('chat_message');
   }catch(e){
     chatLog.push({role:'assistant',content:'⚠️ '+e.message});
   }
@@ -1161,7 +1180,7 @@ async function makeQuiz(){
     qi=0; qScore=0;
     $('quizSetup').style.display='none'; $('quizResult').style.display='none'; $('quizRunner').style.display='block';
     showQuestion();
-    LS.set('sai-quizcount', LS.get('sai-quizcount',0)+1); checkBadges();
+    LS.set('sai-quizcount', LS.get('sai-quizcount',0)+1); checkBadges(); track('quiz_start');
   }catch(e){ toast(e.message,'err'); }
   busy(btn,false,T('quiz.make'));
 }
@@ -1198,7 +1217,7 @@ function endQuiz(exit){
     '<button class="btn btn-gold btn-sm" onclick="makeQuiz()">'+(lang==='en'?'New quiz':'Yana test')+'</button>'+
     '<button class="btn btn-ghost btn-sm" onclick="learnTab(\'cards\',document.querySelectorAll(\'#page-learn .chip\')[1])">'+T('learn.tab2')+'</button>'+
     '</div></div>';
-  addXP(10 + Math.round(pct/10));
+  addXP(10 + Math.round(pct/10)); track('quiz_complete', { score_pct: pct }); sendLog('quiz_complete', qTopic + ' — ' + qScore + '/' + quiz.length + ' (' + pct + '%)');
   history.unshift({id:Date.now(),date:new Date().toLocaleDateString('uz-UZ'),goal:qTopic,
     result:'Natija: '+qScore+'/'+quiz.length+' ('+pct+'%)',type:'quiz'});
   LS.set('sai-history',history); renderCards(); checkBadges(); queueSync();
@@ -1532,8 +1551,9 @@ function completeRegistration(){
   userInfo={ name, goal:$('regGoal').value.trim(), picture:profile.picture, email:profile.email };
   LS.set('sai-user',userInfo);
   fetch('/api/saveuser',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({name,surname:profile.surname,birth:profile.age+' yosh'})}).catch(()=>{});
+    body:JSON.stringify({name,surname:profile.surname,birth:profile.age+' yosh',email:profile.email,picture:profile.picture,lang})}).catch(()=>{});
   $('landing').style.display='none'; paintUser();
+  track('sign_up', { method: googleUserData ? 'google' : 'guest' });
   if (userInfo.email) cloudPull();
   toast((lang==='en'?'Welcome, ':'Xush kelibsiz, ')+name+'!','ok');
 }
@@ -1546,7 +1566,7 @@ function installApp(){
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt=e;
   $('installBtn').style.display='flex';
   if ($('landing').style.display !== 'none') $('loginInstallBtn').style.display='block'; });
-window.addEventListener('appinstalled', ()=>{ $('installBtn').style.display='none'; $('loginInstallBtn').style.display='none'; });
+window.addEventListener('appinstalled', ()=>{ $('installBtn').style.display='none'; $('loginInstallBtn').style.display='none'; track('pwa_installed'); });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
 
 /* ==================== INIT ==================== */
