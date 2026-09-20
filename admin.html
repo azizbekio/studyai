@@ -39,6 +39,13 @@ tr:hover td{background:var(--surface)}
     <span class="tab active" id="tab-users" onclick="switchTab('users')">Foydalanuvchilar</span>
     <span class="tab" id="tab-activity" onclick="switchTab('activity')">So'nggi faoliyat</span>
   </div>
+  <div id="activityFilters" style="display:none;margin-top:10px">
+    <span class="tab active" data-f="all" onclick="setFilter('all',this)">Hammasi</span>
+    <span class="tab" data-f="chat_message" onclick="setFilter('chat_message',this)">Chat</span>
+    <span class="tab" data-f="task_add,task_status" onclick="setFilter('task_add,task_status',this)">Vazifalar</span>
+    <span class="tab" data-f="quiz_complete" onclick="setFilter('quiz_complete',this)">Testlar</span>
+    <span class="tab" data-f="plan_analysis,plan_ideal" onclick="setFilter('plan_analysis,plan_ideal',this)">Rejalar</span>
+  </div>
   <div id="stat" style="margin-top:16px"></div>
   <div id="err" class="err"></div>
   <div id="tableWrap"></div>
@@ -52,6 +59,14 @@ function switchTab(v){
   currentView = v;
   document.getElementById('tab-users').classList.toggle('active', v==='users');
   document.getElementById('tab-activity').classList.toggle('active', v==='activity');
+  document.getElementById('activityFilters').style.display = v==='activity' ? 'block' : 'none';
+  load();
+}
+let activityFilter = 'all';
+function setFilter(f, el){
+  activityFilter = f;
+  el.parentNode.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
   load();
 }
 
@@ -80,16 +95,18 @@ async function load(){
         : '<div class="sub" style="margin-top:16px">Hali hech kim ro\u2019yxatdan o\u2019tmagan.</div>';
     } else {
       document.getElementById('stat').innerHTML = '<span class="stat">' + d.total + '</span> so\u2019nggi harakat (oxirgi 200 tasi)';
-      const labels = { chat_message:'Chat', quiz_complete:'Test', task_add:'Vazifa', plan_analysis:'Tahlil', plan_ideal:'Ideal reja' };
-      const rows = d.activity.map(a => '<tr>' +
+      const labels = { chat_message:'Chat', quiz_complete:'Test', task_add:'Vazifa qo\u2019shildi', task_status:'Vazifa holati', plan_analysis:'Tahlil', plan_ideal:'Ideal reja' };
+      const allowed = activityFilter==='all' ? null : activityFilter.split(',');
+      const filtered = allowed ? d.activity.filter(a => allowed.includes(a.type)) : d.activity;
+      const rows = filtered.map(a => '<tr>' +
         '<td>' + (a.email||'—') + '</td>' +
         '<td><span class="tag">' + (labels[a.type]||a.type) + '</span></td>' +
         '<td class="detail">' + (a.detail||'') + '</td>' +
         '<td>' + (a.created_at ? new Date(a.created_at).toLocaleString() : '—') + '</td>' +
         '</tr>').join('');
-      document.getElementById('tableWrap').innerHTML = d.activity.length ?
+      document.getElementById('tableWrap').innerHTML = filtered.length ?
         '<table><thead><tr><th>Email</th><th>Turi</th><th>Tafsilot</th><th>Vaqt</th></tr></thead><tbody>' + rows + '</tbody></table>'
-        : '<div class="sub" style="margin-top:16px">Hali faoliyat qayd etilmagan.</div>';
+        : '<div class="sub" style="margin-top:16px">Bu filtrda faoliyat yo\u2019q.</div>';
     }
   }catch(e){ document.getElementById('err').textContent = e.message; document.getElementById('stat').textContent=''; }
 }
