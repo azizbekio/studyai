@@ -476,6 +476,12 @@ tr:last-child td{border:none}
     </div>
 
     <div id="reviewArea"></div>
+
+    <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+      <span data-i18n="cards.all">Barcha kartochkalar</span>
+      <span id="allCardsCount" style="color:var(--gold)"></span>
+    </div>
+    <div id="allCardsArea"></div>
   </div>
 </section>
 
@@ -709,7 +715,7 @@ const I18N = {
   'quiz.new':'New quiz','quiz.topic':'Topic or text','quiz.ph':'Type a topic or paste your notes here',
   'quiz.hint':'If you paste text, questions come from that text.','quiz.count':'Questions','quiz.level':'Difficulty',
   'quiz.easy':'Easy','quiz.mid':'Medium','quiz.hard':'Hard','quiz.make':'Build quiz','quiz.next':'Next','quiz.exit':'Exit',
-  'cards.total':'Total cards','cards.due':'Due today','cards.learned':'Mastered','cards.make':'Let AI create cards',
+  'cards.total':'Total cards','cards.due':'Due today','cards.learned':'Mastered','cards.make':'Let AI create cards','cards.all':'All cards',
   'cards.ph':'Topic: Present Perfect, cell division…','cards.gen':'Create','cards.manual':'Add manually',
   'plan.h':'Plan','plan.sub':'Turns your goal into realistic steps.','plan.t1':'Situation analysis','plan.t2':'Ideal plan',
   'plan.run':'Analyse','plan.make':'Build plan',
@@ -978,10 +984,11 @@ function planTab(x, el){
 function addTask(){
   const name = $('taskName').value.trim();
   if (!name){ toast(s('needName'),'err'); $('taskName').focus(); return; }
-  allTasks.unshift({ id:Date.now(), name, hours:parseFloat($('taskHours').value)||0, note:$('taskNote').value.trim(),
+  const hours = parseFloat($('taskHours').value)||0, note = $('taskNote').value.trim();
+  allTasks.unshift({ id:Date.now(), name, hours, note,
     status:'pending', dateKey:todayKey(), date:new Date().toLocaleDateString('uz-UZ') });
   save(); ['taskName','taskHours','taskNote'].forEach(i=>$(i).value='');
-  $('taskName').focus(); renderTasks(); toast(s('added'),'ok'); checkBadges(); track('task_add'); sendLog('task_add', name);
+  $('taskName').focus(); renderTasks(); toast(s('added'),'ok'); checkBadges(); track('task_add'); sendLog('task_add', name + (hours?' — '+hours+' soat':'') + (note?' — '+note:''));
 }
 function setStatus(id, status){
   const t = allTasks.find(x=>x.id===id); if (!t) return;
@@ -990,6 +997,7 @@ function setStatus(id, status){
   if (was!=='done' && t.status==='done') addXP(10);
   if (was!=='half' && t.status==='half') addXP(5);
   save(); renderTasks();
+  if (t.status!=='pending') sendLog('task_status', t.name + ' — ' + t.status);
 }
 function deleteTask(id){
   const t = allTasks.find(x=>x.id===id);
@@ -1259,6 +1267,7 @@ function renderCards(){
   const badge=$('dueBadge');
   if (badge){ badge.style.display = due.length?'inline-block':'none'; badge.textContent = due.length; }
   const area = $('reviewArea');
+  renderAllCards();
   if (!area) return;
   if (!cards.length){ area.innerHTML = '<div class="empty"><div class="ico">&#127183;</div><div>'+
     (lang==='en'?'No cards yet. Generate some or take a quiz.':'Hali karta yo\u2019q. Test yeching yoki mavzu kiriting.')+'</div></div>'; return; }
@@ -1289,7 +1298,45 @@ function gradeCard(g){
   }
   LS.set('sai-cards', cards); addXP(2); renderCards(); queueSync(); checkBadges();
 }
-function dropCard(){ cards = cards.filter(c=>c.id!==curCard.id); LS.set('sai-cards',cards); renderCards(); }
+function dropCard(id){
+  const targetId = id || (curCard && curCard.id);
+  if (!targetId) return;
+  if (!confirm(lang==='en'?'Delete this card?':'Bu kartochkani o\u2019chirmoqchimisiz?')) return;
+  cards = cards.filter(c=>c.id!==targetId);
+  LS.set('sai-cards',cards); renderCards(); queueSync();
+}
+function editCard(id){
+  const c = cards.find(x=>x.id===id); if (!c) return;
+  const f = prompt(lang==='en'?'Question / front side:':'Savol (old tomoni):', c.front);
+  if (f===null) return;
+  const b = prompt(lang==='en'?'Answer / back side:':'Javob (orqa tomoni):', c.back);
+  if (b===null) return;
+  c.front = f.trim() || c.front; c.back = b.trim() || c.back;
+  LS.set('sai-cards', cards); renderCards(); renderAllCards(); toast(s('saved'),'ok'); queueSync();
+}
+function cardStageLabel(c){
+  const days = STEP[c.box] || 0;
+  if (c.box >= STEP.length-1) return lang==='en' ? 'Mastered' : 'O\u2019zlashtirilgan';
+  if (c.due <= todayKey()) return lang==='en' ? 'Due now' : 'Hozir navbatda';
+  const left = Math.max(0, Math.ceil((new Date(c.due) - new Date(todayKey())) / 86400000));
+  return (lang==='en' ? 'in ' + left + ' d' : left + ' kunda') + ' · ' + (lang==='en' ? 'stage ' : c.box+1+'-bosqich');
+}
+function renderAllCards(){
+  const wrap = $('allCardsArea'); if (!wrap) return;
+  $('allCardsCount').textContent = cards.length ? '(' + cards.length + ')' : '';
+  if (!cards.length){ wrap.innerHTML = ''; return; }
+  wrap.innerHTML = cards.map(c => {
+    const badgeColor = c.box >= STEP.length-1 ? 'var(--done)' : (c.due <= todayKey() ? 'var(--half)' : 'var(--text3)');
+    return '<div class="task-item" style="cursor:default">' +
+      '<div class="task-head"><div style="flex:1">' +
+      '<div class="task-title" style="font-size:13.5px">' + esc(c.front) + '</div>' +
+      '<div class="task-meta" style="color:'+badgeColor+'">' + cardStageLabel(c) + '</div>' +
+      '</div><div class="task-actions">' +
+      '<button class="icon-btn" onclick="editCard(' + JSON.stringify(c.id) + ')" title="'+(lang==='en'?'Edit':'Tahrirlash')+'">&#9998;</button>' +
+      '<button class="icon-btn" onclick="dropCard(' + JSON.stringify(c.id) + ')" title="'+(lang==='en'?'Delete':'O\u2019chirish')+'">&#10005;</button>' +
+      '</div></div></div>';
+  }).join('');
+}
 
 /* ==================== STREAK / STATS ==================== */
 function groupByDate(){
