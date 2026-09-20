@@ -378,27 +378,32 @@
     loading('exClubs');
     fetch('/api/clubs?view=top').then(function (r) { return r.json(); }).then(function (d) {
       if (d.error) throw new Error(d.error.message);
-      var list = d.clubs || [];
-      if (!list.length) {
-        q('exClubs').innerHTML = '<div class="empty"><div class="ico">&#127963;</div><div>' +
-          L('Hali klub yo\u2019q. Birinchisini siz tuzing.', 'No clubs yet. Create the first one.') + '</div></div>';
-        return;
-      }
-      var rows = list.map(function (c, i) {
-        var mine = (myClub && c.code === myClub) ? 'background:var(--gold-dim)' : '';
-        return '<tr style="' + mine + '"><td style="font-weight:700">' + medal(i) + '</td>' +
-          '<td>' + e(c.name) + '<div style="font-size:11px;color:var(--text3)">' + e(c.code) + '</div></td>' +
-          '<td>' + n(c.members) + '</td>' +
-          '<td style="color:var(--gold);font-weight:700">' + n(c.xp) + '</td>' +
-          '<td>' + n(c.avg) + '</td></tr>';
-      }).join('');
-      q('exClubs').innerHTML = '<div class="card"><div class="table-wrap"><table><thead><tr>' +
-        '<th>#</th><th>' + L('Klub', 'Club') + '</th><th>' + L('A\u2019zolar', 'Members') + '</th>' +
-        '<th>' + L('Jami XP', 'Total XP') + '</th><th>' + L('O\u2019rtacha', 'Average') + '</th>' +
-        '</tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+      lastClubList = d.clubs || [];
+      injectClubSearch();
+      renderClubsList(lastClubList);
     }).catch(function (err) {
       q('exClubs').innerHTML = '<div class="empty"><div class="ico">&#9888;</div><div>' + e(err.message) + '</div></div>';
     });
+  }
+
+  function renderClubsList(list) {
+    if (!list.length) {
+      q('exClubs').innerHTML = '<div class="empty"><div class="ico">&#127963;</div><div>' +
+        L('Hali klub yo\u2019q. Birinchisini siz tuzing.', 'No clubs yet. Create the first one.') + '</div></div>';
+      return;
+    }
+    var rows = list.map(function (c, i) {
+      var mine = (myClub && c.code === myClub) ? 'background:var(--gold-dim)' : '';
+      return '<tr style="' + mine + '"><td style="font-weight:700">' + medal(i) + '</td>' +
+        '<td>' + e(c.name) + '<div style="font-size:11px;color:var(--text3)">' + e(c.code) + '</div></td>' +
+        '<td>' + n(c.members) + '</td>' +
+        '<td style="color:var(--gold);font-weight:700">' + n(c.xp) + '</td>' +
+        '<td>' + n(c.avg) + '</td></tr>';
+    }).join('');
+    q('exClubs').innerHTML = '<div class="card"><div class="table-wrap"><table><thead><tr>' +
+      '<th>#</th><th>' + L('Klub', 'Club') + '</th><th>' + L('A\u2019zolar', 'Members') + '</th>' +
+      '<th>' + L('Jami XP', 'Total XP') + '</th><th>' + L('O\u2019rtacha', 'Average') + '</th>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table></div></div>';
   }
 
   function loadMyClub() {
@@ -513,7 +518,318 @@
     setTimeout(pushScore, 1500);
   };
 
-  /* ---------- 7. Ishga tushirish ---------- */
+  /* ============================================================
+     8. USERNAME + QIDIRUV + SHAXSIY XABARLAR
+     ============================================================ */
+  var myUsername = LS.get('sai-username', '');
+  var usernameOk = false;
+  var msgPeer = null, msgTimer = null;
+
+  function debounce(fn, ms) {
+    var t;
+    return function () {
+      var args = arguments, ctx = this;
+      clearTimeout(t);
+      t = setTimeout(function () { fn.apply(ctx, args); }, ms);
+    };
+  }
+
+  /* ---- 8.1 Sozlamalarga username kartasi ---- */
+  function injectUsernameCard() {
+    var page = q('page-settings');
+    if (!page) return;
+    page.insertAdjacentHTML('afterbegin',
+      '<div class="card" id="exUserCard">' +
+      '<div class="card-title" id="exUserTitle"></div>' +
+      '<div class="hint" id="exUserHint" style="margin-bottom:10px"></div>' +
+      '<div class="form-row">' +
+      '<div class="form-group"><input id="exUsernameInput" maxlength="20" placeholder="masalan: azizbek_a"></div>' +
+      '<div class="form-group"><button class="btn btn-gold" id="exUsernameSave" onclick="exSaveUsername()" style="width:100%"></button></div>' +
+      '</div>' +
+      '<div id="exUsernameStatus" style="font-size:12.5px;min-height:18px"></div>' +
+      '</div>');
+    var inp = q('exUsernameInput');
+    inp.value = myUsername;
+    inp.addEventListener('input', debounce(exCheckUsername, 450));
+  }
+
+  function exCheckUsername() {
+    var inp = q('exUsernameInput'); if (!inp) return;
+    var v = (inp.value || '').trim().toLowerCase();
+    var box = q('exUsernameStatus');
+    usernameOk = false;
+    if (!v) { box.textContent = ''; return; }
+    if (!/^[a-z][a-z0-9_]{2,19}$/.test(v)) {
+      box.innerHTML = '<span style="color:var(--undone)">' +
+        L('3-20 belgi, harf bilan boshlanishi, faqat harf/raqam/_', '3-20 chars, must start with a letter, letters/digits/_ only') + '</span>';
+      return;
+    }
+    if (v === myUsername) {
+      box.innerHTML = '<span style="color:var(--done)">' + L('Bu — sizning joriy nomingiz', 'This is your current username') + '</span>';
+      usernameOk = true; return;
+    }
+    box.textContent = '…';
+    fetch('/api/username?check=' + encodeURIComponent(v)).then(function (r) { return r.json(); }).then(function (d) {
+      if (d.available) {
+        box.innerHTML = '<span style="color:var(--done)">&#10003; ' + L('Bo\u2019sh, olsa bo\u2019ladi', 'Available') + '</span>';
+        usernameOk = true;
+      } else {
+        box.innerHTML = '<span style="color:var(--undone)">&#10007; ' + L('Band, boshqa nom tanlang', 'Taken, choose another') + '</span>';
+        usernameOk = false;
+      }
+    }).catch(function () { box.textContent = ''; });
+  }
+
+  window.exSaveUsername = function () {
+    if (!hasUser()) { toast(L('Avval Google bilan kiring', 'Sign in with Google first'), 'err'); return; }
+    var inp = q('exUsernameInput');
+    var v = (inp.value || '').trim().toLowerCase();
+    if (!v) { toast(L('Username kiriting', 'Enter a username'), 'err'); return; }
+    if (v !== myUsername && !usernameOk) { toast(L('Avval mos va bo\u2019sh nom tanlang', 'Pick a valid, available username first'), 'err'); return; }
+    var btn = q('exUsernameSave');
+    busy(btn, true);
+    fetch('/api/username', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: userInfo.email, username: v })
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (d.error) throw new Error(d.error.message);
+      myUsername = v; LS.set('sai-username', v);
+      toast(L('Saqlandi', 'Saved'), 'ok');
+    }).catch(function (err) { toast(err.message, 'err'); })
+      .then(function () { busy(btn, false, L('Saqlash', 'Save')); });
+  };
+
+  /* ---- 8.2 Xabarlar sahifasi ---- */
+  function injectMessagesPage() {
+    var main = document.querySelector('.main');
+    if (!main) return;
+    main.insertAdjacentHTML('beforeend',
+      '<section class="page" id="page-messages">' +
+      '<h1 class="page-header" id="exMsgH"></h1>' +
+      '<div class="page-sub" id="exMsgSub"></div>' +
+      '<div class="card" style="padding:0;overflow:hidden">' +
+      '<div style="display:flex;min-height:58vh">' +
+      '<div id="exConvList" style="width:100%;max-width:250px;border-right:1px solid var(--border);overflow-y:auto"></div>' +
+      '<div id="exThreadWrap" style="flex:1;display:flex;flex-direction:column;min-width:0">' +
+      '<div id="exThreadEmpty" class="empty" style="margin:auto"></div>' +
+      '<div id="exThreadBody" style="display:none;flex-direction:column;flex:1;min-height:0">' +
+      '<div id="exThreadHead" style="padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px"></div>' +
+      '<div id="exThreadMsgs" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:9px"></div>' +
+      '<div style="display:flex;gap:9px;padding:12px;border-top:1px solid var(--border)">' +
+      '<input id="exMsgInput" maxlength="500" onkeydown="if(event.key===\'Enter\')exSendMsg()">' +
+      '<button class="chat-send" onclick="exSendMsg()">&#10148;</button>' +
+      '</div></div></div></div></div>' +
+      '</section>');
+  }
+
+  function injectMessagesNav() {
+    var hist = document.querySelector('.sidebar-nav .nav-item[data-page="history"]');
+    if (hist) {
+      hist.insertAdjacentHTML('afterend',
+        '<div class="nav-item" data-page="messages" onclick="go(\'messages\')"><span class="nav-icon">&#128172;</span> <span id="exNavMsg"></span>' +
+        '<span class="nav-badge" id="exMsgBadge" style="display:none">0</span></div>');
+    }
+    var row = document.querySelector('#mobileNav .row');
+    var set = row && row.querySelector('[data-page="settings"]');
+    if (row && set) {
+      set.insertAdjacentHTML('beforebegin',
+        '<button class="mnav" data-page="messages" onclick="go(\'messages\')"><span class="i">&#128172;</span><span id="exNavMsg2"></span></button>');
+    }
+  }
+
+  function paintMsgLabels() {
+    var set = function (id, t) { var el = q(id); if (el) el.textContent = t; };
+    set('exMsgH', L('Xabarlar', 'Messages'));
+    set('exMsgSub', L('Talabalar bilan bevosita yozishing.', 'Message other students directly.'));
+    set('exNavMsg', L('Xabarlar', 'Messages'));
+    set('exNavMsg2', L('Xabar', 'Chat'));
+    var ph = q('exMsgInput'); if (ph) ph.placeholder = L('Xabar yozing…', 'Type a message…');
+    var em = q('exThreadEmpty'); if (em) em.innerHTML = '<div class="ico">&#128172;</div><div>' +
+      L('Suhbat tanlang yoki Reytingda username orqali qidiring.', 'Pick a conversation, or search by username on the Leaderboard page.') + '</div>';
+  }
+
+  function exUnreadPoll() {
+    if (!hasUser()) return;
+    fetch('/api/messages?email=' + encodeURIComponent(userInfo.email))
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var badge = q('exMsgBadge');
+        var n = d.unreadTotal || 0;
+        if (badge) { badge.style.display = n ? 'inline-block' : 'none'; badge.textContent = n; }
+        var page = q('page-messages');
+        if (page && page.classList.contains('active')) exRenderConvList(d.list || []);
+      }).catch(function () { });
+  }
+
+  function exRenderConvList(list) {
+    var box = q('exConvList'); if (!box) return;
+    if (!list.length) {
+      box.innerHTML = '<div class="empty" style="padding:20px 14px"><div class="ico">&#128172;</div><div style="font-size:12.5px">' +
+        L('Hali suhbat yo\u2019q', 'No conversations yet') + '</div></div>';
+      return;
+    }
+    box.innerHTML = list.map(function (c) {
+      var active = msgPeer === c.username ? 'background:var(--gold-dim)' : '';
+      var av = c.picture ? '<img src="' + e(c.picture) + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover">' :
+        '<div style="width:32px;height:32px;border-radius:50%;background:var(--surface3);display:grid;place-items:center;font-weight:700;flex-shrink:0">' +
+        e((c.name || c.username || '?').charAt(0).toUpperCase()) + '</div>';
+      return '<div onclick="exOpenThread(\'' + e(c.username) + '\')" data-name="' + e(c.name).replace(/"/g, '') + '" data-pic="' + e(c.picture) + '" ' +
+        'style="display:flex;gap:10px;align-items:center;padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--border);' + active + '">' +
+        av + '<div style="min-width:0;flex:1">' +
+        '<div style="font-size:13.5px;font-weight:600;display:flex;justify-content:space-between;gap:6px">' +
+        '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + e(c.name || ('@' + c.username)) + '</span>' +
+        (c.unread ? '<span style="background:var(--gold);color:var(--on-gold);border-radius:99px;font-size:10px;padding:1px 6px;flex-shrink:0">' + c.unread + '</span>' : '') +
+        '</div><div style="font-size:11.5px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + e(c.last || '') + '</div>' +
+        '</div></div>';
+    }).join('');
+  }
+
+  window.exOpenThread = function (username, name, picture) {
+    if (!hasUser()) { toast(L('Avval Google bilan kiring', 'Sign in with Google first'), 'err'); return; }
+    if (!name || !picture) {
+      // Suhbatlar ro'yxatidan bosilgan bo'lsa, ma'lumot data-attributedan olinadi
+      var row = document.querySelector('#exConvList [onclick*="' + username + '"]');
+      if (row) { name = row.getAttribute('data-name') || ''; picture = row.getAttribute('data-pic') || ''; }
+    }
+    msgPeer = username;
+    q('exThreadEmpty').style.display = 'none';
+    q('exThreadBody').style.display = 'flex';
+    q('exThreadHead').innerHTML =
+      (picture ? '<img src="' + e(picture) + '" style="width:30px;height:30px;border-radius:50%;object-fit:cover">' : '') +
+      '<div><div style="font-weight:600;font-size:14px">' + e(name || ('@' + username)) + '</div>' +
+      '<div style="font-size:11.5px;color:var(--text3)">@' + e(username) + '</div></div>';
+    go('messages');
+    exLoadThread();
+    clearInterval(msgTimer);
+    msgTimer = setInterval(exLoadThread, 4000);
+  };
+
+  function exLoadThread() {
+    if (!msgPeer || !hasUser()) return;
+    fetch('/api/messages?email=' + encodeURIComponent(userInfo.email) + '&withUsername=' + encodeURIComponent(msgPeer))
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.error) return;
+        var box = q('exThreadMsgs'); if (!box) return;
+        var atBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 40;
+        box.innerHTML = (d.thread || []).map(function (m) {
+          return '<div style="display:flex;max-width:78%;align-self:' + (m.mine ? 'flex-end' : 'flex-start') + '">' +
+            '<div style="background:' + (m.mine ? 'var(--gold)' : 'var(--surface2)') + ';color:' + (m.mine ? 'var(--on-gold)' : 'var(--text)') +
+            ';border:1px solid ' + (m.mine ? 'transparent' : 'var(--border)') + ';border-radius:13px;padding:9px 13px;font-size:13.5px;word-break:break-word">' +
+            e(m.body) + '</div></div>';
+        }).join('');
+        if (atBottom) box.scrollTop = box.scrollHeight;
+        exUnreadPoll();
+      }).catch(function () { });
+  }
+
+  window.exSendMsg = function () {
+    var inp = q('exMsgInput'); if (!inp) return;
+    var text = (inp.value || '').trim();
+    if (!text || !msgPeer) return;
+    if (!hasUser()) { toast(L('Avval Google bilan kiring', 'Sign in with Google first'), 'err'); return; }
+    inp.value = '';
+    fetch('/api/messages', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: userInfo.email, toUsername: msgPeer, body: text })
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (d.error) throw new Error(d.error.message);
+      exLoadThread();
+    }).catch(function (err) { toast(err.message, 'err'); inp.value = text; });
+  };
+
+  /* ---- 8.3 Reytingda username qidiruv ---- */
+  function injectUserSearch() {
+    var solo = q('exSolo');
+    if (!solo) return;
+    solo.insertAdjacentHTML('beforebegin',
+      '<div class="form-group" style="margin-bottom:14px">' +
+      '<input id="exUserSearch" placeholder="' + L('Username bo\u2019yicha qidirish…', 'Search by username…') + '">' +
+      '</div><div id="exSearchResults"></div>');
+    q('exUserSearch').addEventListener('input', debounce(exRunUserSearch, 400));
+  }
+
+  function exRunUserSearch() {
+    var v = (q('exUserSearch').value || '').trim();
+    var box = q('exSearchResults');
+    if (v.length < 2) { box.innerHTML = ''; return; }
+    box.innerHTML = '<div class="empty" style="padding:14px"><span class="typing"><i></i><i></i><i></i></span></div>';
+    fetch('/api/scores?q=' + encodeURIComponent(v)).then(function (r) { return r.json(); }).then(function (d) {
+      var list = d.list || [];
+      if (!list.length) { box.innerHTML = '<div class="empty" style="padding:14px">' + L('Hech kim topilmadi', 'No one found') + '</div>'; return; }
+      box.innerHTML = '<div class="card">' + list.map(function (u) {
+        var av = u.picture ? '<img src="' + e(u.picture) + '" style="width:30px;height:30px;border-radius:50%;object-fit:cover">' :
+          '<div style="width:30px;height:30px;border-radius:50%;background:var(--surface3);display:grid;place-items:center;font-weight:700">' +
+          e((u.name || u.username).charAt(0).toUpperCase()) + '</div>';
+        return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">' + av +
+          '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13.5px">' + e(u.name || ('@' + u.username)) + '</div>' +
+          '<div style="font-size:11.5px;color:var(--text3)">@' + e(u.username) + ' &middot; ' + u.xp + ' XP</div></div>' +
+          '<button class="btn btn-ghost btn-sm" onclick="exOpenThread(\'' + e(u.username) + '\',\'' + e(u.name).replace(/'/g, '') + '\',\'' + e(u.picture) + '\')">' +
+          L('Xabar', 'Message') + '</button></div>';
+      }).join('') + '</div>';
+    }).catch(function () { box.innerHTML = ''; });
+  }
+
+  /* ---- 8.4 Klublarni nomi bo'yicha qidirish ---- */
+  var lastClubList = [];
+  function injectClubSearch() {
+    var box = q('exClubs');
+    if (!box || q('exClubSearch')) return;
+    box.insertAdjacentHTML('beforebegin',
+      '<div class="form-group" style="margin-bottom:14px">' +
+      '<input id="exClubSearch" placeholder="' + L('Klub nomi bo\u2019yicha qidirish…', 'Search clubs by name…') + '">' +
+      '</div>');
+    q('exClubSearch').addEventListener('input', function () {
+      var v = (this.value || '').trim().toLowerCase();
+      var filtered = !v ? lastClubList : lastClubList.filter(function (c) {
+        return (c.name || '').toLowerCase().indexOf(v) >= 0 || (c.code || '').toLowerCase().indexOf(v) >= 0;
+      });
+      renderClubsList(filtered);
+    });
+  }
+
+  /* ---- 8.5 Ulanish nuqtalari ---- */
+  var _go2 = window.go;
+  window.go = function (page) {
+    _go2(page);
+    if (page === 'messages') { exUnreadPoll(); }
+    else { clearInterval(msgTimer); }
+  };
+
+  var _setLang2 = window.setLang;
+  window.setLang = function (l) {
+    _setLang2(l);
+    paintMsgLabels();
+    var us = q('exUserSearch'); if (us) us.placeholder = L('Username bo\u2019yicha qidirish…', 'Search by username…');
+    var cs = q('exClubSearch'); if (cs) cs.placeholder = L('Klub nomi bo\u2019yicha qidirish…', 'Search clubs by name…');
+    var title = q('exUserTitle'); if (title) title.textContent = '@ ' + L('Username (foydalanuvchi nomi)', 'Username');
+    var hint = q('exUserHint'); if (hint) hint.textContent = L(
+      'Boshqa talabalar sizni shu nom orqali topadi va xabar yoza oladi. Faqat lotin harf, raqam va pastki chiziq, 3-20 belgi.',
+      'Other students find and message you by this name. Latin letters, digits and underscore only, 3-20 characters.');
+    var sv = q('exUsernameSave'); if (sv) sv.textContent = L('Saqlash', 'Save');
+  };
+
+  /* ============================================================
+     9. Ishga tushirish (8-bo'lim)
+     ============================================================ */
+  function start2() {
+    try {
+      injectMessagesPage();
+      injectMessagesNav();
+      injectUsernameCard();
+      injectUserSearch();
+      paintMsgLabels();
+      if (hasUser()) setTimeout(exUnreadPoll, 3000);
+    } catch (err) {
+      if (window.console) console.warn('StudyAI extra (username/messages):', err);
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start2);
+  else start2();
+
+  /* ============================================================
+     10. ISHGA TUSHIRISH (asosiy 1-7 bo'lim) — pastda turadi
+     ============================================================ */
   function start() {
     try {
       injectRankPage();
