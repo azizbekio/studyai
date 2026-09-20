@@ -220,6 +220,25 @@
       .then(function () { busy(btn, false, '&#129302; ' + L('Xatolarimni tahlil qil', 'Analyse my mistakes')); });
   };
 
+  /* ---------- 3.5 XATO TUZATISH: kartochka "necha kunda" ko'rsatkichi ----------
+     Muammo: eski kod ba'zida bugun qaytishi kerak bo'lgan kartochkani
+     "1 kunda" deb ko'rsatib qo'yardi ("Hozir navbatda" o'rniga).
+     Sabab: sana solishtirish aniq emas edi. Bu yerda kalendar kunlarini
+     to'g'ridan-to'g'ri (soat/vaqt zonasi ta'sirisiz) solishtiramiz. */
+  function exDaysBetween(dueStr, todayStr) {
+    var a = dueStr.split('-').map(Number), b = todayStr.split('-').map(Number);
+    var da = Date.UTC(a[0], a[1] - 1, a[2]);
+    var db = Date.UTC(b[0], b[1] - 1, b[2]);
+    return Math.round((da - db) / 86400000);
+  }
+  window.cardStageLabel = function (c) {
+    if (c.box >= STEP.length - 1) return L('O\u2019zlashtirilgan', 'Mastered');
+    var left = exDaysBetween(c.due, todayKey());
+    if (left <= 0) return L('Hozir navbatda', 'Due now');
+    var stageTxt = L((c.box + 1) + '-bosqich', 'stage ' + (c.box + 1));
+    return (lang === 'en' ? ('in ' + left + ' d') : (left + ' kunda')) + ' \u00b7 ' + stageTxt;
+  };
+
   /* ---------- 4. Reyting sahifasi ---------- */
   function injectRankPage() {
     var main = document.querySelector('.main');
@@ -504,6 +523,7 @@
       paintLabels();
       if (hasUser()) setTimeout(pushScore, 2500);
       if (location.hash.slice(1) === 'rank') go('rank');
+      try { renderCards(); } catch (err) { } // kartochka yorlig'ini darrov yangilash
     } catch (err) {
       if (window.console) console.warn('StudyAI extra:', err);
     }
