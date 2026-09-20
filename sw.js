@@ -1,5 +1,5 @@
 // sw.js — StudyAI offline qobiq (v6, birlashtirilgan)
-const CACHE = 'studyai-v6';
+const CACHE = 'studyai-v7';
 const SHELL = ['/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png'];
 
 // O'rnatish — bitta fayl yuklanmasa ham, qolganlari saqlanadi
