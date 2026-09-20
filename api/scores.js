@@ -83,12 +83,28 @@ module.exports = async (req, res) => {
 
     /* ---------- REYTINGNI O'QISH ---------- */
     const query = req.query || {};
+
+    /* Username bo'yicha qidiruv (email hech qachon qaytarilmaydi) */
+    if (query.q) {
+      const term = String(query.q).trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+      if (term.length < 2) return res.status(200).json({ list: [] });
+      const found = await sb(TABLE +
+        '?select=username,name,picture,xp,level&username=ilike.' + encodeURIComponent('%' + term + '%') +
+        '&order=xp.desc&limit=15');
+      return res.status(200).json({
+        list: (found || []).filter(u => u.username).map(u => ({
+          username: u.username, name: u.name || '', picture: u.picture || '',
+          xp: u.xp || 0, level: u.level || 1
+        }))
+      });
+    }
+
     const top = Math.min(parseInt(query.top, 10) || 50, 200);
     const meEmail = String(query.email || '').trim().toLowerCase();
 
     // Reyting uchun eng ko'pi bilan 500 ta qator (hozircha yetarli)
     const all = await sb(TABLE +
-      '?select=email,name,picture,xp,level,coins,streak,club&order=xp.desc,updated_at.asc&limit=500');
+      '?select=email,name,picture,username,xp,level,coins,streak,club&order=xp.desc,updated_at.asc&limit=500');
 
     const rows = Array.isArray(all) ? all : [];
     let rank = null;
@@ -96,10 +112,11 @@ module.exports = async (req, res) => {
 
     const list = rows.slice(0, top).map((u, i) => {
       const mine = meEmail && String(u.email || '').toLowerCase() === meEmail;
-      if (mine) { rank = i + 1; me = { xp: u.xp, level: u.level, coins: u.coins, club: u.club || null }; }
+      if (mine) { rank = i + 1; me = { xp: u.xp, level: u.level, coins: u.coins, club: u.club || null, username: u.username || '' }; }
       return {
         name: u.name || '',
         picture: u.picture || '',
+        username: u.username || '',
         xp: u.xp || 0,
         level: u.level || 1,
         coins: u.coins || 0,
@@ -114,7 +131,7 @@ module.exports = async (req, res) => {
       for (let i = 0; i < rows.length; i++) {
         if (String(rows[i].email || '').toLowerCase() === meEmail) {
           rank = i + 1;
-          me = { xp: rows[i].xp, level: rows[i].level, coins: rows[i].coins, club: rows[i].club || null };
+          me = { xp: rows[i].xp, level: rows[i].level, coins: rows[i].coins, club: rows[i].club || null, username: rows[i].username || '' };
           break;
         }
       }
