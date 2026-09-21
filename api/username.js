@@ -1,12 +1,20 @@
 /* ============================================================
    /api/username.js  —  foydalanuvchi nomi (username)
-   QAYERGA: api/ papkasiga, nomi: username.js
+   QAYERGA: repodagi  api/username.js  ni SHU fayl bilan almashtiring.
 
-   GET  /api/username?check=aziz01        -> {available:true/false}
-   POST /api/username {email, username}   -> saqlaydi, band bo'lsa xato qaytaradi
+   GET  /api/username?check=aziz01        -> {available:true/false, reason:'...'}
+   POST /api/username {email, username}   -> saqlaydi
 
-   Qoida: 3-20 belgi, kichik lotin harf bilan boshlanadi,
-          faqat harf/raqam/pastki chiziq (_) bo'lishi mumkin.
+   QOIDA: 3-20 belgi, FAQAT kichik lotin harf, raqam va pastki chiziq (_),
+          birinchi belgi — harf.
+
+   NEGA faqat kichik harf?
+   "Azizbek" va "azizbek" ikki xil odam bo'lib ko'rinsa, odamlar
+   bir-birini chalkashtiradi (bu — "homograph" muammosi). Shuning uchun
+   Instagram, GitHub, Telegram ham username'ni kichik harfga keltiradi.
+   Biz esa jim kichraytirmaymiz — foydalanuvchiga OCHIQ aytamiz.
+   Ism (masalan "Azizbek") esa alohida "name" maydonida katta harf
+   bilan saqlanadi va profilda aynan shu ko'rinadi.
 
    Kerakli env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 ============================================================ */
@@ -35,7 +43,7 @@ async function sb(path, opts) {
   try { data = text ? JSON.parse(text) : null; } catch (e) { data = text; }
   if (!r.ok) {
     const raw = (data && data.message) ? data.message : String(data || '');
-    const dup = /duplicate key|already exists/i.test(raw);
+    const dup = /duplicate key|already exists|unique/i.test(raw);
     const err = new Error(dup ? 'DUPLICATE' : (raw || ('Supabase xatosi (' + r.status + ')')));
     err.dup = dup;
     throw err;
@@ -49,39 +57,68 @@ function readBody(req) {
   return req.body;
 }
 
+/* Xatoni ANIQ nomlab qaytaramiz — brauzer to'g'ri xabar ko'rsata olsin */
+function describe(raw) {
+  if (!raw) return 'empty';
+  if (/[A-Z]/.test(raw)) return 'uppercase';
+  if (/[^a-z0-9_]/.test(raw)) return 'charset';
+  if (raw.length < 3) return 'short';
+  if (raw.length > 20) return 'long';
+  if (!/^[a-z]/.test(raw)) return 'start';
+  return 'format';
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   try {
     if (!SB_URL || !SB_KEY) throw new Error('SUPABASE_URL yoki SUPABASE_SERVICE_ROLE_KEY sozlanmagan');
 
+    /* ---------- BAND/BO'SH TEKSHIRUVI ---------- */
     if (req.method === 'GET') {
-      const u = String((req.query || {}).check || '').trim().toLowerCase();
-      if (!RULE.test(u)) return res.status(200).json({ available: false, reason: 'format' });
-      const found = await sb(TABLE + '?select=email&username=eq.' + encodeURIComponent(u));
-      return res.status(200).json({ available: !(found && found.length) });
+      const raw = String((req.query || {}).check || '').trim();
+      if (!RULE.test(raw)) {
+        return res.status(200).json({ available: false, reason: describe(raw) });
+      }
+      // lower(username) bo'yicha unique indeks bor, lekin qidiruvni ham
+      // katta/kichik harfga befarq (ilike) qilamiz.
+      const found = await sb(TABLE + '?select=email&username=ilike.' + encodeURIComponent(raw));
+      return res.status(200).json({ available: !(found && found.length), reason: 'ok' });
     }
 
+    /* ---------- SAQLASH ---------- */
     if (req.method === 'POST') {
       const b = readBody(req);
       const email = String(b.email || '').trim().toLowerCase();
-      const username = String(b.username || '').trim().toLowerCase();
+      const raw = String(b.username || '').trim();
+
       if (!email || email.indexOf('@') < 0) {
         return res.status(400).json({ error: { message: 'email kerak' } });
       }
-      if (!RULE.test(username)) {
-        return res.status(400).json({ error: { message: 'Username 3-20 belgi, harf bilan boshlanishi va faqat lotin harf/raqam/_ bo\'lishi kerak' } });
+      if (!RULE.test(raw)) {
+        const why = describe(raw);
+        const msg = why === 'uppercase'
+          ? 'Username faqat KICHIK harflardan iborat bo\'ladi. Masalan: azizbek_a'
+          : 'Username 3-20 belgi, kichik lotin harfi bilan boshlanadi, faqat harf/raqam/_ bo\'lishi mumkin';
+        return res.status(400).json({ error: { message: msg, reason: why } });
       }
+
+      // Boshqa odam bu nomni olganmi?
+      const taken = await sb(TABLE + '?select=email&username=ilike.' + encodeURIComponent(raw));
+      if (taken && taken.length && String(taken[0].email).toLowerCase() !== email) {
+        return res.status(409).json({ error: { message: 'Bu username band, boshqasini tanlang' } });
+      }
+
       try {
-        await sb(TABLE, {
+        await sb(TABLE + '?on_conflict=email', {
           method: 'POST',
-          body: JSON.stringify({ email: email, username: username, updated_at: new Date().toISOString() }),
+          body: JSON.stringify({ email: email, username: raw, updated_at: new Date().toISOString() }),
           headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }
         });
       } catch (err) {
         if (err.dup) return res.status(409).json({ error: { message: 'Bu username band, boshqasini tanlang' } });
         throw err;
       }
-      return res.status(200).json({ ok: true, username: username });
+      return res.status(200).json({ ok: true, username: raw });
     }
 
     return res.status(405).json({ error: { message: 'Method not allowed' } });
