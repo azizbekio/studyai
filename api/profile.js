@@ -12,6 +12,9 @@
    Kerakli env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 ============================================================ */
 
+const { requireUser } = require('./_session');
+const { guard } = require('./_ratelimit');
+
 const SB_URL = process.env.SUPABASE_URL;
 const SB_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SCORES = 'studyai_scores';
@@ -48,11 +51,11 @@ module.exports = async (req, res) => {
 
     /* ---------- SAQLASH ---------- */
     if (req.method === 'POST') {
+      const who = requireUser(req, res);
+      if (!who) return;
+      if (!guard(res, 'profile:' + who.email, 10, 60000)) return;
       const b = readBody(req);
-      const email = String(b.email || '').trim().toLowerCase();
-      if (!email || email.indexOf('@') < 0) {
-        return res.status(400).json({ error: { message: 'email kerak' } });
-      }
+      const email = who.email;
 
       const row = { email: email, updated_at: new Date().toISOString() };
 
@@ -80,11 +83,19 @@ module.exports = async (req, res) => {
 
     /* ---------- OCHIQ PROFILNI O'QISH ---------- */
     const username = String((req.query || {}).username || '').trim().toLowerCase();
-    if (!username) return res.status(400).json({ error: { message: 'username kerak' } });
+    const cols = 'name,username,bio,avatar,picture,xp,level,streak,coins,club,club_role,quizzes,tasks_done';
 
-    const rows = await sb(SCORES +
-      '?select=name,username,bio,avatar,picture,xp,level,streak,coins,club,club_role,quizzes,tasks_done' +
-      '&username=eq.' + encodeURIComponent(username));
+    let rows;
+    if (username) {
+      rows = await sb(SCORES + '?select=' + cols + '&username=eq.' + encodeURIComponent(username));
+    } else {
+      /* username berilmagan -> "mening profilim". Kim ekanini
+         sessiyadan bilamiz, shuning uchun email so'ramaymiz. */
+      const who = requireUser(req, res);
+      if (!who) return;
+      rows = await sb(SCORES + '?select=' + cols + '&email=eq.' + encodeURIComponent(who.email));
+      if (!rows || !rows[0]) return res.status(200).json({ profile: null });
+    }
 
     const u = rows && rows[0];
     if (!u) return res.status(404).json({ error: { message: 'Foydalanuvchi topilmadi' } });
