@@ -1,19 +1,24 @@
+const { requireUser } = require("./_session");
+
 // api/saveuser.js — yangi/qaytgan foydalanuvchini Supabase jadvaliga yozadi
 // Kerakli env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 
 const SB_URL = process.env.SUPABASE_URL;
 const SB_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Session");
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: { message: "Faqat POST" } });
 
   try {
+    /* Kim ekanini sessiyadan bilamiz — brauzer yuborgan email'ga ishonmaymiz */
+    const who = requireUser(req, res);
+    if (!who) return;
     const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
-    const { name, surname, birth, email, picture, lang } = body;
+    const { name, surname, birth, picture, lang } = body;
 
     if (!SB_URL || !SB_KEY) {
       // Baza ulanmagan — saytni buzmaslik uchun jim tarzda o'tkazamiz.
@@ -24,7 +29,7 @@ export default async function handler(req, res) {
       name: String(name || "").slice(0, 100),
       surname: String(surname || "").slice(0, 100),
       age: String(birth || "").slice(0, 40),
-      email: String(email || "").slice(0, 160).toLowerCase() || null,
+      email: who.email,
       picture: String(picture || "").slice(0, 500),
       lang: String(lang || "uz").slice(0, 5),
       ip: (req.headers["x-forwarded-for"] || "").split(",")[0].trim()
@@ -51,4 +56,4 @@ export default async function handler(req, res) {
   } catch (err) {
     return res.status(200).json({ error: { message: err.message } });
   }
-}
+};
