@@ -57,7 +57,8 @@ async function setUserClub(email, name, club) {
   const clean = String(name || '').trim().slice(0, 60);
   if (clean) row.name = clean;
 
-  await sb(SCORES, {
+  // on_conflict=email — mavjud qatorni YANGILAYDI (username, xp va h.k. joyida qoladi)
+  await sb(SCORES + '?on_conflict=email', {
     method: 'POST',
     body: JSON.stringify(row),
     headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }
@@ -111,12 +112,38 @@ module.exports = async (req, res) => {
       }
 
       if (action === 'leave') {
+        // Shartsiz bajariladi: brauzerda klub esda qolmagan bo'lsa ham
+        // odam klubda "arvoh a'zo" bo'lib qolmaydi.
         await sb(SCORES + '?email=eq.' + encodeURIComponent(email), {
           method: 'PATCH',
           body: JSON.stringify({ club: null }),
           headers: { Prefer: 'return=minimal' }
         });
         return res.status(200).json({ ok: true });
+      }
+
+      /* ---- HISOBNI BUTUNLAY O'CHIRISH ----
+         1) klubdan chiqaradi  2) klub chatidagi xabarlarini o'chiradi
+         3) shaxsiy xabarlarini o'chiradi  4) ball/username qatorini o'chiradi.
+         Shundan keyin qayta ro'yxatdan o'tsa — mutlaqo toza boshlaydi. */
+      if (action === 'purge') {
+        const enc = encodeURIComponent(email);
+        const quiet = { Prefer: 'return=minimal' };
+
+        await sb(SCORES + '?email=eq.' + enc, {
+          method: 'PATCH', body: JSON.stringify({ club: null }), headers: quiet
+        }).catch(function () {});
+
+        await sb('studyai_club_messages?email=eq.' + enc, { method: 'DELETE', headers: quiet })
+          .catch(function () {});
+        await sb('studyai_messages?from_email=eq.' + enc, { method: 'DELETE', headers: quiet })
+          .catch(function () {});
+        await sb('studyai_messages?to_email=eq.' + enc, { method: 'DELETE', headers: quiet })
+          .catch(function () {});
+        await sb(SCORES + '?email=eq.' + enc, { method: 'DELETE', headers: quiet })
+          .catch(function () {});
+
+        return res.status(200).json({ ok: true, purged: true });
       }
 
       return res.status(400).json({ error: { message: 'Noma\'lum action' } });
