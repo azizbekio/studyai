@@ -8,6 +8,8 @@
    Kerakli env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 ============================================================ */
 
+const { requireUser } = require('./_session');
+
 const SB_URL = process.env.SUPABASE_URL;
 const SB_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const TABLE = 'studyai_scores';
@@ -56,11 +58,11 @@ module.exports = async (req, res) => {
 
     /* ---------- BALLNI SAQLASH ---------- */
     if (req.method === 'POST') {
+      /* Ball yozish — faqat o'z hisobiga. Email sessiyadan olinadi. */
+      const who = requireUser(req, res);
+      if (!who) return;
       const b = readBody(req);
-      const email = String(b.email || '').trim().toLowerCase();
-      if (!email || email.indexOf('@') < 0) {
-        return res.status(400).json({ error: { message: 'email kerak' } });
-      }
+      const email = who.email;
       const row = {
         email: email,
         name: String(b.name || '').slice(0, 60),
