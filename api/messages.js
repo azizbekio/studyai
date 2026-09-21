@@ -41,7 +41,7 @@ function readBody(req) {
 }
 
 async function findByUsername(username) {
-  const rows = await sb(SCORES + '?select=email,name,picture,username&username=eq.' + encodeURIComponent(username));
+  const rows = await sb(SCORES + '?select=email,name,picture,avatar,username&username=eq.' + encodeURIComponent(username));
   return (rows && rows[0]) || null;
 }
 
@@ -117,14 +117,14 @@ module.exports = async (req, res) => {
     const peerEmails = Object.keys(byPeer);
     let users = [];
     if (peerEmails.length) {
-      users = await sb(SCORES + '?select=email,name,picture,username&email=in.(' + peerEmails.join(',') + ')');
+      users = await sb(SCORES + '?select=email,name,picture,avatar,username&email=in.(' + peerEmails.join(',') + ')');
     }
 
     const list = (users || [])
       .filter(function (u) { return !!u.username; }) // username yo'q bo'lsa ro'yxatga qo'shmaymiz
       .map(function (u) {
         return {
-          username: u.username, name: u.name || '', picture: u.picture || '',
+          username: u.username, name: u.name || '', picture: u.avatar || u.picture || '',
           last: byPeer[u.email].last, at: byPeer[u.email].at, unread: byPeer[u.email].unread
         };
       })
