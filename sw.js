@@ -5,7 +5,7 @@
    siz yangi funksiyalarni (username, xabarlar, klub qidiruvi…)
    deploy qilsangiz ham, telefoningizda ESKI fayl ochilaverardi. */
 
-const CACHE = 'studyai-v8';
+const CACHE = 'studyai-v9';
 const SHELL = ['/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png', '/studyai-extra.js'];
 
 self.addEventListener('install', e => {
