@@ -138,12 +138,13 @@ module.exports = async (req, res) => {
       if (!club || !club.length) return res.status(200).json({ club: null, members: [] });
 
       const members = await sb(SCORES +
-        '?select=email,name,xp,streak&club=eq.' + encodeURIComponent(code) + '&order=xp.desc&limit=200');
+        '?select=email,name,username,xp,streak&club=eq.' + encodeURIComponent(code) + '&order=xp.desc&limit=200');
 
       return res.status(200).json({
         club: { code: club[0].code, name: club[0].name },
         members: (members || []).map(m => ({
           name: m.name || '',
+          username: m.username || '',
           xp: m.xp || 0,
           streak: m.streak || 0,
           me: String(m.email || '').toLowerCase() === email
