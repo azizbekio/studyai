@@ -19,6 +19,9 @@
    Kerakli env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 ============================================================ */
 
+const { requireUser, readSession } = require('./_session');
+const { guard } = require('./_ratelimit');
+
 const SB_URL = process.env.SUPABASE_URL;
 const SB_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const TABLE = 'studyai_scores';
@@ -82,18 +85,25 @@ module.exports = async (req, res) => {
       // lower(username) bo'yicha unique indeks bor, lekin qidiruvni ham
       // katta/kichik harfga befarq (ilike) qilamiz.
       const found = await sb(TABLE + '?select=email&username=ilike.' + encodeURIComponent(raw));
-      return res.status(200).json({ available: !(found && found.length), reason: 'ok' });
+      const taken = !!(found && found.length);
+
+      /* MUHIM: agar bu nom AYNAN SHU odamniki bo'lsa, "band" demaymiz.
+         Ilgari shu sabab odam chiqib kirganda o'z username'ini
+         qayta ola olmay qolardi. */
+      const who = readSession(req);
+      const mine = taken && who && String(found[0].email).toLowerCase() === who.email;
+      return res.status(200).json({ available: !taken || !!mine, mine: !!mine, reason: mine ? 'mine' : 'ok' });
     }
 
     /* ---------- SAQLASH ---------- */
     if (req.method === 'POST') {
+      const who = requireUser(req, res);
+      if (!who) return;
+      /* Username'ni cheksiz almashtirib, boshqalarnikini "band qilib" yurmasin */
+      if (!guard(res, 'uname:' + who.email, 8, 300000)) return;
       const b = readBody(req);
-      const email = String(b.email || '').trim().toLowerCase();
+      const email = who.email;
       const raw = String(b.username || '').trim();
-
-      if (!email || email.indexOf('@') < 0) {
-        return res.status(400).json({ error: { message: 'email kerak' } });
-      }
       if (!RULE.test(raw)) {
         const why = describe(raw);
         const msg = why === 'uppercase'
