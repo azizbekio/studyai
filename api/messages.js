@@ -13,6 +13,9 @@
    Kerakli env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 ============================================================ */
 
+const { requireUser } = require('./_session');
+const { guard } = require('./_ratelimit');
+
 const SB_URL = process.env.SUPABASE_URL;
 const SB_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const MSG = 'studyai_messages';
@@ -52,12 +55,14 @@ module.exports = async (req, res) => {
 
     /* =============== XABAR YUBORISH =============== */
     if (req.method === 'POST') {
+      const who = requireUser(req, res);
+      if (!who) return;
+      if (!guard(res, 'dm:' + who.email, 20, 60000)) return;
       const b = readBody(req);
-      const from = String(b.from || '').trim().toLowerCase();
+      const from = who.email;   // jo'natuvchi sessiyadan olinadi
       const toUsername = String(b.toUsername || '').trim().toLowerCase();
       const body = String(b.body || '').trim().slice(0, 500);
 
-      if (!from || from.indexOf('@') < 0) return res.status(400).json({ error: { message: 'from email kerak' } });
       if (!toUsername) return res.status(400).json({ error: { message: 'Qabul qiluvchi username kerak' } });
       if (!body) return res.status(400).json({ error: { message: 'Xabar bo\'sh bo\'lmasligi kerak' } });
 
@@ -74,9 +79,10 @@ module.exports = async (req, res) => {
     }
 
     /* =============== O'QISH =============== */
+    const who = requireUser(req, res);
+    if (!who) return;
     const query = req.query || {};
-    const email = String(query.email || '').trim().toLowerCase();
-    if (!email) return res.status(400).json({ error: { message: 'email kerak' } });
+    const email = who.email;
 
     if (query.withUsername) {
       const target = await findByUsername(String(query.withUsername).trim().toLowerCase());
