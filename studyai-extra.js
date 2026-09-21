@@ -323,6 +323,44 @@
   };
 
   /* ---------- 4. Reyting sahifasi ---------- */
+  /* ============================================================
+     ROLLAR (klub lavozimlari) — brauzerdagi ko'rinish qismi.
+     Haqiqiy tekshiruv HAR DOIM serverda (api/clubs.js) bo'ladi.
+     ============================================================ */
+  var ROLE_LIST = [
+    { id: 'student',        rank: 1, ico: '\uD83D\uDCD8', uz: 'O\u2019quvchi',              en: 'Student' },
+    { id: 'scholar',        rank: 2, ico: '\uD83C\uDF93', uz: 'Talaba',                     en: 'Scholar' },
+    { id: 'genius',         rank: 3, ico: '\uD83D\uDCA1', uz: 'Genius',                     en: 'Genius' },
+    { id: 'teacher',        rank: 4, ico: '\uD83D\uDCDA', uz: 'O\u2019qituvchi',            en: 'Teacher' },
+    { id: 'head_teacher',   rank: 5, ico: '\uD83C\uDFAF', uz: 'Katta o\u2019qituvchi',      en: 'Head Teacher' },
+    { id: 'vice_principal', rank: 6, ico: '\uD83E\uDD48', uz: 'Direktor o\u2019rinbosari',  en: 'Assistant Principal' },
+    { id: 'principal',      rank: 7, ico: '\uD83D\uDC51', uz: 'Direktor (Principal)',       en: 'Principal' }
+  ];
+  function roleById(id) {
+    for (var i = 0; i < ROLE_LIST.length; i++) if (ROLE_LIST[i].id === id) return ROLE_LIST[i];
+    return ROLE_LIST[0];
+  }
+  function roleName(id) { var r = roleById(id); return L(r.uz, r.en); }
+  function roleBadge(id) {
+    var r = roleById(id);
+    var strong = r.rank >= 6;
+    return '<span style="display:inline-block;font-size:10.5px;padding:2px 7px;border-radius:99px;white-space:nowrap;' +
+      'background:' + (strong ? 'var(--gold)' : 'var(--surface3)') + ';color:' + (strong ? 'var(--on-gold)' : 'var(--text2)') + ';' +
+      'border:1px solid ' + (strong ? 'transparent' : 'var(--border)') + '">' + r.ico + ' ' + e(roleName(id)) + '</span>';
+  }
+
+  /* Kichik avatar chizuvchi — hamma joyda bir xil ko'rinsin */
+  function avatarHTML(src, name, size) {
+    size = size || 32;
+    if (src) {
+      return '<img src="' + e(src) + '" alt="" style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;flex-shrink:0">';
+    }
+    return '<div style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;background:var(--surface3);' +
+      'display:grid;place-items:center;font-weight:700;font-size:' + Math.round(size * 0.42) + 'px;flex-shrink:0">' +
+      e(String(name || '?').charAt(0).toUpperCase()) + '</div>';
+  }
+
+  /* ---------- 4. REYTING sahifasi (faqat talabalar) ---------- */
   function injectRankPage() {
     var main = document.querySelector('.main');
     if (!main) return;
@@ -335,46 +373,66 @@
       '<div class="stat-card"><div class="stat-num" id="exStatXp">0</div><div class="stat-label" id="exLbXp"></div></div>' +
       '<div class="stat-card"><div class="stat-num" id="exStatCoins" style="color:var(--half)">0</div><div class="stat-label" id="exLbCoins"></div></div>' +
       '</div>' +
-      '<div class="chips" style="margin-bottom:14px">' +
-      '<button class="chip active" id="exTab1" onclick="exTab(\'solo\',this)"></button>' +
-      '<button class="chip" id="exTab2" onclick="exTab(\'clubs\',this)"></button>' +
-      '<button class="chip" id="exTab3" onclick="exTab(\'my\',this)"></button>' +
-      '</div>' +
       '<div id="exSolo"></div>' +
+      '</section>');
+  }
+
+  /* ---------- KLUBLAR — endi ALOHIDA sahifa ---------- */
+  function injectClubsPage() {
+    var main = document.querySelector('.main');
+    if (!main || q('page-clubs')) return;
+    main.insertAdjacentHTML('beforeend',
+      '<section class="page" id="page-clubs">' +
+      '<h1 class="page-header" id="exClubH"></h1>' +
+      '<div class="page-sub" id="exClubSub"></div>' +
+      '<div class="chips" style="margin-bottom:14px">' +
+      '<button class="chip active" id="exCTab1" onclick="exClubTab(\'my\',this)"></button>' +
+      '<button class="chip" id="exCTab2" onclick="exClubTab(\'top\',this)"></button>' +
+      '</div>' +
+      '<div id="exMy"></div>' +
       '<div id="exClubs" style="display:none"></div>' +
-      '<div id="exMy" style="display:none"></div>' +
       '</section>');
   }
 
   function injectNav() {
-    // Bu funksiya endi hech narsa qilmaydi — Reyting va Xabarlar
-    // navigatsiyasi birgalikda injectSocialNav() orqali qo'shiladi
-    // (pastda, "Ulanish nuqtalari" bo'limidan oldin chaqiriladi).
     var sb = document.querySelector('.sidebar-bottom');
-    if (sb) {
+    if (sb && !q('exCoinBox')) {
       sb.insertAdjacentHTML('afterbegin',
         '<div id="exCoinBox" style="font-size:12px;color:var(--text2);padding:7px 10px;margin-bottom:8px;' +
         'background:var(--surface2);border:1px solid var(--border);border-radius:10px;text-align:center"></div>');
     }
   }
 
-  /* Reyting + Xabarlar — "Asosiy" bo'limidan keyin, alohida yangi bo'lim sifatida.
-     "Tahlil" (Statistika/Tarix) ichiga qo'shilmaydi, chunki bular tahlil emas. */
+  /* "Jamoa" bo'limi: Reyting · Klublar · Xabarlar.
+     Qizil badge uchun kichik CSS ham shu yerda qo'shiladi. */
   function injectSocialNav() {
+    if (!q('exRedBadgeCSS')) {
+      document.head.insertAdjacentHTML('beforeend',
+        '<style id="exRedBadgeCSS">' +
+        '.nav-badge.red{background:#ef4444;color:#fff;animation:exPulse 1.6s ease-in-out infinite}' +
+        '@keyframes exPulse{0%,100%{opacity:1}50%{opacity:.55}}' +
+        '.mnav .exdot{position:absolute;top:4px;right:calc(50% - 16px);width:9px;height:9px;border-radius:50%;background:#ef4444}' +
+        '#mobileNav .mnav{position:relative}' +
+        '</style>');
+    }
     var learnItem = document.querySelector('.sidebar-nav .nav-item[data-page="learn"]');
-    if (learnItem && !document.getElementById('exNavLabel')) {
+    if (learnItem && !q('exNavLabel')) {
       learnItem.insertAdjacentHTML('afterend',
         '<div class="nav-section" id="exSocialSection"></div>' +
         '<div class="nav-item" data-page="rank" onclick="go(\'rank\')"><span class="nav-icon">&#127942;</span> <span id="exNavLabel"></span></div>' +
+        '<div class="nav-item" data-page="clubs" onclick="go(\'clubs\')"><span class="nav-icon">&#127963;</span> <span id="exNavClub"></span>' +
+        '<span class="nav-badge red" id="exClubBadge" style="display:none">0</span></div>' +
         '<div class="nav-item" data-page="messages" onclick="go(\'messages\')"><span class="nav-icon">&#128172;</span> <span id="exNavMsg"></span>' +
-        '<span class="nav-badge" id="exMsgBadge" style="display:none">0</span></div>');
+        '<span class="nav-badge red" id="exMsgBadge" style="display:none">0</span></div>');
     }
     var row = document.querySelector('#mobileNav .row');
     var set = row && row.querySelector('[data-page="settings"]');
-    if (row && set && !document.getElementById('exNavLabel2')) {
+    if (row && set && !q('exNavLabel2')) {
       set.insertAdjacentHTML('beforebegin',
-        '<button class="mnav" data-page="rank" onclick="go(\'rank\')"><span class="i">&#127942;</span><span id="exNavLabel2"></span></button>' +
-        '<button class="mnav" data-page="messages" onclick="go(\'messages\')"><span class="i">&#128172;</span><span id="exNavMsg2"></span></button>');
+        '<button class="mnav" data-page="clubs" onclick="go(\'clubs\')"><span class="i">&#127963;</span><span id="exNavClub2"></span>' +
+        '<span class="exdot" id="exClubDot" style="display:none"></span></button>' +
+        '<button class="mnav" data-page="messages" onclick="go(\'messages\')"><span class="i">&#128172;</span><span id="exNavMsg2"></span>' +
+        '<span class="exdot" id="exMsgDot" style="display:none"></span></button>');
     }
   }
 
@@ -382,33 +440,38 @@
     var set = function (id, txt) { var el = q(id); if (el) el.textContent = txt; };
     set('exNavLabel', L('Reyting', 'Leaderboard'));
     set('exNavLabel2', L('Reyting', 'Rank'));
+    set('exNavClub', L('Klublar', 'Clubs'));
+    set('exNavClub2', L('Klub', 'Clubs'));
     set('exSocialSection', L('Jamoa', 'Community'));
     set('exRankH', L('Reyting', 'Leaderboard'));
-    set('exRankSub', L('Boshqa talabalar bilan solishtiring va klub tuzing.', 'See how you compare and join a club.'));
+    set('exRankSub', L('Barcha talabalar XP bo\u2019yicha. Ismiga bosing \u2014 profil ochiladi.',
+      'All students by XP. Tap a name to open their profile.'));
+    set('exClubH', L('Klublar', 'Clubs'));
+    set('exClubSub', L('Klub tuzing, do\u2019stlaringizni chaqiring va birgalikda musobaqalashing.',
+      'Create a club, invite friends and compete together.'));
+    set('exCTab1', L('Mening klubim', 'My club'));
+    set('exCTab2', L('Klublar reytingi', 'Club ranking'));
     set('exLbRank', L('Mening o\u2019rnim', 'My position'));
     set('exLbXp', 'XP');
     set('exLbCoins', L('Tanga', 'Coins'));
-    set('exTab1', L('Talabalar', 'Students'));
-    set('exTab2', L('Klublar', 'Clubs'));
-    set('exTab3', L('Mening klubim', 'My club'));
     var sl = q('exSubjLabel'); if (sl) sl.textContent = L('Fan tanlang (ixtiyoriy)', 'Pick a subject (optional)');
     var sf = q('exSubjFree'); if (sf) sf.textContent = L('O\u2019zim yozaman', 'My own topic');
     paintCoins();
     renderSubjects();
   }
 
-  var curTab = 'solo';
-  window.exTab = function (which, el) {
-    curTab = which;
+  var curClubTab = 'my';
+  window.exClubTab = function (which, el) {
+    curClubTab = which;
     if (el) {
       el.parentNode.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('active'); });
       el.classList.add('active');
     }
-    q('exSolo').style.display = which === 'solo' ? 'block' : 'none';
-    q('exClubs').style.display = which === 'clubs' ? 'block' : 'none';
-    q('exMy').style.display = which === 'my' ? 'block' : 'none';
-    if (which === 'clubs') loadClubs();
+    var my = q('exMy'), top = q('exClubs');
+    if (my) my.style.display = which === 'my' ? 'block' : 'none';
+    if (top) top.style.display = which === 'top' ? 'block' : 'none';
     if (which === 'my') loadMyClub();
+    if (which === 'top') loadClubs();
   };
 
   function loading(id) {
@@ -450,23 +513,32 @@
     }
     var rows = list.map(function (u, i) {
       var mine = u.me ? 'background:var(--gold-dim)' : '';
-      var av = u.picture
-        ? '<img src="' + e(u.picture) + '" alt="" style="width:24px;height:24px;border-radius:50%;vertical-align:middle;margin-right:7px">'
-        : '<span style="display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--surface3);font-size:11px;vertical-align:middle;margin-right:7px">' +
-        e((u.name || '?').charAt(0).toUpperCase()) + '</span>';
+      /* MUHIM: katta qilib ISM ko'rsatiladi ("Azizbek"), username esa
+         pastda kichik kulrang holda ("@azizbek_a"). */
+      var who = '<div style="display:flex;align-items:center;gap:8px;min-width:0">' +
+        avatarHTML(u.picture, u.name || u.username, 28) +
+        '<div style="min-width:0">' +
+        '<div style="font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' +
+        e(u.name || L('Nomsiz', 'Unnamed')) +
+        (u.me ? ' <span style="color:var(--gold);font-size:11px">\u25cf ' + L('siz', 'you') + '</span>' : '') + '</div>' +
+        (u.username ? '<div style="font-size:11px;color:var(--text3)">@' + e(u.username) + '</div>' : '') +
+        '</div></div>';
+      var clickable = u.username
+        ? ' style="cursor:pointer" onclick="exOpenProfile(\'' + e(u.username) + '\')"'
+        : '';
       return '<tr style="' + mine + '"><td style="font-weight:700">' + medal(i) + '</td>' +
-        '<td>' + av + e(u.name || L('Nomsiz', 'Unnamed')) + (u.me ? ' <span style="color:var(--gold);font-size:11px">&#9679; ' + L('siz', 'you') + '</span>' : '') + '</td>' +
+        '<td' + clickable + '>' + who + '</td>' +
         '<td style="color:var(--gold);font-weight:700">' + n(u.xp) + '</td>' +
         '<td>' + n(u.level) + '</td>' +
         '<td>&#129689; ' + n(u.coins) + '</td>' +
-        '<td>&#128293; ' + n(u.streak) + '</td>' +
-        '<td>' + (u.club ? e(u.club) : '—') + '</td></tr>';
+        '<td>&#128293; ' + n(u.streak) + '</td></tr>';
     }).join('');
     q('exSolo').innerHTML = '<div class="card"><div class="table-wrap"><table><thead><tr>' +
       '<th>#</th><th>' + L('Talaba', 'Student') + '</th><th>XP</th><th>' + L('Daraja', 'Level') + '</th>' +
-      '<th>' + L('Tanga', 'Coins') + '</th><th>Streak</th><th>' + L('Klub', 'Club') + '</th>' +
+      '<th>' + L('Tanga', 'Coins') + '</th><th>Streak</th>' +
       '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
-      '<div class="hint">' + L('Ro\u2019yxat har ochilganda yangilanadi.', 'The list refreshes each time you open it.') + '</div></div>';
+      '<div class="hint">' + L('Ismiga bosing \u2014 profil, bio va \u201cXabar yozish\u201d tugmasi ochiladi.',
+        'Tap a name to see their profile, bio and a Message button.') + '</div></div>';
   }
 
   /* ---------- 5. Klublar ---------- */
@@ -476,15 +548,16 @@
       if (d.error) throw new Error(d.error.message);
       lastClubList = d.clubs || [];
       injectClubSearch();
-      renderClubsList(lastClubList);
+      exRunClubFilter();
     }).catch(function (err) {
       q('exClubs').innerHTML = '<div class="empty"><div class="ico">&#9888;</div><div>' + e(err.message) + '</div></div>';
     });
   }
 
   function renderClubsList(list, query) {
+    var box = q('exClubs'); if (!box) return;
     if (!list.length) {
-      q('exClubs').innerHTML = '<div class="empty"><div class="ico">&#127963;</div><div>' +
+      box.innerHTML = '<div class="empty"><div class="ico">&#127963;</div><div>' +
         (query
           ? L('\u201C' + query + '\u201D bo\u2019yicha klub topilmadi.', 'No club found for \u201C' + query + '\u201D.')
           : L('Hali klub yo\u2019q. Birinchisini siz tuzing.', 'No clubs yet. Create the first one.')) + '</div></div>';
@@ -496,13 +569,15 @@
         ? '<span style="color:var(--gold);font-size:11px">' + L('sizniki', 'yours') + '</span>'
         : '<button class="btn btn-ghost btn-sm" onclick="exJoinByCode(\'' + e(c.code) + '\')">' + L('Qo\u2019shilish', 'Join') + '</button>';
       return '<tr style="' + (isMine ? 'background:var(--gold-dim)' : '') + '"><td style="font-weight:700">' + medal(i) + '</td>' +
-        '<td>' + e(c.name) + '<div style="font-size:11px;color:var(--text3)">' + e(c.code) + '</div></td>' +
+        '<td><div style="font-weight:600">' + e(c.name) + '</div>' +
+        '<div style="font-size:11px;color:var(--text3)">' + e(c.code) +
+        (c.principal ? ' \u00b7 \uD83D\uDC51 ' + e(c.principal) : '') + '</div></td>' +
         '<td>' + n(c.members) + '</td>' +
         '<td style="color:var(--gold);font-weight:700">' + n(c.xp) + '</td>' +
         '<td>' + n(c.avg) + '</td>' +
         '<td>' + joinBtn + '</td></tr>';
     }).join('');
-    q('exClubs').innerHTML = '<div class="card"><div class="table-wrap"><table><thead><tr>' +
+    box.innerHTML = '<div class="card"><div class="table-wrap"><table><thead><tr>' +
       '<th>#</th><th>' + L('Klub', 'Club') + '</th><th>' + L('A\u2019zolar', 'Members') + '</th>' +
       '<th>' + L('Jami XP', 'Total XP') + '</th><th>' + L('O\u2019rtacha', 'Average') + '</th><th></th>' +
       '</tr></thead><tbody>' + rows + '</tbody></table></div></div>';
@@ -517,9 +592,12 @@
     clubPost({ action: 'join', email: userInfo.email, name: userInfo.name || '', code: code }, null, function (d) {
       toast(L('Klubga qo\u2019shildingiz: ', 'Joined: ') + d.name, 'ok');
       myClub = d.code; LS.set('sai-club', myClub);
-      exTab('my', document.getElementById('exTab3'));
+      exClubTab('my', q('exCTab1'));
     });
   };
+
+  /* ---------- Mening klubim ---------- */
+  var myRole = null;
 
   function loadMyClub() {
     if (!hasUser()) { q('exMy').innerHTML = guestBox(); return; }
@@ -528,51 +606,86 @@
       .then(function (r) { return r.json(); })
       .then(function (d) {
         if (d.error) throw new Error(d.error.message);
-        if (!d.club) { myClub = null; LS.set('sai-club', null); renderNoClub(); return; }
+        if (!d.club) { myClub = null; myRole = null; LS.set('sai-club', null); renderNoClub(); return; }
+
         myClub = d.club.code; LS.set('sai-club', myClub);
+        myRole = d.myRole || 'student';
+        var iAmBoss = (myRole === 'principal');
+
         var meRow = (d.members || []).filter(function (m) { return m.me; })[0];
         if (meRow && meRow.username) { myUsername = meRow.username; LS.set('sai-username', myUsername); }
 
         var rows = (d.members || []).map(function (m, i) {
-          var who = e(m.name || L('Nomsiz', 'Unnamed'));
-          var uname = m.username
-            ? '<div style="font-size:11px;color:var(--gold)">@' + e(m.username) + '</div>'
-            : '<div style="font-size:11px;color:var(--text3)">' + L('username yo\u2019q', 'no username') + '</div>';
-          var msgBtn = (!m.me && m.username)
-            ? '<button class="icon-btn" title="' + L('Xabar', 'Message') + '" onclick="exOpenThread(\'' + e(m.username) + '\',\'' + e(m.name).replace(/'/g, '') + '\',\'\')">&#128172;</button>'
-            : '';
+          var who = '<div style="display:flex;align-items:center;gap:8px;min-width:0">' +
+            avatarHTML(m.avatar, m.name || m.username, 30) +
+            '<div style="min-width:0">' +
+            '<div style="font-weight:600;font-size:13.5px">' + e(m.name || L('Nomsiz', 'Unnamed')) +
+            (m.me ? ' <span style="color:var(--gold);font-size:11px">\u25cf ' + L('siz', 'you') + '</span>' : '') + '</div>' +
+            (m.username
+              ? '<div style="font-size:11px;color:var(--text3)">@' + e(m.username) + '</div>'
+              : '<div style="font-size:11px;color:var(--undone)">' + L('username yo\u2019q', 'no username') + '</div>') +
+            '</div></div>';
+
+          var actions = '';
+          if (m.username) {
+            actions += '<button class="icon-btn" title="' + L('Profil', 'Profile') + '" ' +
+              'onclick="exOpenProfile(\'' + e(m.username) + '\')">&#128100;</button>';
+          }
+          if (!m.me && m.username) {
+            actions += '<button class="icon-btn" title="' + L('Xabar', 'Message') + '" ' +
+              'onclick="exOpenThread(\'' + e(m.username) + '\',\'' + e(m.name).replace(/'/g, '') + '\',\'\')">&#128172;</button>';
+          }
+          /* Lavozim berish tugmasi — FAQAT principal ko'radi.
+             Server ham qayta tekshiradi, bu shunchaki qulaylik. */
+          if (iAmBoss && !m.me && m.username) {
+            actions += '<button class="icon-btn" title="' + L('Lavozim berish', 'Set role') + '" ' +
+              'onclick="exSetRole(\'' + e(m.username) + '\',\'' + e(m.name).replace(/'/g, '') + '\')">&#9881;</button>';
+          }
+
           return '<tr><td style="font-weight:700">' + (i + 1) + '</td>' +
-            '<td>' + who + (m.me ? ' <span style="color:var(--gold);font-size:11px">&#9679; ' + L('siz', 'you') + '</span>' : '') + uname + '</td>' +
+            '<td>' + who + '</td>' +
+            '<td>' + roleBadge(m.role) + '</td>' +
             '<td style="color:var(--gold);font-weight:700">' + n(m.xp) + '</td>' +
-            '<td>&#128293; ' + n(m.streak) + '</td><td>' + msgBtn + '</td></tr>';
+            '<td>&#128293; ' + n(m.streak) + '</td>' +
+            '<td style="white-space:nowrap">' + actions + '</td></tr>';
         }).join('');
 
-        /* 9-band: username bo'lmasa klubdoshlar sizga yoza olmaydi — ogohlantiramiz */
         var warn = (meRow && !meRow.username)
           ? '<div class="card" style="border-color:var(--half)">' +
           '<div style="font-size:13px">\u26a0\ufe0f ' +
-          L('Sizda hali username yo\u2019q. Shu sababli klubdoshlaringiz sizga xabar yoza olmaydi va sizni qidiruvda topa olmaydi.',
+          L('Sizda hali username yo\u2019q. Klubdoshlaringiz sizga xabar yoza olmaydi va sizni qidiruvda topa olmaydi.',
             'You have no username yet, so club mates cannot message you or find you in search.') + '</div>' +
-          '<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="go(\'settings\');setTimeout(function(){var i=document.getElementById(\'exUsernameInput\');if(i){i.focus();i.scrollIntoView({block:\'center\'});}},200)">' +
+          '<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="exGoUsername()">' +
           L('Username tanlash', 'Pick a username') + '</button></div>'
           : '';
 
         q('exMy').innerHTML = warn +
-          '<div class="card"><div class="card-title">&#127963; ' + e(d.club.name) + '</div>' +
+          '<div class="card">' +
+          '<div class="card-title">&#127963; ' + e(d.club.name) + '</div>' +
           '<div style="font-size:13px;color:var(--text2)">' + L('Klub kodi', 'Club code') +
           ': <b style="color:var(--gold);letter-spacing:1px">' + e(d.club.code) + '</b></div>' +
-          '<div class="hint">' + L('Bu kodni do\u2019stlaringizga yuboring — ular klubga qo\u2019shiladi.',
+          '<div style="margin-top:8px">' + L('Sizning lavozimingiz', 'Your role') + ': ' + roleBadge(myRole) + '</div>' +
+          '<div class="hint">' + L('Bu kodni do\u2019stlaringizga yuboring \u2014 ular klubga qo\u2019shiladi.',
             'Send this code to friends so they can join.') + '</div>' +
           '<div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:12px">' +
           '<button class="btn btn-ghost btn-sm" onclick="exCopyCode(\'' + e(d.club.code) + '\')">' + L('Kodni nusxalash', 'Copy code') + '</button>' +
           '<button class="btn btn-danger btn-sm" onclick="exLeaveClub()">' + L('Klubdan chiqish', 'Leave club') + '</button>' +
-          '</div></div>' +
+          '</div>' +
+          (iAmBoss
+            ? '<div class="hint" style="margin-top:10px">\uD83D\uDC51 ' +
+            L('Siz Principal\u2019siz. \u2699 tugmasi orqali a\u2019zolarga lavozim bera olasiz. Principal\u2019likni boshqaga bersangiz, o\u2019zingiz Katta o\u2019qituvchi bo\u2019lasiz.',
+              'You are the Principal. Use \u2699 to assign roles. If you hand Principal to someone else, you become Head Teacher.') + '</div>'
+            : '') +
+          '</div>' +
+
           '<div class="card"><div class="card-title">' + L('A\u2019zolar', 'Members') + ' (' + (d.members || []).length + ')</div>' +
-          '<div class="table-wrap"><table><thead><tr><th>#</th><th>' + L('Ism', 'Name') + '</th><th>XP</th><th>Streak</th><th></th></tr></thead>' +
-          '<tbody>' + rows + '</tbody></table></div></div>' +
-          /* ---- 9-band: klub chati (hamma a'zolar bir joyda yozishadi) ---- */
+          '<div class="table-wrap"><table><thead><tr><th>#</th><th>' + L('Ism', 'Name') + '</th>' +
+          '<th>' + L('Lavozim', 'Role') + '</th><th>XP</th><th>Streak</th><th></th></tr></thead>' +
+          '<tbody>' + rows + '</tbody></table></div>' +
+          '<div class="hint">' + L('Ro\u2019yxat lavozim, keyin XP bo\u2019yicha saralanadi.', 'Sorted by role, then by XP.') + '</div></div>' +
+
           '<div class="card"><div class="card-title">&#128172; ' + L('Klub chati', 'Club chat') + '</div>' +
-          '<div id="exClubChat" style="max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:9px;padding:4px 0 10px"></div>' +
+          '<div id="exClubChat" style="max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:9px;padding:4px 0 10px"></div>' +
           '<div style="display:flex;gap:9px">' +
           '<input id="exClubMsgInput" maxlength="400" style="flex:1" placeholder="' +
           L('Klubga yozing\u2026', 'Write to the club\u2026') + '" onkeydown="if(event.key===\'Enter\'){event.preventDefault();exSendClubMsg();}">' +
@@ -580,24 +693,64 @@
           '</div>' +
           '<div class="hint">' + L('Bu yozishmani klubdagi hamma ko\u2019radi.', 'Everyone in the club can see this chat.') + '</div></div>';
 
-        exLoadClubChat();
+        exLoadClubChat(true);
         clearInterval(clubChatTimer);
-        clubChatTimer = setInterval(exLoadClubChat, 6000);
+        clubChatTimer = setInterval(function () { exLoadClubChat(true); }, 6000);
       }).catch(function (err) {
         q('exMy').innerHTML = '<div class="empty"><div class="ico">&#9888;</div><div>' + e(err.message) + '</div></div>';
       });
   }
 
+  window.exGoUsername = function () {
+    go('settings');
+    setTimeout(function () {
+      var i = q('exUsernameInput');
+      if (i) { i.focus(); try { i.scrollIntoView({ block: 'center' }); } catch (err) { } }
+    }, 250);
+  };
+
+  /* Lavozim berish oynasi (faqat principal chaqira oladi) */
+  window.exSetRole = function (username, name) {
+    var opts = ROLE_LIST.map(function (r, i) { return (i + 1) + ') ' + r.ico + ' ' + roleName(r.id); }).join('\n');
+    var pick = prompt(
+      L('Kimga: @' + username + ' (' + (name || '') + ')\n\nLavozim raqamini yozing:\n', 'To @' + username + '\n\nType the role number:\n') + opts,
+      '1');
+    if (!pick) return;
+    var idx = parseInt(pick, 10) - 1;
+    if (isNaN(idx) || idx < 0 || idx >= ROLE_LIST.length) { toast(L('Noto\u2019g\u2019ri raqam', 'Invalid number'), 'err'); return; }
+    var role = ROLE_LIST[idx].id;
+
+    if (role === 'principal') {
+      if (!confirm(L(
+        'DIQQAT: Principal\u2019likni @' + username + ' ga berasizmi?\nSiz avtomatik Katta o\u2019qituvchi bo\u2019lasiz va bu amalni faqat yangi Principal qaytara oladi.',
+        'WARNING: hand Principal over to @' + username + '?\nYou will become Head Teacher and only the new Principal can undo it.'))) return;
+    }
+
+    clubPost({ action: 'setrole', email: userInfo.email, target: username, role: role }, null, function (d) {
+      toast(L('Lavozim berildi: ', 'Role set: ') + roleName(role), 'ok');
+      loadMyClub();
+    });
+  };
+
   function renderNoClub() {
     q('exMy').innerHTML =
       '<div class="card"><div class="card-title">' + L('Klub tuzish', 'Create a club') + '</div>' +
-      '<div class="form-group"><input id="exClubName" placeholder="' + L('Klub nomi: 11-A sinf', 'Club name: Group 11-A') + '"></div>' +
+      '<div class="form-group"><input id="exClubName" maxlength="40" placeholder="' + L('Klub nomi: 11-A sinf', 'Club name: Group 11-A') + '"></div>' +
       '<button class="btn btn-gold" id="exCreateBtn" onclick="exCreateClub(this)">' + L('Tuzish', 'Create') + '</button>' +
-      '<div class="hint">' + L('Klub tuzsangiz, sizga kod beriladi. Kodni do\u2019stlaringizga yuborasiz.',
-        'You get a code when you create a club. Share it with your friends.') + '</div></div>' +
+      '<div class="hint">\uD83D\uDC51 ' + L('Klubni ochgan odam avtomatik PRINCIPAL (direktor) bo\u2019ladi va a\u2019zolarga lavozim bera oladi.',
+        'Whoever creates the club automatically becomes the PRINCIPAL and can assign roles.') + '</div></div>' +
       '<div class="card"><div class="card-title">' + L('Klubga qo\u2019shilish', 'Join a club') + '</div>' +
-      '<div class="form-group"><input id="exClubCode" placeholder="' + L('Klub kodi', 'Club code') + '" style="text-transform:uppercase"></div>' +
-      '<button class="btn btn-ghost" id="exJoinBtn" onclick="exJoinClub(this)">' + L('Qo\u2019shilish', 'Join') + '</button></div>';
+      '<div class="form-group"><input id="exClubCode" placeholder="' + L('Klub kodi', 'Club code') + '" style="text-transform:uppercase"' +
+      ' onkeydown="if(event.key===\'Enter\'){event.preventDefault();exJoinClub(document.getElementById(\'exJoinBtn\'));}"></div>' +
+      '<button class="btn btn-ghost" id="exJoinBtn" onclick="exJoinClub(this)">' + L('Qo\u2019shilish', 'Join') + '</button></div>' +
+      '<div class="card"><div class="card-title">' + L('Lavozimlar narvoni', 'Role ladder') + '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:7px">' +
+      ROLE_LIST.slice().reverse().map(function (r) {
+        return '<div style="display:flex;align-items:center;gap:9px;font-size:13px">' +
+          '<span style="color:var(--text3);width:18px;text-align:right">' + r.rank + '</span>' + roleBadge(r.id) + '</div>';
+      }).join('') +
+      '</div><div class="hint">' + L('Principal klubdan chiqsa, eng katta lavozimli a\u2019zo avtomatik Principal bo\u2019ladi. Klubda odam qolmasa, klub o\u2019chadi.',
+        'If the Principal leaves, the highest-ranking member automatically becomes Principal. If nobody is left, the club is deleted.') + '</div></div>';
   }
 
   function clubPost(body, btn, done) {
@@ -617,7 +770,7 @@
     var name = (q('exClubName').value || '').trim();
     if (!name) { toast(L('Klub nomini yozing', 'Enter a club name'), 'err'); return; }
     clubPost({ action: 'create', email: userInfo.email, name: userInfo.name || '', clubName: name }, btn, function (d) {
-      toast(L('Klub tuzildi: ', 'Club created: ') + d.code, 'ok');
+      toast(L('Klub tuzildi: ', 'Club created: ') + d.code + ' \u00b7 \uD83D\uDC51 Principal', 'ok');
       myClub = d.code; LS.set('sai-club', myClub);
       loadMyClub();
     });
@@ -635,18 +788,28 @@
   };
 
   window.exLeaveClub = function () {
-    if (!confirm(L('Klubdan chiqasizmi?', 'Leave this club?'))) return;
+    var extra = (myRole === 'principal')
+      ? L('\n\nSiz Principal\u2019siz: siz chiqsangiz, eng katta lavozimli a\u2019zo avtomatik Principal bo\u2019ladi. Agar klubda boshqa hech kim qolmasa, klub butunlay o\u2019chadi.',
+        '\n\nYou are the Principal: the highest-ranking member will take over automatically. If nobody is left, the club is deleted.')
+      : '';
+    if (!confirm(L('Klubdan chiqasizmi?', 'Leave this club?') + extra)) return;
     clubPost({ action: 'leave', email: userInfo.email }, null, function () {
-      myClub = null; LS.set('sai-club', null);
+      myClub = null; myRole = null; LS.set('sai-club', null);
+      clearInterval(clubChatTimer);
       toast(L('Klubdan chiqdingiz', 'You left the club'));
       loadMyClub();
     });
   };
 
-  /* ---------- 5.5 Klub chati ---------- */
-  var clubChatTimer = null;
+  window.exCopyCode = function (code) {
+    navigator.clipboard.writeText(code).then(function () { toast(L('Nusxa olindi', 'Copied'), 'ok'); });
+  };
 
-  function exLoadClubChat() {
+  /* ---------- 5.5 Klub chati + qizil bildirishnoma ---------- */
+  var clubChatTimer = null, clubPollTimer = null;
+  var clubSeenAt = LS.get('sai-club-seen', '');   // oxirgi ko'rilgan xabar vaqti
+
+  function exLoadClubChat(markRead) {
     var box = q('exClubChat');
     if (!box || !myClub || !hasUser()) { clearInterval(clubChatTimer); return; }
     fetch('/api/clubchat?code=' + encodeURIComponent(myClub) + '&email=' + encodeURIComponent(userInfo.email))
@@ -661,14 +824,24 @@
         }
         var atBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 50;
         box.innerHTML = list.map(function (m) {
-          var who = m.mine ? L('siz', 'you') : (m.username ? '@' + m.username : (m.name || '?'));
-          return '<div style="display:flex;max-width:82%;align-self:' + (m.mine ? 'flex-end' : 'flex-start') + '">' +
+          var head = m.mine
+            ? L('siz', 'you')
+            : (m.name || ('@' + m.username)) + (m.username ? ' \u00b7 @' + m.username : '');
+          return '<div style="display:flex;gap:8px;max-width:88%;align-self:' + (m.mine ? 'flex-end' : 'flex-start') + '">' +
+            (m.mine ? '' : avatarHTML(m.avatar, m.name || m.username, 26)) +
             '<div style="background:' + (m.mine ? 'var(--gold)' : 'var(--surface2)') + ';color:' + (m.mine ? 'var(--on-gold)' : 'var(--text)') +
             ';border:1px solid ' + (m.mine ? 'transparent' : 'var(--border)') + ';border-radius:13px;padding:8px 12px;font-size:13px;word-break:break-word">' +
-            '<div style="font-size:10.5px;opacity:.75;margin-bottom:2px">' + e(who) + '</div>' +
+            '<div style="font-size:10.5px;opacity:.75;margin-bottom:2px">' + e(head) +
+            (m.mine ? '' : ' ' + roleBadge(m.role)) + '</div>' +
             e(m.body) + '</div></div>';
         }).join('');
         if (atBottom) box.scrollTop = box.scrollHeight;
+
+        if (markRead && d.lastAt) {
+          clubSeenAt = d.lastAt;
+          LS.set('sai-club-seen', clubSeenAt);
+          paintClubBadge(0);
+        }
       }).catch(function () { });
   }
 
@@ -684,19 +857,221 @@
       body: JSON.stringify({ email: userInfo.email, code: myClub, body: text })
     }).then(function (r) { return r.json(); }).then(function (d) {
       if (d.error) throw new Error(d.error.message);
-      exLoadClubChat();
+      exLoadClubChat(true);
     }).catch(function (err) { toast(err.message, 'err'); inp.value = text; });
   };
 
-  window.exCopyCode = function (code) {
-    navigator.clipboard.writeText(code).then(function () { toast(L('Nusxa olindi', 'Copied'), 'ok'); });
+  /* Qizil badge: klubga yangi xabar kelganini bildiradi.
+     Butun chatni emas, faqat SONNI so'raymiz — trafik tejaladi. */
+  function paintClubBadge(count) {
+    var b = q('exClubBadge');
+    if (b) { b.style.display = count ? 'inline-block' : 'none'; b.textContent = count > 99 ? '99+' : count; }
+    var d = q('exClubDot');
+    if (d) d.style.display = count ? 'block' : 'none';
+  }
+
+  function exClubPoll() {
+    if (!hasUser() || !myClub) { paintClubBadge(0); return; }
+    var onClubPage = q('page-clubs') && q('page-clubs').classList.contains('active') && curClubTab === 'my';
+    if (onClubPage) { paintClubBadge(0); return; }
+    fetch('/api/clubchat?count=1&code=' + encodeURIComponent(myClub) +
+      '&email=' + encodeURIComponent(userInfo.email) +
+      (clubSeenAt ? '&since=' + encodeURIComponent(clubSeenAt) : ''))
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var c = d.unread || 0;
+        paintClubBadge(c);
+        if (c && !exClubToastShown) {
+          exClubToastShown = true;
+          toast('\uD83D\uDD34 ' + L('Klubga yangi xabar keldi', 'New message in your club'), 'err');
+          setTimeout(function () { exClubToastShown = false; }, 120000);
+        }
+      }).catch(function () { });
+  }
+  var exClubToastShown = false;
+
+  function startClubPoll() {
+    clearInterval(clubPollTimer);
+    if (!hasUser()) return;
+    exClubPoll();
+    clubPollTimer = setInterval(exClubPoll, 25000);
+  }
+
+  /* ============================================================
+     6.5 PROFIL OYNASI (modal) — istalgan odamning profili
+     ============================================================ */
+  window.exOpenProfile = function (username) {
+    if (!username) return;
+    var title = q('modalTitle'), body = q('modalContent'), modal = q('modal');
+    if (!title || !body || !modal) return;
+    title.textContent = '@' + username;
+    body.innerHTML = '<div class="empty" style="padding:24px"><span class="typing"><i></i><i></i><i></i></span></div>';
+    modal.classList.add('open');
+
+    fetch('/api/profile?username=' + encodeURIComponent(username))
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.error) throw new Error(d.error.message);
+        var p = d.profile;
+        title.textContent = p.name || ('@' + p.username);
+        var isMe = (myUsername && p.username === myUsername);
+        body.innerHTML =
+          '<div style="display:flex;gap:14px;align-items:center;margin-bottom:14px">' +
+          avatarHTML(p.avatar, p.name || p.username, 64) +
+          '<div style="min-width:0">' +
+          '<div style="font-size:18px;font-weight:700">' + e(p.name || L('Nomsiz', 'Unnamed')) + '</div>' +
+          '<div style="font-size:12.5px;color:var(--gold)">@' + e(p.username) + '</div>' +
+          (p.clubName ? '<div style="font-size:12px;color:var(--text2);margin-top:4px">\uD83C\uDFDB ' + e(p.clubName) +
+            (p.role ? ' \u00b7 ' + roleBadge(p.role) : '') + '</div>' : '') +
+          '</div></div>' +
+          (p.bio ? '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;' +
+            'padding:11px 13px;font-size:13.5px;line-height:1.6;margin-bottom:14px">' + e(p.bio) + '</div>' : '') +
+          '<div class="stats-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:6px">' +
+          '<div class="stat-card"><div class="stat-num" style="color:var(--gold)">' + n(p.xp) + '</div><div class="stat-label">XP</div></div>' +
+          '<div class="stat-card"><div class="stat-num">' + n(p.level) + '</div><div class="stat-label">' + L('Daraja', 'Level') + '</div></div>' +
+          '<div class="stat-card"><div class="stat-num">' + n(p.streak) + '</div><div class="stat-label">Streak</div></div>' +
+          '<div class="stat-card"><div class="stat-num">' + n(p.quizzes) + '</div><div class="stat-label">' + L('Test', 'Quizzes') + '</div></div>' +
+          '</div>' +
+          (isMe ? '' :
+            '<button class="btn btn-gold" style="width:100%;margin-top:12px" onclick="closeModal();exOpenThread(\'' +
+            e(p.username) + '\',\'' + e(p.name).replace(/'/g, '') + '\',\'' + e(p.avatar) + '\')">\uD83D\uDCAC ' +
+            L('Xabar yozish', 'Send a message') + '</button>');
+      })
+      .catch(function (err) {
+        body.innerHTML = '<div class="empty"><div class="ico">&#9888;</div><div>' + e(err.message) + '</div></div>';
+      });
   };
+
+  /* ============================================================
+     6.6 PROFILNI TAHRIRLASH: bio + rasm (avatar)
+     Rasm serverga yuborilishidan OLDIN brauzerda canvas orqali
+     256x256 ga kichraytiriladi va JPEG'ga aylantiriladi.
+     Sabab: telefondagi rasm 3-5 MB bo'ladi; bazaga bunday narsani
+     solib bo'lmaydi va internet ham ko'p ketadi. Kichraytirgandan
+     keyin ~10-20 KB bo'ladi.
+     ============================================================ */
+  function injectProfileCard() {
+    var card = q('exUserCard');
+    if (!card || q('exProfCard')) return;
+    card.insertAdjacentHTML('afterend',
+      '<div class="card" id="exProfCard">' +
+      '<div class="card-title" id="exProfTitle"></div>' +
+      '<div style="display:flex;gap:14px;align-items:center;margin-bottom:12px">' +
+      '<div id="exProfAvatar"></div>' +
+      '<div style="flex:1;display:flex;gap:8px;flex-wrap:wrap">' +
+      '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'exAvatarFile\').click()" id="exAvatarBtn"></button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="exRemoveAvatar()" id="exAvatarDel"></button>' +
+      '<input type="file" id="exAvatarFile" accept="image/*" style="display:none" onchange="exPickAvatar(this)">' +
+      '</div></div>' +
+      '<div class="form-group"><label class="form-label" id="exBioLabel"></label>' +
+      '<textarea id="exBioInput" maxlength="160" rows="3" style="width:100%;resize:vertical"></textarea>' +
+      '<div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--text3);margin-top:4px">' +
+      '<span id="exBioHint"></span><span id="exBioCount">0/160</span></div></div>' +
+      '<button class="btn btn-gold" id="exProfSave" onclick="exSaveProfile(this)"></button>' +
+      '</div>');
+
+    var ta = q('exBioInput');
+    ta.addEventListener('input', function () { q('exBioCount').textContent = ta.value.length + '/160'; });
+    paintProfileLabels();
+    loadMyProfile();
+  }
+
+  var myAvatar = LS.get('sai-avatar', ''), myBio = LS.get('sai-bio', '');
+
+  function paintMyAvatar() {
+    var box = q('exProfAvatar');
+    if (box) box.innerHTML = avatarHTML(myAvatar || (hasUser() ? userInfo.picture : ''), userInfo && userInfo.name, 64);
+    /* Yon paneldagi rasm ham yangilansin */
+    var sb = q('sidebarAvatar');
+    if (sb && myAvatar) sb.innerHTML = '<img src="' + e(myAvatar) + '" alt="">';
+  }
+
+  function loadMyProfile() {
+    paintMyAvatar();
+    var ta = q('exBioInput');
+    if (ta) { ta.value = myBio; q('exBioCount').textContent = ta.value.length + '/160'; }
+    if (!hasUser() || !myUsername) return;
+    fetch('/api/profile?username=' + encodeURIComponent(myUsername))
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.error || !d.profile) return;
+        myBio = d.profile.bio || '';
+        myAvatar = d.profile.avatar || '';
+        LS.set('sai-bio', myBio); LS.set('sai-avatar', myAvatar);
+        if (ta) { ta.value = myBio; q('exBioCount').textContent = ta.value.length + '/160'; }
+        paintMyAvatar();
+      }).catch(function () { });
+  }
+
+  /* Rasmni tanlash -> kichraytirish -> ko'rsatish */
+  window.exPickAvatar = function (input) {
+    var file = input.files && input.files[0];
+    input.value = '';
+    if (!file) return;
+    if (!/^image\//.test(file.type)) { toast(L('Bu rasm emas', 'Not an image'), 'err'); return; }
+    if (file.size > 8 * 1024 * 1024) { toast(L('Rasm juda katta (8 MB dan kichik bo\u2019lsin)', 'Image too large (max 8 MB)'), 'err'); return; }
+
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      var img = new Image();
+      img.onload = function () {
+        var SIZE = 256;
+        var canvas = document.createElement('canvas');
+        canvas.width = SIZE; canvas.height = SIZE;
+        var ctx = canvas.getContext('2d');
+        /* Kvadrat qilib markazdan kesamiz (cover) */
+        var side = Math.min(img.width, img.height);
+        var sx = (img.width - side) / 2, sy = (img.height - side) / 2;
+        ctx.drawImage(img, sx, sy, side, side, 0, 0, SIZE, SIZE);
+        myAvatar = canvas.toDataURL('image/jpeg', 0.75);
+        paintMyAvatar();
+        toast(L('Rasm tayyor \u2014 endi \u201cSaqlash\u201d bosing', 'Image ready \u2014 now press Save'), 'ok');
+      };
+      img.onerror = function () { toast(L('Rasmni o\u2019qib bo\u2019lmadi', 'Could not read the image'), 'err'); };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.exRemoveAvatar = function () {
+    myAvatar = '';
+    paintMyAvatar();
+    toast(L('Rasm olib tashlandi \u2014 \u201cSaqlash\u201d bosing', 'Photo removed \u2014 press Save'), 'ok');
+  };
+
+  window.exSaveProfile = function (btn) {
+    if (!hasUser()) { toast(L('Avval Google bilan kiring', 'Sign in with Google first'), 'err'); return; }
+    var bio = (q('exBioInput').value || '').trim();
+    busy(btn, true);
+    fetch('/api/profile', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: userInfo.email, bio: bio, avatar: myAvatar || null })
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (d.error) throw new Error(d.error.message);
+      myBio = bio;
+      LS.set('sai-bio', myBio); LS.set('sai-avatar', myAvatar);
+      paintMyAvatar();
+      toast(L('Profil saqlandi', 'Profile saved'), 'ok');
+    }).catch(function (err) { toast(err.message, 'err'); })
+      .then(function () { busy(btn, false, L('Saqlash', 'Save')); });
+  };
+
+  function paintProfileLabels() {
+    var set = function (id, t) { var el = q(id); if (el) el.textContent = t; };
+    set('exProfTitle', L('Profil ko\u2019rinishi', 'Public profile'));
+    set('exAvatarBtn', '\uD83D\uDCF7 ' + L('Rasm tanlash', 'Choose photo'));
+    set('exAvatarDel', L('Rasmni olib tashlash', 'Remove photo'));
+    set('exBioLabel', L('Bio \u2014 o\u2019zingiz haqingizda', 'Bio \u2014 about you'));
+    set('exBioHint', L('Masalan: 11-sinf, IELTS 7.0 ga tayyorlanyapman', 'e.g. Grade 11, preparing for IELTS 7.0'));
+    set('exProfSave', L('Saqlash', 'Save'));
+  }
 
   /* ---------- 6. Ulanish nuqtalari ---------- */
   var _go = window.go;
   window.go = function (page) {
     _go(page);
-    if (page === 'rank') { loadRank(); exTab(curTab, null); if (curTab === 'clubs') loadClubs(); if (curTab === 'my') loadMyClub(); }
+    if (page === 'rank') { loadRank(); }
+    if (page === 'clubs') { exClubTab(curClubTab, q(curClubTab === 'my' ? 'exCTab1' : 'exCTab2')); }
     else { clearInterval(clubChatTimer); }
   };
 
@@ -711,7 +1086,7 @@
   var _complete = window.completeRegistration;
   window.completeRegistration = function () {
     var f = q('regUsername');
-    var v = f ? (f.value || '').trim().toLowerCase() : '';
+    var v = f ? (f.value || '').trim() : '';
 
     /* Google bilan kirgan bo'lsa username shart: usiz odam sizga
        xabar ham yoza olmaydi, klubda ham ko'rinmaysiz. */
@@ -795,16 +1170,23 @@
 
   function exCheckRegUsername() {
     var inp = q('regUsername'); if (!inp) return;
-    var v = (inp.value || '').trim().toLowerCase();
+    var v = (inp.value || '').trim();
     var box = q('exRegUserStatus');
     regUsernameOk = null; regUsernameChecked = v;
     if (!v) {
       box.innerHTML = '<span style="color:var(--undone)">' + L('Bu maydon majburiy', 'This field is required') + '</span>';
       return;
     }
-    if (!/^[a-z][a-z0-9_]{2,19}$/.test(v)) {
-      box.innerHTML = '<span style="color:var(--undone)">' + L('3-20 belgi, lotin harfi bilan boshlanadi, faqat harf/raqam/_', '3-20 chars, starts with a latin letter, letters/digits/_ only') + '</span>';
+    var bad = usernameProblem(v);
+    if (bad) {
+      box.innerHTML = '<span style="color:var(--undone)">\u2717 ' + usernameReason(bad) + '</span>';
       regUsernameOk = false;
+      if (bad === 'uppercase') {
+        inp.value = v.toLowerCase();     // darhol tuzatib beramiz
+        box.innerHTML += '<br><span style="color:var(--half)">' +
+          L('Kichik harfga o\u2019tkazdik: ', 'Converted to lowercase: ') + '<b>' + e(inp.value) + '</b></span>';
+        setTimeout(exCheckRegUsername, 250);
+      }
       return;
     }
     box.textContent = '\u2026';
@@ -830,6 +1212,33 @@
   var myUsername = LS.get('sai-username', '');
   var usernameOk = false;
   var msgPeer = null, msgTimer = null;
+
+  /* Username xatosini ODAM TILIDA tushuntirish.
+     Eng muhim holat: 'uppercase' — ilgari biz katta harfni jimgina
+     kichik harfga aylantirib qo'yardik, odam esa "nega men yozgan
+     narsa o'zgardi?" deb hayron bo'lardi. Endi ochiq aytamiz. */
+  function usernameReason(reason) {
+    switch (reason) {
+      case 'uppercase': return L('Katta harf mumkin emas. Faqat kichik harf: azizbek_a',
+        'Capital letters are not allowed. Lowercase only: azizbek_a');
+      case 'charset': return L('Faqat lotin harflari, raqam va pastki chiziq (_)',
+        'Only latin letters, digits and underscore (_)');
+      case 'short': return L('Kamida 3 ta belgi', 'At least 3 characters');
+      case 'long': return L('Ko\u2019pi bilan 20 ta belgi', 'At most 20 characters');
+      case 'start': return L('Harf bilan boshlanishi kerak', 'Must start with a letter');
+      case 'empty': return L('Bu maydon bo\u2019sh', 'This field is empty');
+      default: return L('3-20 belgi, kichik harf bilan boshlanadi', '3-20 chars, starts with a lowercase letter');
+    }
+  }
+  function usernameProblem(raw) {
+    if (!raw) return 'empty';
+    if (/[A-Z]/.test(raw)) return 'uppercase';
+    if (/[^a-z0-9_]/.test(raw)) return 'charset';
+    if (raw.length < 3) return 'short';
+    if (raw.length > 20) return 'long';
+    if (!/^[a-z]/.test(raw)) return 'start';
+    return null;
+  }
 
   function debounce(fn, ms) {
     var t;
@@ -893,13 +1302,17 @@
 
   function exCheckUsername() {
     var inp = q('exUsernameInput'); if (!inp) return;
-    var v = (inp.value || '').trim().toLowerCase();
+    var v = (inp.value || '').trim();     // DIQQAT: toLowerCase QILMAYMIZ
     var box = q('exUsernameStatus');
     usernameOk = false;
     if (!v) { box.textContent = ''; return; }
-    if (!/^[a-z][a-z0-9_]{2,19}$/.test(v)) {
-      box.innerHTML = '<span style="color:var(--undone)">' +
-        L('3-20 belgi, harf bilan boshlanishi, faqat harf/raqam/_', '3-20 chars, must start with a letter, letters/digits/_ only') + '</span>';
+    var bad = usernameProblem(v);
+    if (bad) {
+      box.innerHTML = '<span style="color:var(--undone)">\u2717 ' + usernameReason(bad) + '</span>' +
+        (bad === 'uppercase'
+          ? ' <button class="btn btn-ghost btn-sm" style="margin-left:6px;padding:2px 8px" onclick="exFixUsernameCase()">' +
+          L('kichik harfga o\u2019tkazish', 'make it lowercase') + '</button>'
+          : '');
       return;
     }
     if (v === myUsername) {
@@ -918,11 +1331,20 @@
     }).catch(function () { box.textContent = ''; });
   }
 
+  window.exFixUsernameCase = function () {
+    var inp = q('exUsernameInput');
+    if (!inp) return;
+    inp.value = (inp.value || '').toLowerCase();
+    exCheckUsername();
+  };
+
   window.exSaveUsername = function () {
     if (!hasUser()) { toast(L('Avval Google bilan kiring', 'Sign in with Google first'), 'err'); return; }
     var inp = q('exUsernameInput');
-    var v = (inp.value || '').trim().toLowerCase();
+    var v = (inp.value || '').trim();
     if (!v) { toast(L('Username kiriting', 'Enter a username'), 'err'); return; }
+    var bad = usernameProblem(v);
+    if (bad) { toast(usernameReason(bad), 'err'); return; }
     if (v !== myUsername && !usernameOk) { toast(L('Avval mos va bo\u2019sh nom tanlang', 'Pick a valid, available username first'), 'err'); return; }
     var btn = q('exUsernameSave');
     busy(btn, true);
@@ -931,7 +1353,8 @@
       body: JSON.stringify({ email: userInfo.email, username: v })
     }).then(function (r) { return r.json(); }).then(function (d) {
       if (d.error) throw new Error(d.error.message);
-      myUsername = v; LS.set('sai-username', v);
+      myUsername = d.username || v; LS.set('sai-username', myUsername);
+      paintAccWho(); loadMyProfile();
       toast(L('Saqlandi', 'Saved'), 'ok');
     }).catch(function (err) { toast(err.message, 'err'); })
       .then(function () { busy(btn, false, L('Saqlash', 'Save')); });
@@ -1080,14 +1503,22 @@
       L('Suhbat tanlang yoki Reytingda username orqali qidiring.', 'Pick a conversation, or search by username on the Leaderboard page.') + '</div>';
   }
 
+  var exMsgToastShown = false;
   function exUnreadPoll() {
     if (!hasUser()) return;
     fetch('/api/messages?email=' + encodeURIComponent(userInfo.email))
       .then(function (r) { return r.json(); })
       .then(function (d) {
         var badge = q('exMsgBadge');
-        var n = d.unreadTotal || 0;
-        if (badge) { badge.style.display = n ? 'inline-block' : 'none'; badge.textContent = n; }
+        var cnt = d.unreadTotal || 0;
+        if (badge) { badge.style.display = cnt ? 'inline-block' : 'none'; badge.textContent = cnt > 99 ? '99+' : cnt; }
+        var dot = q('exMsgDot');
+        if (dot) dot.style.display = cnt ? 'block' : 'none';
+        if (cnt && !exMsgToastShown) {
+          exMsgToastShown = true;
+          toast('\uD83D\uDD34 ' + L('Sizga yangi xabar keldi', 'You have a new message'), 'err');
+          setTimeout(function () { exMsgToastShown = false; }, 120000);
+        }
         var page = q('page-messages');
         if (page && page.classList.contains('active')) exRenderConvList(d.list || []);
       }).catch(function () { });
@@ -1329,6 +1760,7 @@
   window.setLang = function (l) {
     _setLang2(l);
     paintMsgLabels();
+    paintProfileLabels();
     var us = q('exUserSearch'); if (us) us.placeholder = L('Username bo\u2019yicha qidirish…', 'Search by username…');
     var cs = q('exClubSearch'); if (cs) cs.placeholder = L('Klub nomi bo\u2019yicha qidirish…', 'Search clubs by name…');
     var title = q('exUserTitle'); if (title) title.textContent = '@ ' + L('Username (foydalanuvchi nomi)', 'Username');
@@ -1347,12 +1779,16 @@
       injectMessagesPage();
       injectUsernameCard();
       injectRegUsernameField();
-      injectUserSearch();
+      /* injectUserSearch() olib tashlandi: odam qidirish endi Xabarlar sahifasida */
       injectMessagesSearch();
+      injectProfileCard();
       paintMsgLabels();
       paintLogoutLabels();
       exAfterSwitch();
-      if (hasUser()) setTimeout(exUnreadPoll, 3000);
+      if (hasUser()) {
+        setTimeout(exUnreadPoll, 3000);
+        setInterval(exUnreadPoll, 30000);   // har 30 soniyada yangi xabarni tekshiramiz
+      }
     } catch (err) {
       if (window.console) console.warn('StudyAI extra (username/messages):', err);
     }
@@ -1366,14 +1802,17 @@
   function start() {
     try {
       injectRankPage();
+      injectClubsPage();
       injectNav();
       injectSocialNav();
       injectSubjects();
       injectSubjectCard();
       paintLabels();
       paintMsgLabels(); // exNavMsg endi mavjud, label qayta chizamiz
+      startClubPoll();  // badge elementlari endi mavjud
       if (hasUser()) setTimeout(pushScore, 2500);
-      if (location.hash.slice(1) === 'rank') go('rank');
+      var h = location.hash.slice(1);
+      if (h === 'rank' || h === 'clubs' || h === 'messages') go(h);
       try { renderCards(); } catch (err) { } // kartochka yorlig'ini darrov yangilash
     } catch (err) {
       if (window.console) console.warn('StudyAI extra:', err);
