@@ -1,8 +1,13 @@
-// sw.js — StudyAI offline qobiq (v6, birlashtirilgan)
-const CACHE = 'studyai-v7';
+/* sw.js — StudyAI offline qobiq (v8)
+   MUHIM O'ZGARISH: studyai-extra.js va boshqa JS fayllar endi
+   "avval tarmoq" (network-first) rejimida yuklanadi.
+   Sabab: eski versiyada JS "avval kesh" edi — shuning uchun
+   siz yangi funksiyalarni (username, xabarlar, klub qidiruvi…)
+   deploy qilsangiz ham, telefoningizda ESKI fayl ochilaverardi. */
+
+const CACHE = 'studyai-v8';
 const SHELL = ['/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png', '/studyai-extra.js'];
 
-// O'rnatish — bitta fayl yuklanmasa ham, qolganlari saqlanadi
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE).then(c =>
@@ -11,7 +16,6 @@ self.addEventListener('install', e => {
   );
 });
 
-// Faollashtirish — eski versiyadagi keshlarni tozalash
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -20,38 +24,51 @@ self.addEventListener('activate', e => {
   );
 });
 
+// Sahifadan "darhol yangilan" buyrug'i
+self.addEventListener('message', e => {
+  if (e.data === 'skipWaiting') self.skipWaiting();
+});
+
+function networkFirst(request, fallbackUrl) {
+  return fetch(request).then(r => {
+    if (r && r.ok) {
+      const copy = r.clone();
+      caches.open(CACHE).then(c => c.put(fallbackUrl || request, copy));
+    }
+    return r;
+  }).catch(() => caches.match(fallbackUrl || request).then(c => c || caches.match('/index.html')));
+}
+
 self.addEventListener('fetch', e => {
   const { request } = e;
   const url = new URL(request.url);
 
-  // POST, API so'rovlar va brauzer kengaytmalari — hech qachon keshlanmaydi
   if (request.method !== 'GET' ||
       url.pathname.startsWith('/api/') ||
       url.protocol === 'chrome-extension:') {
     return;
   }
 
-  // Sahifa navigatsiyasi (index.html): avval tarmoq — har doim eng yangi versiya.
-  // Internet uzilsa, keshdagi oxirgi nusxa ko'rsatiladi.
+  // 1) Sahifa navigatsiyasi — avval tarmoq
   if (request.mode === 'navigate') {
-    e.respondWith(
-      fetch(request).then(r => {
-        const copy = r.clone();
-        caches.open(CACHE).then(c => c.put('/index.html', copy));
-        return r;
-      }).catch(() => caches.match('/index.html'))
-    );
+    e.respondWith(networkFirst(request, '/index.html'));
     return;
   }
 
-  // Qolgan statik fayllar (CSS, JS, shriftlar, rasmlar): avval kesh — tezroq yuklanadi.
+  // 2) O'z JS fayllarimiz — avval tarmoq (yangilanish darhol yetib boradi)
+  if (url.origin === location.origin && /\.(js|json)$/.test(url.pathname)) {
+    e.respondWith(networkFirst(request));
+    return;
+  }
+
+  // 3) Qolgan statik fayllar (rasm, shrift, CDN) — avval kesh
   e.respondWith(
     caches.match(request).then(cached => {
       if (cached) return cached;
       return fetch(request).then(response => {
-        const sameOrThirdParty = url.origin === location.origin ||
+        const ok = url.origin === location.origin ||
           url.hostname.includes('cdnjs') || url.hostname.includes('fonts.g');
-        if (response.ok && sameOrThirdParty) {
+        if (response.ok && ok) {
           const clone = response.clone();
           caches.open(CACHE).then(c => c.put(request, clone));
         }
