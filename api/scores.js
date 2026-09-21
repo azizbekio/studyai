@@ -73,7 +73,10 @@ module.exports = async (req, res) => {
         quizzes: int(b.quizzes, 0, 500000),
         updated_at: new Date().toISOString()
       };
-      await sb(TABLE, {
+      // on_conflict=email -> mavjud qator YANGILANADI.
+      // Diqqat: bu yerda avatar/bio/username/club yozilmaydi, shuning uchun
+      // ular o'chib ketmaydi — faqat sanab o'tilgan ustunlar yangilanadi.
+      await sb(TABLE + '?on_conflict=email', {
         method: 'POST',
         body: JSON.stringify(row),
         headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }
@@ -89,11 +92,13 @@ module.exports = async (req, res) => {
       const term = String(query.q).trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
       if (term.length < 2) return res.status(200).json({ list: [] });
       const found = await sb(TABLE +
-        '?select=username,name,picture,xp,level&username=ilike.' + encodeURIComponent('%' + term + '%') +
+        '?select=username,name,picture,avatar,bio,xp,level&username=ilike.' + encodeURIComponent('%' + term + '%') +
         '&order=xp.desc&limit=15');
       return res.status(200).json({
         list: (found || []).filter(u => u.username).map(u => ({
-          username: u.username, name: u.name || '', picture: u.picture || '',
+          username: u.username, name: u.name || '',
+          picture: u.avatar || u.picture || '',
+          bio: u.bio || '',
           xp: u.xp || 0, level: u.level || 1
         }))
       });
@@ -104,7 +109,7 @@ module.exports = async (req, res) => {
 
     // Reyting uchun eng ko'pi bilan 500 ta qator (hozircha yetarli)
     const all = await sb(TABLE +
-      '?select=email,name,picture,username,xp,level,coins,streak,club&order=xp.desc,updated_at.asc&limit=500');
+      '?select=email,name,picture,avatar,bio,username,xp,level,coins,streak,club,club_role&order=xp.desc,updated_at.asc&limit=500');
 
     const rows = Array.isArray(all) ? all : [];
     let rank = null;
@@ -112,10 +117,11 @@ module.exports = async (req, res) => {
 
     const list = rows.slice(0, top).map((u, i) => {
       const mine = meEmail && String(u.email || '').toLowerCase() === meEmail;
-      if (mine) { rank = i + 1; me = { xp: u.xp, level: u.level, coins: u.coins, club: u.club || null, username: u.username || '' }; }
+      if (mine) { rank = i + 1; me = { xp: u.xp, level: u.level, coins: u.coins, club: u.club || null, username: u.username || '', bio: u.bio || '', avatar: u.avatar || u.picture || '', role: u.club_role || null }; }
       return {
         name: u.name || '',
-        picture: u.picture || '',
+        picture: u.avatar || u.picture || '',
+        bio: u.bio || '',
         username: u.username || '',
         xp: u.xp || 0,
         level: u.level || 1,
@@ -131,7 +137,7 @@ module.exports = async (req, res) => {
       for (let i = 0; i < rows.length; i++) {
         if (String(rows[i].email || '').toLowerCase() === meEmail) {
           rank = i + 1;
-          me = { xp: rows[i].xp, level: rows[i].level, coins: rows[i].coins, club: rows[i].club || null, username: rows[i].username || '' };
+          me = { xp: rows[i].xp, level: rows[i].level, coins: rows[i].coins, club: rows[i].club || null, username: rows[i].username || '', bio: rows[i].bio || '', avatar: rows[i].avatar || rows[i].picture || '', role: rows[i].club_role || null };
           break;
         }
       }
