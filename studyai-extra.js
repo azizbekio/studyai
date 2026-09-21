@@ -234,11 +234,23 @@
     return Math.round((da - db) / 86400000);
   }
   function exCardStageLabel(c) {
-    if (c.box >= STEP.length - 1) return L('O\u2019zlashtirilgan', 'Mastered');
+    var box = n(c.box);
+    if (box >= STEP.length - 1) return L('O\u2019zlashtirilgan', 'Mastered');
     var left = exDaysBetween(c.due, todayKey());
-    if (left <= 0) return L('Hozir navbatda', 'Due now');
-    var stageTxt = L((c.box + 1) + '-bosqich', 'stage ' + (c.box + 1));
-    return (lang === 'en' ? ('in ' + left + ' d') : (left + ' kunda')) + ' \u00b7 ' + stageTxt;
+    var stageTxt = L((box + 1) + '-bosqich', 'stage ' + (box + 1) + '/' + (STEP.length - 1));
+    if (left <= 0) return L('Hozir navbatda', 'Due now') + ' \u00b7 ' + stageTxt;
+    return (lang === 'en' ? ('in ' + left + ' d') : (left + ' kundan keyin')) + ' \u00b7 ' + stageTxt;
+  }
+  /* Bosqichni ko'zga ko'rinadigan nuqtalar bilan ko'rsatamiz —
+     shunda kartochka "o'zgarayotgani" darhol seziladi. */
+  function exCardDots(c) {
+    var box = n(c.box), out = '';
+    for (var i = 1; i < STEP.length; i++) {
+      var on = i <= box;
+      out += '<span style="display:inline-block;width:13px;height:4px;border-radius:2px;margin-right:3px;' +
+        'background:' + (on ? 'var(--gold)' : 'var(--border)') + '"></span>';
+    }
+    return out;
   }
   function exFixCardLabels() {
     var area = q('allCardsArea');
@@ -246,13 +258,68 @@
     var rows = area.querySelectorAll('.task-item');
     for (var i = 0; i < rows.length && i < cards.length; i++) {
       var meta = rows[i].querySelector('.task-meta');
-      if (meta) meta.textContent = exCardStageLabel(cards[i]);
+      if (meta) {
+        meta.innerHTML = exCardDots(cards[i]) +
+          '<span style="margin-left:6px">' + e(exCardStageLabel(cards[i])) + '</span>';
+      }
     }
   }
   var _renderCards = window.renderCards;
   window.renderCards = function () {
     _renderCards();
     try { exFixCardLabels(); } catch (err) { }
+    try { exPaintReviewProgress(); } catch (err) { }
+  };
+
+  /* Takrorlash ekranida joriy kartochkaning bosqichi ko'rinib tursin */
+  function exPaintReviewProgress() {
+    var area = q('reviewArea');
+    if (!area || typeof curCard === 'undefined' || !curCard) return;
+    if (q('exCardStage')) return;
+    var flash = q('flash');
+    if (!flash) return;
+    flash.insertAdjacentHTML('beforebegin',
+      '<div id="exCardStage" style="font-size:11.5px;color:var(--text3);margin-bottom:8px">' +
+      exCardDots(curCard) + '<span style="margin-left:7px">' + e(exCardStageLabel(curCard)) + '</span></div>');
+  }
+
+  /* ---- 1-band: kartochka TIZIMI endi rostdan ham o'zgaradi ----
+     Eski xato: "Qiyin" tugmasi box = Math.max(0, box) qilardi — ya'ni
+     hech narsa o'zgarmasdi va muddat ham deyarli siljimasdi.
+     Yangi (to'g'ri Leitner) qoida:
+       Bilmadim -> 0-bosqichga qaytadi, bugun yana chiqadi
+       Qiyin    -> bitta bosqich pastga tushadi, muddat qisqaradi
+       Bildim   -> bitta bosqich yuqoriga, muddat uzayadi          */
+  window.gradeCard = function (g) {
+    if (typeof curCard === 'undefined' || !curCard) return;
+    var box = n(curCard.box);
+    var days;
+    if (g === 0) { box = 0; days = 0; }
+    else if (g === 1) { box = Math.max(0, box - 1); days = Math.max(1, STEP[box] || 1); }
+    else { box = Math.min(STEP.length - 1, box + 1); days = Math.max(1, STEP[box] || 1); }
+
+    curCard.box = box;
+    if (g === 0) {
+      curCard.due = todayKey();
+      cards = cards.filter(function (c) { return c.id !== curCard.id; });
+      cards.push(curCard);
+    } else {
+      var d = new Date();
+      d.setDate(d.getDate() + days);
+      curCard.due = d.toISOString().slice(0, 10);
+    }
+
+    LS.set('sai-cards', cards);
+    addXP(2);
+    try { queueSync(); } catch (err) { }
+    try { checkBadges(); } catch (err) { }
+
+    var msg = g === 0
+      ? L('Bugun yana chiqadi', 'You will see it again today')
+      : L(days + ' kundan keyin qaytadi \u00b7 ' + (box + 1) + '-bosqich',
+        'comes back in ' + days + ' d \u00b7 stage ' + (box + 1));
+    toast(msg, g === 0 ? '' : 'ok');
+    renderCards();
   };
 
   /* ---------- 4. Reyting sahifasi ---------- */
@@ -415,25 +482,44 @@
     });
   }
 
-  function renderClubsList(list) {
+  function renderClubsList(list, query) {
     if (!list.length) {
       q('exClubs').innerHTML = '<div class="empty"><div class="ico">&#127963;</div><div>' +
-        L('Hali klub yo\u2019q. Birinchisini siz tuzing.', 'No clubs yet. Create the first one.') + '</div></div>';
+        (query
+          ? L('\u201C' + query + '\u201D bo\u2019yicha klub topilmadi.', 'No club found for \u201C' + query + '\u201D.')
+          : L('Hali klub yo\u2019q. Birinchisini siz tuzing.', 'No clubs yet. Create the first one.')) + '</div></div>';
       return;
     }
     var rows = list.map(function (c, i) {
-      var mine = (myClub && c.code === myClub) ? 'background:var(--gold-dim)' : '';
-      return '<tr style="' + mine + '"><td style="font-weight:700">' + medal(i) + '</td>' +
+      var isMine = (myClub && c.code === myClub);
+      var joinBtn = isMine
+        ? '<span style="color:var(--gold);font-size:11px">' + L('sizniki', 'yours') + '</span>'
+        : '<button class="btn btn-ghost btn-sm" onclick="exJoinByCode(\'' + e(c.code) + '\')">' + L('Qo\u2019shilish', 'Join') + '</button>';
+      return '<tr style="' + (isMine ? 'background:var(--gold-dim)' : '') + '"><td style="font-weight:700">' + medal(i) + '</td>' +
         '<td>' + e(c.name) + '<div style="font-size:11px;color:var(--text3)">' + e(c.code) + '</div></td>' +
         '<td>' + n(c.members) + '</td>' +
         '<td style="color:var(--gold);font-weight:700">' + n(c.xp) + '</td>' +
-        '<td>' + n(c.avg) + '</td></tr>';
+        '<td>' + n(c.avg) + '</td>' +
+        '<td>' + joinBtn + '</td></tr>';
     }).join('');
     q('exClubs').innerHTML = '<div class="card"><div class="table-wrap"><table><thead><tr>' +
       '<th>#</th><th>' + L('Klub', 'Club') + '</th><th>' + L('A\u2019zolar', 'Members') + '</th>' +
-      '<th>' + L('Jami XP', 'Total XP') + '</th><th>' + L('O\u2019rtacha', 'Average') + '</th>' +
+      '<th>' + L('Jami XP', 'Total XP') + '</th><th>' + L('O\u2019rtacha', 'Average') + '</th><th></th>' +
       '</tr></thead><tbody>' + rows + '</tbody></table></div></div>';
   }
+
+  window.exJoinByCode = function (code) {
+    if (!hasUser()) { toast(L('Avval Google bilan kiring.', 'Sign in with Google first.'), 'err'); return; }
+    if (myClub && myClub !== code) {
+      if (!confirm(L('Siz allaqachon klubdasiz. Eski klubdan chiqib, bunisiga qo\u2019shilasizmi?',
+        'You are already in a club. Leave it and join this one?'))) return;
+    }
+    clubPost({ action: 'join', email: userInfo.email, name: userInfo.name || '', code: code }, null, function (d) {
+      toast(L('Klubga qo\u2019shildingiz: ', 'Joined: ') + d.name, 'ok');
+      myClub = d.code; LS.set('sai-club', myClub);
+      exTab('my', document.getElementById('exTab3'));
+    });
+  };
 
   function loadMyClub() {
     if (!hasUser()) { q('exMy').innerHTML = guestBox(); return; }
@@ -444,15 +530,34 @@
         if (d.error) throw new Error(d.error.message);
         if (!d.club) { myClub = null; LS.set('sai-club', null); renderNoClub(); return; }
         myClub = d.club.code; LS.set('sai-club', myClub);
+        var meRow = (d.members || []).filter(function (m) { return m.me; })[0];
+        if (meRow && meRow.username) { myUsername = meRow.username; LS.set('sai-username', myUsername); }
+
         var rows = (d.members || []).map(function (m, i) {
-          var msgBtn = (!m.me && m.username) ?
-            '<button class="icon-btn" title="' + L('Xabar', 'Message') + '" onclick="exOpenThread(\'' + e(m.username) + '\',\'' + e(m.name).replace(/'/g, '') + '\',\'\')">&#128172;</button>' : '';
-          return '<tr><td style="font-weight:700">' + (i + 1) + '</td><td>' + e(m.name || L('Nomsiz', 'Unnamed')) +
-            (m.me ? ' <span style="color:var(--gold);font-size:11px">&#9679; ' + L('siz', 'you') + '</span>' : '') + '</td>' +
+          var who = e(m.name || L('Nomsiz', 'Unnamed'));
+          var uname = m.username
+            ? '<div style="font-size:11px;color:var(--gold)">@' + e(m.username) + '</div>'
+            : '<div style="font-size:11px;color:var(--text3)">' + L('username yo\u2019q', 'no username') + '</div>';
+          var msgBtn = (!m.me && m.username)
+            ? '<button class="icon-btn" title="' + L('Xabar', 'Message') + '" onclick="exOpenThread(\'' + e(m.username) + '\',\'' + e(m.name).replace(/'/g, '') + '\',\'\')">&#128172;</button>'
+            : '';
+          return '<tr><td style="font-weight:700">' + (i + 1) + '</td>' +
+            '<td>' + who + (m.me ? ' <span style="color:var(--gold);font-size:11px">&#9679; ' + L('siz', 'you') + '</span>' : '') + uname + '</td>' +
             '<td style="color:var(--gold);font-weight:700">' + n(m.xp) + '</td>' +
             '<td>&#128293; ' + n(m.streak) + '</td><td>' + msgBtn + '</td></tr>';
         }).join('');
-        q('exMy').innerHTML =
+
+        /* 9-band: username bo'lmasa klubdoshlar sizga yoza olmaydi — ogohlantiramiz */
+        var warn = (meRow && !meRow.username)
+          ? '<div class="card" style="border-color:var(--half)">' +
+          '<div style="font-size:13px">\u26a0\ufe0f ' +
+          L('Sizda hali username yo\u2019q. Shu sababli klubdoshlaringiz sizga xabar yoza olmaydi va sizni qidiruvda topa olmaydi.',
+            'You have no username yet, so club mates cannot message you or find you in search.') + '</div>' +
+          '<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="go(\'settings\');setTimeout(function(){var i=document.getElementById(\'exUsernameInput\');if(i){i.focus();i.scrollIntoView({block:\'center\'});}},200)">' +
+          L('Username tanlash', 'Pick a username') + '</button></div>'
+          : '';
+
+        q('exMy').innerHTML = warn +
           '<div class="card"><div class="card-title">&#127963; ' + e(d.club.name) + '</div>' +
           '<div style="font-size:13px;color:var(--text2)">' + L('Klub kodi', 'Club code') +
           ': <b style="color:var(--gold);letter-spacing:1px">' + e(d.club.code) + '</b></div>' +
@@ -464,7 +569,20 @@
           '</div></div>' +
           '<div class="card"><div class="card-title">' + L('A\u2019zolar', 'Members') + ' (' + (d.members || []).length + ')</div>' +
           '<div class="table-wrap"><table><thead><tr><th>#</th><th>' + L('Ism', 'Name') + '</th><th>XP</th><th>Streak</th><th></th></tr></thead>' +
-          '<tbody>' + rows + '</tbody></table></div></div>';
+          '<tbody>' + rows + '</tbody></table></div></div>' +
+          /* ---- 9-band: klub chati (hamma a'zolar bir joyda yozishadi) ---- */
+          '<div class="card"><div class="card-title">&#128172; ' + L('Klub chati', 'Club chat') + '</div>' +
+          '<div id="exClubChat" style="max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:9px;padding:4px 0 10px"></div>' +
+          '<div style="display:flex;gap:9px">' +
+          '<input id="exClubMsgInput" maxlength="400" style="flex:1" placeholder="' +
+          L('Klubga yozing\u2026', 'Write to the club\u2026') + '" onkeydown="if(event.key===\'Enter\'){event.preventDefault();exSendClubMsg();}">' +
+          '<button class="chat-send" onclick="exSendClubMsg()">&#10148;</button>' +
+          '</div>' +
+          '<div class="hint">' + L('Bu yozishmani klubdagi hamma ko\u2019radi.', 'Everyone in the club can see this chat.') + '</div></div>';
+
+        exLoadClubChat();
+        clearInterval(clubChatTimer);
+        clubChatTimer = setInterval(exLoadClubChat, 6000);
       }).catch(function (err) {
         q('exMy').innerHTML = '<div class="empty"><div class="ico">&#9888;</div><div>' + e(err.message) + '</div></div>';
       });
@@ -525,6 +643,51 @@
     });
   };
 
+  /* ---------- 5.5 Klub chati ---------- */
+  var clubChatTimer = null;
+
+  function exLoadClubChat() {
+    var box = q('exClubChat');
+    if (!box || !myClub || !hasUser()) { clearInterval(clubChatTimer); return; }
+    fetch('/api/clubchat?code=' + encodeURIComponent(myClub) + '&email=' + encodeURIComponent(userInfo.email))
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.error) { box.innerHTML = '<div class="hint">' + e(d.error.message) + '</div>'; return; }
+        var list = d.list || [];
+        if (!list.length) {
+          box.innerHTML = '<div class="empty" style="padding:18px"><div class="ico">&#128172;</div><div style="font-size:12.5px">' +
+            L('Hali xabar yo\u2019q. Birinchi bo\u2019lib yozing.', 'No messages yet. Be the first.') + '</div></div>';
+          return;
+        }
+        var atBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 50;
+        box.innerHTML = list.map(function (m) {
+          var who = m.mine ? L('siz', 'you') : (m.username ? '@' + m.username : (m.name || '?'));
+          return '<div style="display:flex;max-width:82%;align-self:' + (m.mine ? 'flex-end' : 'flex-start') + '">' +
+            '<div style="background:' + (m.mine ? 'var(--gold)' : 'var(--surface2)') + ';color:' + (m.mine ? 'var(--on-gold)' : 'var(--text)') +
+            ';border:1px solid ' + (m.mine ? 'transparent' : 'var(--border)') + ';border-radius:13px;padding:8px 12px;font-size:13px;word-break:break-word">' +
+            '<div style="font-size:10.5px;opacity:.75;margin-bottom:2px">' + e(who) + '</div>' +
+            e(m.body) + '</div></div>';
+        }).join('');
+        if (atBottom) box.scrollTop = box.scrollHeight;
+      }).catch(function () { });
+  }
+
+  window.exSendClubMsg = function () {
+    var inp = q('exClubMsgInput');
+    if (!inp || !myClub) return;
+    var text = (inp.value || '').trim();
+    if (!text) return;
+    if (!hasUser()) { toast(L('Avval Google bilan kiring', 'Sign in with Google first'), 'err'); return; }
+    inp.value = '';
+    fetch('/api/clubchat', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: userInfo.email, code: myClub, body: text })
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (d.error) throw new Error(d.error.message);
+      exLoadClubChat();
+    }).catch(function (err) { toast(err.message, 'err'); inp.value = text; });
+  };
+
   window.exCopyCode = function (code) {
     navigator.clipboard.writeText(code).then(function () { toast(L('Nusxa olindi', 'Copied'), 'ok'); });
   };
@@ -534,6 +697,7 @@
   window.go = function (page) {
     _go(page);
     if (page === 'rank') { loadRank(); exTab(curTab, null); if (curTab === 'clubs') loadClubs(); if (curTab === 'my') loadMyClub(); }
+    else { clearInterval(clubChatTimer); }
   };
 
   var _setLang = window.setLang;
@@ -543,56 +707,121 @@
     if (q('page-rank') && q('page-rank').classList.contains('active')) loadRank();
   };
 
+  /* ---- 5-band: username ro'yxatdan o'tishning MAJBURIY qismi ---- */
   var _complete = window.completeRegistration;
   window.completeRegistration = function () {
-    _complete();
-    setTimeout(pushScore, 1500);
     var f = q('regUsername');
     var v = f ? (f.value || '').trim().toLowerCase() : '';
+
+    /* Google bilan kirgan bo'lsa username shart: usiz odam sizga
+       xabar ham yoza olmaydi, klubda ham ko'rinmaysiz. */
+    if (f && googleUserData) {
+      if (!/^[a-z][a-z0-9_]{2,19}$/.test(v)) {
+        toast(L('Username tanlang: 3-20 belgi, lotin harfi bilan boshlanadi',
+          'Pick a username: 3-20 chars, starts with a latin letter'), 'err');
+        f.focus();
+        try { f.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (err) { }
+        return;
+      }
+      if (regUsernameChecked === v && regUsernameOk === false) {
+        toast(L('Bu username band, boshqasini tanlang', 'That username is taken, pick another'), 'err');
+        f.focus();
+        return;
+      }
+    }
+
+    _complete();
+    setTimeout(pushScore, 1500);
+
     if (v && /^[a-z][a-z0-9_]{2,19}$/.test(v) && typeof userInfo !== 'undefined' && userInfo.email) {
+      myUsername = v; LS.set('sai-username', v);
       fetch('/api/username', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: userInfo.email, username: v })
       }).then(function (r) { return r.json(); }).then(function (d) {
-        if (!d.error) { myUsername = v; LS.set('sai-username', v); }
+        if (d.error) {
+          myUsername = ''; LS.set('sai-username', '');
+          toast(L('Username saqlanmadi, Sozlamalardan tanlang', 'Username not saved, set it in Settings'), 'err');
+        }
+        var inp = q('exUsernameInput'); if (inp) inp.value = myUsername;
+        paintAccWho();
       }).catch(function () { });
     }
   };
 
   /* ---- 5-band: ro'yxatdan o'tish ekraniga username maydoni ---- */
-  var regUsernameOk = false;
+  var regUsernameOk = null, regUsernameChecked = '';
+  function exSuggestUsername() {
+    var base = '';
+    try {
+      base = (q('regName').value || '') + (q('regSurname') ? ('_' + (q('regSurname').value || '').charAt(0)) : '');
+    } catch (err) { }
+    base = base.toLowerCase()
+      .replace(/[\u02bb\u2019']/g, '')
+      .replace(/[^a-z0-9_]/g, '')
+      .replace(/^[^a-z]+/, '')
+      .slice(0, 16);
+    if (base.length < 3) return '';
+    return base;
+  }
+
   function injectRegUsernameField() {
     var step2 = q('loginStep2');
     if (!step2 || q('regUsername')) return;
     var goalInput = q('regGoal');
     var goalGroup = goalInput ? goalInput.closest('.form-group') : null;
     var html = '<div class="form-group"><label class="form-label" id="exRegUserLabel"></label>' +
-      '<input id="regUsername" maxlength="20" placeholder="masalan: azizbek_a">' +
-      '<div id="exRegUserStatus" style="font-size:11.5px;margin-top:5px;min-height:16px"></div></div>';
-    if (goalGroup) goalGroup.insertAdjacentHTML('afterend', html);
+      '<input id="regUsername" maxlength="20" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="masalan: azizbek_a">' +
+      '<div id="exRegUserStatus" style="font-size:11.5px;margin-top:5px;min-height:16px"></div>' +
+      '<div class="hint" id="exRegUserHint" style="margin-top:4px"></div></div>';
+    /* Maqsad maydonidan OLDIN turadi — chunki bu majburiy, maqsad esa ixtiyoriy */
+    if (goalGroup) goalGroup.insertAdjacentHTML('beforebegin', html);
     else step2.insertAdjacentHTML('beforeend', html);
-    q('regUsername').addEventListener('input', debounce(exCheckRegUsername, 400));
+
+    var inp = q('regUsername');
+    inp.addEventListener('input', debounce(exCheckRegUsername, 400));
+
+    /* Ismdan avtomatik taklif qilamiz — odam bo'sh qoldirib ketmasin */
+    var fill = function () {
+      if (inp.value) return;
+      var s = exSuggestUsername();
+      if (s) { inp.value = s; exCheckRegUsername(); }
+    };
+    setTimeout(fill, 600);
+    var nm = q('regName'); if (nm) nm.addEventListener('blur', fill);
+
     paintRegUsernameLabel();
   }
+
   function exCheckRegUsername() {
     var inp = q('regUsername'); if (!inp) return;
     var v = (inp.value || '').trim().toLowerCase();
     var box = q('exRegUserStatus');
-    regUsernameOk = false;
-    if (!v) { box.textContent = ''; return; }
-    if (!/^[a-z][a-z0-9_]{2,19}$/.test(v)) {
-      box.innerHTML = '<span style="color:var(--undone)">' + L('3-20 belgi, harf bilan boshlanishi', '3-20 chars, must start with a letter') + '</span>';
+    regUsernameOk = null; regUsernameChecked = v;
+    if (!v) {
+      box.innerHTML = '<span style="color:var(--undone)">' + L('Bu maydon majburiy', 'This field is required') + '</span>';
       return;
     }
-    box.textContent = '…';
+    if (!/^[a-z][a-z0-9_]{2,19}$/.test(v)) {
+      box.innerHTML = '<span style="color:var(--undone)">' + L('3-20 belgi, lotin harfi bilan boshlanadi, faqat harf/raqam/_', '3-20 chars, starts with a latin letter, letters/digits/_ only') + '</span>';
+      regUsernameOk = false;
+      return;
+    }
+    box.textContent = '\u2026';
     fetch('/api/username?check=' + encodeURIComponent(v)).then(function (r) { return r.json(); }).then(function (d) {
-      if (d.available) { box.innerHTML = '<span style="color:var(--done)">&#10003; ' + L('Bo\u2019sh', 'Available') + '</span>'; regUsernameOk = true; }
-      else { box.innerHTML = '<span style="color:var(--undone)">&#10007; ' + L('Band', 'Taken') + '</span>'; regUsernameOk = false; }
-    }).catch(function () { box.textContent = ''; });
+      if (regUsernameChecked !== v) return;
+      if (d.available) { box.innerHTML = '<span style="color:var(--done)">&#10003; ' + L('Bo\u2019sh, sizniki bo\u2019ladi', 'Available') + '</span>'; regUsernameOk = true; }
+      else { box.innerHTML = '<span style="color:var(--undone)">&#10007; ' + L('Band, boshqasini yozing', 'Taken, try another') + '</span>'; regUsernameOk = false; }
+    }).catch(function () { box.textContent = ''; regUsernameOk = null; });
   }
+
   function paintRegUsernameLabel() {
     var el = q('exRegUserLabel');
-    if (el) el.textContent = L('Username (talabalar sizni shu orqali topadi)', 'Username (other students find you by this)');
+    if (el) el.textContent = L('Username \u2014 majburiy', 'Username \u2014 required');
+    var h = q('exRegUserHint');
+    if (h) h.textContent = L(
+      'Do\u2019stlaringiz sizni shu nom orqali topadi, xabar yozadi va klubda ko\u2019radi. Keyinroq Sozlamalardan o\u2019zgartirsa bo\u2019ladi.',
+      'Friends find you by this name, message you and see you in clubs. You can change it later in Settings.');
   }
 
   /* ============================================================
@@ -633,13 +862,33 @@
     inp.value = myUsername;
     inp.addEventListener('input', debounce(exCheckUsername, 450));
 
-    /* Chiqish / akkauntni almashtirish tugmasi ham shu yerga */
+    /* Hisob kartasi: joriy email + akkauntni almashtirish + hisobni o'chirish */
     q('exUserCard').insertAdjacentHTML('afterend',
       '<div class="card" id="exLogoutCard">' +
       '<div class="card-title" id="exLogoutTitle"></div>' +
+      '<div id="exAccWho" style="font-size:13px;color:var(--text2);margin-bottom:6px"></div>' +
       '<div class="hint" id="exLogoutHint" style="margin-bottom:10px"></div>' +
-      '<button class="btn btn-ghost" id="exLogoutBtn" onclick="exLogout()"></button>' +
-      '</div>');
+      '<div style="display:flex;gap:9px;flex-wrap:wrap">' +
+      '<button class="btn btn-gold btn-sm" id="exSwitchBtn" onclick="exSwitchAccount()"></button>' +
+      '<button class="btn btn-ghost btn-sm" id="exLogoutBtn" onclick="exLogout()"></button>' +
+      '</div>' +
+      '<div style="border-top:1px solid var(--border);margin-top:14px;padding-top:12px">' +
+      '<div style="font-size:12.5px;color:var(--undone);font-weight:600;margin-bottom:6px" id="exDelTitle"></div>' +
+      '<div class="hint" id="exDelHint" style="margin-bottom:9px"></div>' +
+      '<button class="btn btn-danger btn-sm" id="exDelBtn" onclick="exDeleteAccount()"></button>' +
+      '</div></div>');
+    paintAccWho();
+  }
+
+  function paintAccWho() {
+    var el = q('exAccWho');
+    if (!el) return;
+    if (hasUser()) {
+      el.innerHTML = L('Joriy hisob', 'Signed in as') + ': <b>' + e(userInfo.email) + '</b>' +
+        (myUsername ? ' <span style="color:var(--gold)">@' + e(myUsername) + '</span>' : '');
+    } else {
+      el.textContent = L('Hozir hech qanday hisobga kirilmagan.', 'Not signed in.');
+    }
   }
 
   function exCheckUsername() {
@@ -688,22 +937,95 @@
       .then(function () { busy(btn, false, L('Saqlash', 'Save')); });
   };
 
-  /* ---- 2-band: Chiqish / akkauntni almashtirish ---- */
+  /* ---- 2-band: Chiqish va akkauntni ALMASHTIRISH ---- */
+  function exForgetGoogle() {
+    try { if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect(); } catch (err) { }
+  }
+
   window.exLogout = function () {
     var msg = L(
-      'Chiqasizmi? Boshqa Google hisobi bilan qayta kira olasiz. Diqqat: bu qurilmadagi vazifa/kartochka kabi ma\u2019lumotlar hisobga emas, shu brauzerga bog\u2019liq — chiqib qayta kirsangiz ham ular joyida qoladi.',
-      'Sign out? You can sign back in with a different Google account. Note: tasks/cards on this device are tied to the browser, not the account — they will still be here after you sign back in.'
+      'Hisobdan chiqasizmi?\n\nBu qurilmadagi vazifa, kartochka va XP o\u2019chmaydi — ular brauzerda qoladi. Qayta kirsangiz hammasi joyida bo\u2019ladi.',
+      'Sign out?\n\nTasks, cards and XP on this device are NOT deleted — they stay in the browser. Everything will be here when you sign back in.'
     );
     if (!confirm(msg)) return;
+    exForgetGoogle();
     localStorage.removeItem('sai-user-info');
     localStorage.removeItem('sai-user');
     location.reload();
   };
+
+  /* Akkauntni almashtirish — chiqib, darhol Google tanlash oynasini ochadi */
+  window.exSwitchAccount = function () {
+    var msg = L(
+      'Boshqa Google hisobiga o\u2019tasizmi?\n\nJoriy hisobdan chiqasiz va Google hisob tanlash oynasi ochiladi. Bu qurilmadagi ma\u2019lumotlar o\u2019chmaydi.',
+      'Switch to another Google account?\n\nYou will be signed out and Google will ask which account to use. Data on this device is not deleted.'
+    );
+    if (!confirm(msg)) return;
+    exForgetGoogle();
+    localStorage.removeItem('sai-user-info');
+    localStorage.removeItem('sai-user');
+    LS.set('sai-switch', 1);
+    location.reload();
+  };
+
+  /* Sahifa qayta ochilganda: almashtirish so'ralgan bo'lsa Google oynasini ochamiz */
+  function exAfterSwitch() {
+    if (!LS.get('sai-switch', 0)) return;
+    LS.set('sai-switch', 0);
+    setTimeout(function () { try { handleGoogleLogin(); } catch (err) { } }, 900);
+  }
+
+  /* ---- 3 & 4-band: HISOBNI O'CHIRISH (klubdan ham chiqaradi) ---- */
+  window.exDeleteAccount = function () {
+    if (!hasUser()) { toast(L('Avval hisobga kiring', 'Sign in first'), 'err'); return; }
+
+    var warn = L(
+      '\u26a0\ufe0f DIQQAT — HISOBNI O\u2019CHIRISH\n\n' +
+      'Quyidagilar butunlay yo\u2019qoladi va QAYTARIB BO\u2019LMAYDI:\n' +
+      '\u2022 reytingdagi XP, daraja, tanga va streak\n' +
+      '\u2022 username (@' + (myUsername || '\u2014') + ') \u2014 boshqa odam uni olishi mumkin\n' +
+      '\u2022 klub a\u2019zoligingiz (klubdan chiqarilasiz)\n' +
+      '\u2022 shu qurilmadagi vazifa, kartochka va chat tarixi\n\n' +
+      'Davom etasizmi?',
+      '\u26a0\ufe0f WARNING — DELETE ACCOUNT\n\n' +
+      'The following will be gone permanently and CANNOT be restored:\n' +
+      '\u2022 XP, level, coins and streak on the leaderboard\n' +
+      '\u2022 your username (@' + (myUsername || '\u2014') + ') \u2014 someone else may take it\n' +
+      '\u2022 your club membership (you will be removed from the club)\n' +
+      '\u2022 tasks, cards and chat history on this device\n\n' +
+      'Continue?'
+    );
+    if (!confirm(warn)) return;
+
+    var word = L('O\u2019CHIRISH', 'DELETE');
+    var typed = prompt(L('Tasdiqlash uchun quyidagi so\u2019zni yozing: ', 'Type this word to confirm: ') + word);
+    if (!typed || typed.trim().toUpperCase() !== word) {
+      toast(L('Bekor qilindi', 'Cancelled'));
+      return;
+    }
+
+    toast(L('O\u2019chirilmoqda\u2026', 'Deleting\u2026'));
+    fetch('/api/clubs', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'purge', email: userInfo.email })
+    }).catch(function () { }).then(function () {
+      exForgetGoogle();
+      localStorage.clear();
+      location.reload();
+    });
+  };
+
   function paintLogoutLabels() {
     var set = function (id, t) { var el = q(id); if (el) el.textContent = t; };
     set('exLogoutTitle', L('Hisob', 'Account'));
-    set('exLogoutHint', L('Boshqa Google hisobiga o\u2019tmoqchi bo\u2019lsangiz, avval chiqing.', 'Sign out to switch to a different Google account.'));
-    set('exLogoutBtn', L('Chiqish / akkauntni almashtirish', 'Sign out / switch account'));
+    set('exLogoutHint', L('Boshqa Google hisobiga o\u2019tish yoki chiqish.', 'Switch to a different Google account, or sign out.'));
+    set('exSwitchBtn', L('Akkauntni almashtirish', 'Switch account'));
+    set('exLogoutBtn', L('Chiqish', 'Sign out'));
+    set('exDelTitle', L('Hisobni butunlay o\u2019chirish', 'Delete account permanently'));
+    set('exDelHint', L('XP, username va klub a\u2019zoligi bilan birga o\u2019chadi. Qaytarib bo\u2019lmaydi.',
+      'Deletes XP, username and club membership too. This cannot be undone.'));
+    set('exDelBtn', L('Hisobni o\u2019chirish', 'Delete account'));
+    paintAccWho();
   }
 
   /* ---- 8.2 Xabarlar sahifasi ---- */
@@ -714,6 +1036,16 @@
       '<section class="page" id="page-messages">' +
       '<h1 class="page-header" id="exMsgH"></h1>' +
       '<div class="page-sub" id="exMsgSub"></div>' +
+      /* 7-band: odam qidirish AYNAN shu yerda, eng tepada */
+      '<div class="card" id="exFindCard">' +
+      '<div class="card-title" id="exFindTitle"></div>' +
+      '<div style="display:flex;gap:8px">' +
+      '<input id="exMsgSearch" style="flex:1" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="">' +
+      '<button class="btn btn-gold btn-sm" onclick="exRunMsgSearch()">&#128269;</button>' +
+      '</div>' +
+      '<div class="hint" id="exFindHint" style="margin-top:6px"></div>' +
+      '<div id="exMsgSearchResults"></div>' +
+      '</div>' +
       '<div class="card" style="padding:0;overflow:hidden">' +
       '<div style="display:flex;min-height:58vh">' +
       '<div id="exConvList" style="width:100%;max-width:250px;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto">' +
@@ -739,6 +1071,10 @@
     set('exMsgSub', L('Talabalar bilan bevosita yozishing.', 'Message other students directly.'));
     set('exNavMsg', L('Xabarlar', 'Messages'));
     set('exNavMsg2', L('Xabar', 'Chat'));
+    set('exFindTitle', '\uD83D\uDD0D ' + L('Odam qidirish', 'Find someone'));
+    set('exFindHint', L('Username bo\u2019yicha qidiring va to\u2019g\u2019ridan-to\u2019g\u2019ri yozing.',
+      'Search by username and message them directly.'));
+    var sp = q('exMsgSearch'); if (sp) sp.placeholder = L('Masalan: azizbek_a', 'For example: azizbek_a');
     var ph = q('exMsgInput'); if (ph) ph.placeholder = L('Xabar yozing…', 'Type a message…');
     var em = q('exThreadEmpty'); if (em) em.innerHTML = '<div class="ico">&#128172;</div><div>' +
       L('Suhbat tanlang yoki Reytingda username orqali qidiring.', 'Pick a conversation, or search by username on the Leaderboard page.') + '</div>';
@@ -835,29 +1171,46 @@
   };
 
   function injectMessagesSearch() {
-    var list = q('exConvList');
-    if (!list || q('exMsgSearch')) return;
-    list.insertAdjacentHTML('afterbegin',
-      '<div style="padding:10px">' +
-      '<input id="exMsgSearch" style="font-size:12.5px" placeholder="' + L('Username qidirish…', 'Search username…') + '">' +
-      '<div id="exMsgSearchResults"></div>' +
-      '</div>');
-    q('exMsgSearch').addEventListener('input', debounce(exRunMsgSearch, 400));
+    var inp = q('exMsgSearch');
+    if (!inp || inp.dataset.wired) return;
+    inp.dataset.wired = '1';
+    inp.addEventListener('input', debounce(exRunMsgSearch, 400));
+    inp.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Enter' || ev.keyCode === 13) { ev.preventDefault(); exRunMsgSearch(); }
+    });
   }
-  function exRunMsgSearch() {
-    var v = (q('exMsgSearch').value || '').trim();
+
+  window.exRunMsgSearch = function () {
+    var inp = q('exMsgSearch');
     var box = q('exMsgSearchResults');
-    if (v.length < 2) { box.innerHTML = ''; return; }
+    if (!inp || !box) return;
+    var v = (inp.value || '').trim();
+    if (v.length < 2) {
+      box.innerHTML = '<div style="font-size:11.5px;color:var(--text3);padding:8px 2px">' +
+        L('Kamida 2 ta harf yozing.', 'Type at least 2 characters.') + '</div>';
+      return;
+    }
+    box.innerHTML = '<div class="empty" style="padding:14px"><span class="typing"><i></i><i></i><i></i></span></div>';
     fetch('/api/scores?q=' + encodeURIComponent(v)).then(function (r) { return r.json(); }).then(function (d) {
       var list = d.list || [];
-      if (!list.length) { box.innerHTML = '<div style="font-size:11.5px;color:var(--text3);padding:6px 2px">' + L('Topilmadi', 'Not found') + '</div>'; return; }
-      box.innerHTML = list.map(function (u) {
-        return '<div onclick="exOpenThread(\'' + e(u.username) + '\',\'' + e(u.name).replace(/'/g, '') + '\',\'' + e(u.picture) + '\')" ' +
-          'style="padding:7px 4px;cursor:pointer;font-size:12.5px;border-bottom:1px solid var(--border)">' +
-          '@' + e(u.username) + (u.name ? ' &middot; ' + e(u.name) : '') + '</div>';
-      }).join('');
-    }).catch(function () { });
-  }
+      if (!list.length) {
+        box.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:10px 2px">' +
+          L('Hech kim topilmadi. Username to\u2019liq bo\u2019lishi shart emas.', 'No one found. You can type part of a username.') + '</div>';
+        return;
+      }
+      box.innerHTML = '<div style="margin-top:10px">' + list.map(function (u) {
+        var av = u.picture ? '<img src="' + e(u.picture) + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover">' :
+          '<div style="width:32px;height:32px;border-radius:50%;background:var(--surface3);display:grid;place-items:center;font-weight:700;flex-shrink:0">' +
+          e((u.name || u.username).charAt(0).toUpperCase()) + '</div>';
+        return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">' + av +
+          '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' +
+          e(u.name || ('@' + u.username)) + '</div>' +
+          '<div style="font-size:11.5px;color:var(--text3)">@' + e(u.username) + ' &middot; ' + n(u.xp) + ' XP</div></div>' +
+          '<button class="btn btn-gold btn-sm" onclick="exOpenThread(\'' + e(u.username) + '\',\'' + e(u.name).replace(/'/g, '') + '\',\'' + e(u.picture) + '\')">' +
+          L('Yozish', 'Message') + '</button></div>';
+      }).join('') + '</div>';
+    }).catch(function () { box.innerHTML = ''; });
+  };
 
   /* ---- 8.3 Reytingda username qidiruv ---- */
   function injectUserSearch() {
@@ -897,19 +1250,46 @@
     var box = q('exClubs');
     if (!box || q('exClubSearch')) return;
     box.insertAdjacentHTML('beforebegin',
-      '<div class="form-group" style="margin-bottom:14px">' +
-      '<input id="exClubSearch" placeholder="' + L('Klub nomi bo\u2019yicha qidirish…', 'Search clubs by name…') + '">' +
-      '</div>');
-    q('exClubSearch').addEventListener('input', exRunClubFilter);
-    q('exClubSearch').addEventListener('keydown', function (ev) { if (ev.key === 'Enter') exRunClubFilter(); });
+      '<div style="display:flex;gap:8px;margin-bottom:6px">' +
+      '<input id="exClubSearch" style="flex:1" placeholder="' + L('Klub nomi yoki kodi…', 'Club name or code…') + '">' +
+      '<button class="btn btn-gold btn-sm" id="exClubSearchBtn" onclick="exRunClubFilter()">&#128269;</button>' +
+      '<button class="btn btn-ghost btn-sm" id="exClubClearBtn" onclick="exClearClubSearch()">&#10005;</button>' +
+      '</div>' +
+      '<div id="exClubSearchInfo" class="hint" style="margin-bottom:12px"></div>');
+
+    var inp = q('exClubSearch');
+    inp.addEventListener('input', exRunClubFilter);
+    /* Enter — endi ishlaydi: forma yuborilishini to'xtatamiz va darhol qidiramiz */
+    inp.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Enter' || ev.keyCode === 13) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        inp.blur();           // telefonda klaviatura yopiladi
+        exRunClubFilter();
+      }
+    });
   }
-  function exRunClubFilter() {
-    var v = (q('exClubSearch').value || '').trim().toLowerCase();
+
+  window.exClearClubSearch = function () {
+    var inp = q('exClubSearch');
+    if (inp) inp.value = '';
+    exRunClubFilter();
+  };
+
+  window.exRunClubFilter = function () {
+    var inp = q('exClubSearch');
+    if (!inp) return;
+    var v = (inp.value || '').trim().toLowerCase();
     var filtered = !v ? lastClubList : lastClubList.filter(function (c) {
       return (c.name || '').toLowerCase().indexOf(v) >= 0 || (c.code || '').toLowerCase().indexOf(v) >= 0;
     });
-    renderClubsList(filtered);
-  }
+    var info = q('exClubSearchInfo');
+    if (info) {
+      info.textContent = !v ? L('Jami ' + lastClubList.length + ' ta klub', lastClubList.length + ' clubs in total')
+        : L(filtered.length + ' ta klub topildi', filtered.length + ' clubs found');
+    }
+    renderClubsList(filtered, v);
+  };
 
   /* ---- 3 & 4-band: kuchliroq o'chirish ogohlantirishi + klubdan avtomatik chiqish ---- */
   var _clearAllData = window.clearAllData;
@@ -925,7 +1305,11 @@
       localStorage.clear();
       location.reload();
     };
-    if (hasUser() && myClub) {
+    /* MUHIM: "myClub" faqat shu brauzerda saqlanadi. Boshqa telefonda
+       yoki keshdan keyin u bo'sh bo'lishi mumkin — shuning uchun klubdan
+       chiqish so'rovini HAR DOIM yuboramiz. Aks holda odam klubda
+       "arvoh a'zo" bo'lib qolib ketardi. */
+    if (hasUser()) {
       fetch('/api/clubs', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'leave', email: userInfo.email })
@@ -967,6 +1351,7 @@
       injectMessagesSearch();
       paintMsgLabels();
       paintLogoutLabels();
+      exAfterSwitch();
       if (hasUser()) setTimeout(exUnreadPoll, 3000);
     } catch (err) {
       if (window.console) console.warn('StudyAI extra (username/messages):', err);
