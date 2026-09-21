@@ -1,17 +1,21 @@
+const { requireUser } = require("./_session");
+
 // api/log.js — foydalanuvchi faoliyatini (chat, test, vazifa) Supabase'ga yozadi
 const SB_URL = process.env.SUPABASE_URL;
 const SB_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Session");
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Faqat POST" });
 
   try {
+    const who = requireUser(req, res);
+    if (!who) return;
     const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
-    const { email, type, detail } = body;
+    const { type, detail } = body;
     if (!type) return res.status(200).json({ ok: true, stored: false });
     if (!SB_URL || !SB_KEY) return res.status(200).json({ ok: true, stored: false });
 
@@ -24,7 +28,7 @@ export default async function handler(req, res) {
         "Prefer": "return=minimal"
       },
       body: JSON.stringify({
-        email: String(email || "").slice(0, 160).toLowerCase() || null,
+        email: who.email,
         type: String(type).slice(0, 60),
         detail: String(detail || "").slice(0, 500)
       })
@@ -34,4 +38,4 @@ export default async function handler(req, res) {
   } catch (err) {
     return res.status(200).json({ error: err.message });
   }
-}
+};
