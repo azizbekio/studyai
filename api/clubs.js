@@ -22,6 +22,9 @@
    Kerakli env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 ============================================================ */
 
+const { requireUser } = require('./_session');
+const { guard } = require('./_ratelimit');
+
 const SB_URL = process.env.SUPABASE_URL;
 const SB_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const CLUBS = 'studyai_clubs';
@@ -157,12 +160,15 @@ module.exports = async (req, res) => {
        POST
        ============================================================ */
     if (req.method === 'POST') {
+      /* XAVFSIZLIK: email endi brauzerdan EMAS, imzolangan sessiyadan olinadi.
+         Shuning uchun hech kim boshqa odam nomidan klubga qo'shila olmaydi. */
+      const me = requireUser(req, res);
+      if (!me) return;
+      /* 30 amal / daqiqa: klub ochish-yopishni ketma-ket bosishning oldini oladi */
+      if (!guard(res, 'clubs:' + me.email, 30, 60000)) return;
       const b = readBody(req);
-      const email = String(b.email || '').trim().toLowerCase();
+      const email = me.email;
       const action = String(b.action || '');
-      if (!email || email.indexOf('@') < 0) {
-        return res.status(400).json({ error: { message: 'email kerak' } });
-      }
 
       /* ---------- KLUB TUZISH ---------- */
       if (action === 'create') {
@@ -190,7 +196,7 @@ module.exports = async (req, res) => {
         });
 
         // Klub ochgan odam — principal
-        await setUserClub(email, b.name, code, 'principal');
+        await setUserClub(email, b.name || me.name, code, 'principal');
         if (oldClub && oldClub !== code) await normalizeClub(oldClub);
 
         return res.status(200).json({ ok: true, code: code, name: clubName, role: 'principal' });
@@ -212,7 +218,7 @@ module.exports = async (req, res) => {
           return res.status(200).json({ ok: true, code: code, name: found[0].name, already: true });
         }
 
-        await setUserClub(email, b.name, code, DEFAULT_ROLE);
+        await setUserClub(email, b.name || me.name, code, DEFAULT_ROLE);
         if (oldClub) await normalizeClub(oldClub);   // eski klub direktorsiz qolmasin
 
         return res.status(200).json({ ok: true, code: code, name: found[0].name, role: DEFAULT_ROLE });
@@ -300,8 +306,9 @@ module.exports = async (req, res) => {
 
     /* ---------- MENING KLUBIM ---------- */
     if (view === 'my') {
-      const email = String(query.email || '').trim().toLowerCase();
-      if (!email) return res.status(400).json({ error: { message: 'email kerak' } });
+      const meUser = requireUser(req, res);
+      if (!meUser) return;
+      const email = meUser.email;
 
       const mine = await sb(SCORES + '?select=club&email=eq.' + enc(email));
       const code = (mine && mine[0] && mine[0].club) ? mine[0].club : null;
