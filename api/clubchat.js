@@ -1,14 +1,20 @@
 /* ============================================================
    /api/clubchat.js — klub ichidagi umumiy chat
    QAYERGA: api/ papkasiga, nomi: clubchat.js
+   (agar avvalgi javobdagi versiyasi bo'lsa — ustidan yozing)
 
    GET  /api/clubchat?code=ABC123&email=men@gmail.com
-        -> oxirgi 100 ta xabar (faqat shu klub a'zosi ko'ra oladi)
+        -> oxirgi 100 ta xabar
+   GET  /api/clubchat?code=ABC123&email=...&count=1&since=<ISO vaqt>
+        -> faqat o'qilmagan xabarlar soni (badge uchun, yengil so'rov)
    POST /api/clubchat {email, code, body}
         -> klubga xabar yozadi
 
+   XAVFSIZLIK: har bir so'rovda odam rostdan ham shu klub a'zosimi —
+   serverda tekshiriladi. Brauzerdan kelgan "men a'zoman" degan
+   gapga ishonilmaydi.
+
    Kerakli env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
-   Jadval: studyai_club_messages (supabase-clubchat.sql ga qarang)
 ============================================================ */
 
 const SB_URL = process.env.SUPABASE_URL;
@@ -19,9 +25,7 @@ const SCORES = 'studyai_scores';
 async function sb(path, opts) {
   opts = opts || {};
   const headers = Object.assign({
-    apikey: SB_KEY,
-    Authorization: 'Bearer ' + SB_KEY,
-    'Content-Type': 'application/json'
+    apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json'
   }, opts.headers || {});
   const r = await fetch(SB_URL + '/rest/v1/' + path, {
     method: opts.method || 'GET', headers: headers, body: opts.body
@@ -42,9 +46,9 @@ function readBody(req) {
   return req.body;
 }
 
-/* Foydalanuvchi rostdan ham shu klub a'zosimi? */
 async function memberOf(email) {
-  const rows = await sb(SCORES + '?select=email,name,username,club&email=eq.' + encodeURIComponent(email));
+  const rows = await sb(SCORES +
+    '?select=email,name,username,avatar,club,club_role&email=eq.' + encodeURIComponent(email));
   return (rows && rows[0]) || null;
 }
 
@@ -94,22 +98,49 @@ module.exports = async (req, res) => {
       return res.status(403).json({ error: { message: 'Siz bu klub a\'zosi emassiz' } });
     }
 
+    /* --- Faqat son: badge uchun arzon so'rov --- */
+    if (query.count) {
+      const since = String(query.since || '').trim();
+      let path = CHAT + '?select=id&club=eq.' + encodeURIComponent(code) +
+        '&email=neq.' + encodeURIComponent(email) + '&limit=50';
+      if (since) path += '&created_at=gt.' + encodeURIComponent(since);
+      const rows = await sb(path);
+      return res.status(200).json({ unread: (rows || []).length });
+    }
+
     const rows = await sb(CHAT +
       '?select=id,email,name,username,body,created_at&club=eq.' + encodeURIComponent(code) +
       '&order=created_at.desc&limit=100');
 
-    const list = (rows || []).reverse().map(function (m) {
+    /* Rasm/avatarlarni bir marta olib, xabarlarga yopishtiramiz
+       (har bir xabar uchun alohida so'rov — sekin bo'lardi). */
+    const emails = Array.from(new Set((rows || []).map(m => m.email))).slice(0, 50);
+    let people = [];
+    if (emails.length) {
+      people = await sb(SCORES + '?select=email,avatar,picture,name,username,club_role&email=in.(' +
+        emails.map(encodeURIComponent).join(',') + ')') || [];
+    }
+    const byEmail = {};
+    people.forEach(p => { byEmail[String(p.email).toLowerCase()] = p; });
+
+    const list = (rows || []).reverse().map(m => {
+      const p = byEmail[String(m.email || '').toLowerCase()] || {};
       return {
         id: m.id,
         mine: String(m.email || '').toLowerCase() === email,
-        name: m.name || '',
-        username: m.username || '',
+        name: p.name || m.name || '',
+        username: p.username || m.username || '',
+        avatar: p.avatar || p.picture || '',
+        role: p.club_role || 'student',
         body: m.body,
         at: m.created_at
       };
     });
 
-    return res.status(200).json({ list: list });
+    return res.status(200).json({
+      list: list,
+      lastAt: list.length ? list[list.length - 1].at : null
+    });
 
   } catch (err) {
     return res.status(500).json({ error: { message: err.message } });
