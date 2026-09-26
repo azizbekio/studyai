@@ -99,7 +99,7 @@ module.exports = async (req, res) => {
       return res.status(200).json({
         list: (found || []).filter(u => u.username).map(u => ({
           username: u.username, name: u.name || '',
-          picture: u.avatar || u.picture || '',
+          picture: u.avatar || '',   // Google fotosi ishlatilmaydi
           bio: u.bio || '',
           xp: u.xp || 0, level: u.level || 1
         }))
@@ -119,7 +119,7 @@ module.exports = async (req, res) => {
 
     const list = rows.slice(0, top).map((u, i) => {
       const mine = meEmail && String(u.email || '').toLowerCase() === meEmail;
-      if (mine) { rank = i + 1; me = { xp: u.xp, level: u.level, coins: u.coins, club: u.club || null, username: u.username || '', bio: u.bio || '', avatar: u.avatar || u.picture || '', role: u.club_role || null }; }
+      if (mine) { rank = i + 1; me = { xp: u.xp, level: u.level, coins: u.coins, club: u.club || null, username: u.username || '', bio: u.bio || '', avatar: u.avatar || '', role: u.club_role || null }; }
       return {
         name: u.name || '',
         picture: u.avatar || u.picture || '',
@@ -139,7 +139,7 @@ module.exports = async (req, res) => {
       for (let i = 0; i < rows.length; i++) {
         if (String(rows[i].email || '').toLowerCase() === meEmail) {
           rank = i + 1;
-          me = { xp: rows[i].xp, level: rows[i].level, coins: rows[i].coins, club: rows[i].club || null, username: rows[i].username || '', bio: rows[i].bio || '', avatar: rows[i].avatar || rows[i].picture || '', role: rows[i].club_role || null };
+          me = { xp: rows[i].xp, level: rows[i].level, coins: rows[i].coins, club: rows[i].club || null, username: rows[i].username || '', bio: rows[i].bio || '', avatar: rows[i].avatar || '', role: rows[i].club_role || null };
           break;
         }
       }
