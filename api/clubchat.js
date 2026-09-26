@@ -138,7 +138,7 @@ module.exports = async (req, res) => {
         mine: String(m.email || '').toLowerCase() === email,
         name: p.name || m.name || '',
         username: p.username || m.username || '',
-        avatar: p.avatar || p.picture || '',
+        avatar: p.avatar || '',   // Google fotosi ishlatilmaydi — hammada bitta standart rasm
         role: p.club_role || 'student',
         body: m.body,
         at: m.created_at
