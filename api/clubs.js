@@ -331,7 +331,7 @@ module.exports = async (req, res) => {
         .map(m => ({
           name: m.name || '',
           username: m.username || '',
-          avatar: m.avatar || m.picture || '',
+          avatar: m.avatar || '',   // Google fotosi ishlatilmaydi — hammada bitta standart rasm
           bio: m.bio || '',
           xp: m.xp || 0,
           level: m.level || 1,
