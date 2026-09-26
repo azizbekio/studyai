@@ -130,7 +130,7 @@ module.exports = async (req, res) => {
       .filter(function (u) { return !!u.username; }) // username yo'q bo'lsa ro'yxatga qo'shmaymiz
       .map(function (u) {
         return {
-          username: u.username, name: u.name || '', picture: u.avatar || u.picture || '',
+          username: u.username, name: u.name || '', picture: u.avatar || '',   // Google fotosi ishlatilmaydi
           last: byPeer[u.email].last, at: byPeer[u.email].at, unread: byPeer[u.email].unread
         };
       })
