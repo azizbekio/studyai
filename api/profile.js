@@ -112,7 +112,7 @@ module.exports = async (req, res) => {
         name: u.name || '',
         username: u.username || '',
         bio: u.bio || '',
-        avatar: u.avatar || u.picture || '',
+        avatar: u.avatar || '',   // Google fotosi ishlatilmaydi
         xp: u.xp || 0,
         level: u.level || 1,
         streak: u.streak || 0,
