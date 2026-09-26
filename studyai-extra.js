@@ -172,7 +172,9 @@
       $('regName').value = first;
       $('regSurname').value = (d.name || '').split(' ').slice(1).join(' ');
       $('googleWelcome').textContent = (lang === 'en' ? 'Hi, ' : 'Salom, ') + first + '!';
-      if (d.picture) $('googleAvatar').innerHTML = '<img src="' + e(d.picture) + '" alt="">';
+      /* Google fotosi ko'rsatilmaydi — ro'yxatdan o'tishda ham
+         hamma bitta standart rasmni ko'radi (brend izchilligi uchun) */
+      $('googleAvatar').innerHTML = '<img src="' + e(DEFAULT_AVATAR) + '" alt="">';
       setTimeout(function () { try { injectRegUsernameField(); } catch (err) { } }, 30);
     } catch (err) { toast(err.message, 'err'); }
   };
@@ -190,7 +192,7 @@
     userInfo = LS.get('sai-user', {}) || {};
     userInfo.name = p.name || auth.name || userInfo.name || '';
     userInfo.email = auth.email;
-    userInfo.picture = p.avatar || auth.picture || userInfo.picture || '';
+    userInfo.picture = p.avatar || userInfo.picture || '';   // Google fotosi olinmaydi
     LS.set('sai-user', userInfo);
 
     if (p.username) { myUsername = p.username; LS.set('sai-username', p.username); }
@@ -552,15 +554,48 @@
       'border:1px solid ' + (strong ? 'transparent' : 'var(--border)') + '">' + r.ico + ' ' + e(roleName(id)) + '</span>';
   }
 
-  /* Kichik avatar chizuvchi — hamma joyda bir xil ko'rinsin */
+  /* ============================================================
+     STANDART AVATAR — hamma uchun BITTA xil rasm.
+     ------------------------------------------------------------
+     Ilgari: rasm qo'ymagan odamning avatari — Google fotosi bo'lsa
+     o'sha, bo'lmasa ismining birinchi harfi edi. Natijada hamma
+     boshqa-boshqa ko'rinardi.
+     Endi: hech kim o'z rasmini yuklamaguncha, ABSOLYUT HAMMA — bir xil,
+     saytning o'z belgisi (logo shaklidagi) rasmini ko'radi. Faqat odam
+     Sozlamalar > Profil'da o'z rasmini yuklasa, o'ShaNING o'zigagina
+     boshqacha rasm chiqadi.
+     Bu — bitta kichik SVG rasm, saytning o'zida (base64) saqlanadi,
+     hech qanday tashqi serverdan yuklanmaydi — tezkor va doim ishlaydi.
+     ============================================================ */
+  /* index.html dagi asosiy paintUser() sidebar rasmini o'zicha
+     (Google fotosi yoki harf bilan) chizardi. Uni o'rab olamiz —
+     u ishini tugatgach, ustidan bizning yagona qoidamiz bilan
+     qayta chizamiz: myAvatar bo'lsa o'shani, bo'lmasa standart rasm. */
+  var _paintUser = window.paintUser;
+  if (_paintUser) {
+    window.paintUser = function () {
+      _paintUser();
+      try { paintMyAvatar(); } catch (err) { }
+    };
+  }
+
+  var DEFAULT_AVATAR = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">' +
+    '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+    '<stop offset="0" stop-color="#3b9eff"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>' +
+    '<rect width="100" height="100" fill="url(#g)"/>' +
+    '<circle cx="50" cy="40" r="18" fill="#fff" fill-opacity=".92"/>' +
+    '<path d="M50 62c-22 0-34 12-34 26v6h68v-6c0-14-12-26-34-26z" fill="#fff" fill-opacity=".92"/>' +
+    '</svg>'
+  );
+
+  /* Kichik avatar chizuvchi — hamma joyda bir xil ko'rinsin.
+     `src` bo'sh bo'lsa — harf o'rniga STANDART rasm chiqadi. */
   function avatarHTML(src, name, size) {
     size = size || 32;
-    if (src) {
-      return '<img src="' + e(src) + '" alt="" style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;flex-shrink:0">';
-    }
-    return '<div style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;background:var(--surface3);' +
-      'display:grid;place-items:center;font-weight:700;font-size:' + Math.round(size * 0.42) + 'px;flex-shrink:0">' +
-      e(String(name || '?').charAt(0).toUpperCase()) + '</div>';
+    var url = src || DEFAULT_AVATAR;
+    return '<img src="' + e(url) + '" alt="" style="width:' + size + 'px;height:' + size +
+      'px;border-radius:50%;object-fit:cover;flex-shrink:0;background:var(--surface3)">';
   }
 
   /* ---------- 4. REYTING sahifasi (faqat talabalar) ---------- */
@@ -1181,12 +1216,14 @@
 
   var myAvatar = LS.get('sai-avatar', ''), myBio = LS.get('sai-bio', '');
 
+  /* Rasm hech qayerda Google fotosidan yoki harfdan olinmaydi:
+     yo o'zingiz yuklagan rasm (myAvatar), yo hammaga bir xil
+     standart rasm (DEFAULT_AVATAR). */
   function paintMyAvatar() {
     var box = q('exProfAvatar');
-    if (box) box.innerHTML = avatarHTML(myAvatar || (hasUser() ? userInfo.picture : ''), userInfo && userInfo.name, 64);
-    /* Yon paneldagi rasm ham yangilansin */
+    if (box) box.innerHTML = avatarHTML(myAvatar, userInfo && userInfo.name, 64);
     var sb = q('sidebarAvatar');
-    if (sb && myAvatar) sb.innerHTML = '<img src="' + e(myAvatar) + '" alt="">';
+    if (sb) sb.innerHTML = avatarHTML(myAvatar, userInfo && userInfo.name, 34);
   }
 
   /* Sahifa ochilganda serverdagi profilni tiklaymiz.
@@ -1856,25 +1893,38 @@
       '\u2022 tasks, cards and chat history on this device\n\n' +
       'Continue?'
     );
+    /* Faqat BITTA tasdiq oynasi — "OK" bossangiz o'chadi, "Bekor qilish"
+       bossangiz hech narsa bo'lmaydi. Qo'shimcha so'z yozish shart emas. */
     if (!confirm(warn)) return;
-
-    var word = L('O\u2019CHIRISH', 'DELETE');
-    var typed = prompt(L('Tasdiqlash uchun quyidagi so\u2019zni yozing: ', 'Type this word to confirm: ') + word);
-    if (!typed || typed.trim().toUpperCase() !== word) {
-      toast(L('Bekor qilindi', 'Cancelled'));
-      return;
-    }
 
     toast(L('O\u2019chirilmoqda\u2026', 'Deleting\u2026'));
     fetch('/api/clubs', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'purge', email: userInfo.email })
+      body: JSON.stringify({ action: 'purge' })
     }).catch(function () { }).then(function () {
       exForgetGoogle();
       localStorage.clear();
       location.reload();
     });
   };
+
+  /* ============================================================
+     Eski "Xavfli zona" kartasini olib tashlaymiz.
+     ------------------------------------------------------------
+     Sababi: sahifada IKKITA o'chirish joyi bor edi —
+       1) "Xavfli zona > Barcha ma'lumotlarni o'chirish" (faqat shu
+          qurilmadagi keshni tozalardi, hisobga tegmasdi)
+       2) bizning "Hisobni butunlay o'chirish" (hisobni ham o'chiradi)
+     Ikkalasi ham "o'chirish" so'zi bilan boshlangani uchun odam
+     qaysi biri nima qilishini chalkashtirib yuborardi. Endi FAQAT
+     bitta — to'liq va aniq — o'chirish joyi qoladi.
+     ============================================================ */
+  function exRemoveOldDangerZone() {
+    var btn = document.querySelector('button[onclick="clearAllData()"]');
+    if (!btn) return;
+    var card = btn.closest('.card');
+    if (card) card.remove(); else btn.remove();
+  }
 
   function paintLogoutLabels() {
     var set = function (id, t) { var el = q(id); if (el) el.textContent = t; };
@@ -2068,9 +2118,7 @@
         return;
       }
       box.innerHTML = '<div style="margin-top:10px">' + list.map(function (u) {
-        var av = u.picture ? '<img src="' + e(u.picture) + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover">' :
-          '<div style="width:32px;height:32px;border-radius:50%;background:var(--surface3);display:grid;place-items:center;font-weight:700;flex-shrink:0">' +
-          e((u.name || u.username).charAt(0).toUpperCase()) + '</div>';
+        var av = avatarHTML(u.picture, u.name || u.username, 32);
         return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">' + av +
           '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' +
           e(u.name || ('@' + u.username)) + '</div>' +
@@ -2081,37 +2129,8 @@
     }).catch(function () { box.innerHTML = ''; });
   };
 
-  /* ---- 8.3 Reytingda username qidiruv ---- */
-  function injectUserSearch() {
-    var solo = q('exSolo');
-    if (!solo) return;
-    solo.insertAdjacentHTML('beforebegin',
-      '<div class="form-group" style="margin-bottom:14px">' +
-      '<input id="exUserSearch" placeholder="' + L('Username bo\u2019yicha qidirish…', 'Search by username…') + '">' +
-      '</div><div id="exSearchResults"></div>');
-    q('exUserSearch').addEventListener('input', debounce(exRunUserSearch, 400));
-  }
-
-  function exRunUserSearch() {
-    var v = (q('exUserSearch').value || '').trim();
-    var box = q('exSearchResults');
-    if (v.length < 2) { box.innerHTML = ''; return; }
-    box.innerHTML = '<div class="empty" style="padding:14px"><span class="typing"><i></i><i></i><i></i></span></div>';
-    fetch('/api/scores?q=' + encodeURIComponent(v)).then(function (r) { return r.json(); }).then(function (d) {
-      var list = d.list || [];
-      if (!list.length) { box.innerHTML = '<div class="empty" style="padding:14px">' + L('Hech kim topilmadi', 'No one found') + '</div>'; return; }
-      box.innerHTML = '<div class="card">' + list.map(function (u) {
-        var av = u.picture ? '<img src="' + e(u.picture) + '" style="width:30px;height:30px;border-radius:50%;object-fit:cover">' :
-          '<div style="width:30px;height:30px;border-radius:50%;background:var(--surface3);display:grid;place-items:center;font-weight:700">' +
-          e((u.name || u.username).charAt(0).toUpperCase()) + '</div>';
-        return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">' + av +
-          '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13.5px">' + e(u.name || ('@' + u.username)) + '</div>' +
-          '<div style="font-size:11.5px;color:var(--text3)">@' + e(u.username) + ' &middot; ' + u.xp + ' XP</div></div>' +
-          '<button class="btn btn-ghost btn-sm" onclick="exOpenThread(\'' + e(u.username) + '\',\'' + e(u.name).replace(/'/g, '') + '\',\'' + e(u.picture) + '\')">' +
-          L('Xabar', 'Message') + '</button></div>';
-      }).join('') + '</div>';
-    }).catch(function () { box.innerHTML = ''; });
-  }
+  /* ---- 8.3 (o'chirilgan) — bu qidiruv Xabarlar sahifasiga ko'chirildi,
+     pastdagi exRunMsgSearch shu vazifani bajaradi. ---- */
 
   /* ---- 8.4 Klublarni nomi bo'yicha qidirish ---- */
   var lastClubList = [];
@@ -2220,6 +2239,7 @@
       /* injectUserSearch() olib tashlandi: odam qidirish endi Xabarlar sahifasida */
       injectMessagesSearch();
       injectProfileCard();
+      exRemoveOldDangerZone();
       paintMsgLabels();
       paintLogoutLabels();
       exAfterSwitch();
